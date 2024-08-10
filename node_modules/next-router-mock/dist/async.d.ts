@@ -1,0 +1,10 @@
+import type { NextComponentType, NextPageContext } from "next";
+import type { BaseContext } from "next/dist/shared/lib/utils";
+import { MemoryRouter } from "./MemoryRouter";
+import { WithRouterProps } from "./withMemoryRouter";
+export { useMemoryRouter } from "./useMemoryRouter";
+export { MemoryRouter, BaseRouter, Url } from "./MemoryRouter";
+export declare const memoryRouter: MemoryRouter;
+export default memoryRouter;
+export declare const useRouter: () => Readonly<MemoryRouter>;
+export declare const withRouter: <P extends WithRouterProps, C extends BaseContext = NextPageContext>(ComposedComponent: NextComponentType<C, any, P>) => NextComponentType<C, any, import("./withMemoryRouter").ExcludeRouterProps<P>>;
