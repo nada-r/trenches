@@ -1,7 +1,7 @@
 import { PrismaClient, User } from "@prisma/client";
 import { omitPrisma } from "@src/types";
 
-class userService {
+export class UserService {
   constructor(private prisma: PrismaClient) {
 
   }

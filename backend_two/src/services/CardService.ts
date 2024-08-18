@@ -1,7 +1,6 @@
 import { PrismaClient, Card, Power, User } from "@prisma/client";
-import { omitPrisma } from "../types";
 
-class CardService {
+export class CardService {
   constructor(private prisma: PrismaClient) {}
 
   async createCard(data: Omit<Card, 'id' | 'createdAt' | 'updatedAt' | 'power' | 'owner' | 'powerId' | 'ownerId'>, powerId: Power["id"], userId: User["id"])

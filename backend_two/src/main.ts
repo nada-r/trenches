@@ -19,7 +19,7 @@ async function main() {
     
     //await createUser({name: "test", walletString: "test"});
     //await createPower({name: "test", value: 433});
-    await createCard({name: "rug", price: 3, image: "src/image.com"}, 1, 1);
+    //await createCard({name: "rug", price: 3, image: "src/image.com"}, 1, 1);
 }
 
 main().catch(e => console.error("!Unhandled error in main:", e));

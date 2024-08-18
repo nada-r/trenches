@@ -1,7 +1,7 @@
 import { PrismaClient, Power } from "@prisma/client";
 import { omitPrisma } from "../types";
 
-class PowerService {
+export class PowerService {
   constructor(private prisma: PrismaClient) {}
 
   async createPower(data: omitPrisma<Power>) {
