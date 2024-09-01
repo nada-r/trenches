@@ -5,6 +5,7 @@ import EnvVars from '@src/common/EnvVars';
 import server from './server';
 import { UserService, PowerService, CardService } from './services';
 import { PrismaClient } from '@prisma/client';
+import cors from "cors";
 
 
 interface IServices {
@@ -13,7 +14,7 @@ interface IServices {
   power: PowerService
 }
 
-const services: Partial<IServices> = {};
+export const services: Partial<IServices> = {};
 
 
 /**
@@ -57,4 +58,4 @@ server.listen(EnvVars.Port, () => {
   addService('power', PowerService, prisma);
   
   logger.info(SERVER_START_MSG)}
-);
+)

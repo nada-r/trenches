@@ -18,6 +18,11 @@ export class CardService {
     });
     return card;
   }
+
+  async getAll(): Promise<Card[]> {
+    const cards = await this.prisma.card.findMany({include: {power: true}});
+    return cards;
+  }
 }
 
 export default CardService;
