@@ -43,7 +43,7 @@ app.get("/cards", async (req: Request, res: Response) => {
 })
 
 app.get("/test", (req, res) => {
-  res.json({message: "test"});
+  res.json({message: process.env.DATABASE_URL});
 })
 
 // Show routes called in console during development
