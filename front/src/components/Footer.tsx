@@ -1,64 +1,35 @@
 import React from "react";
 import Link from "next/link";
 import RankIcon from "./icons/RankIcon";
-
-
-const footerStyle: React.CSSProperties = {
-  position: "fixed",
-  bottom: 0,
-  width: "100%",
-  display: "flex",
-  justifyContent: "space-around",
-  backgroundColor: "#f8f8f8",
-  padding: "10px 0",
-  borderTop: "1px solid #ddd",
-};
-
-const linkStyle: React.CSSProperties = {
-  textDecoration: "none",
-  color: "#000",
-};
-
-const iconContainerStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-};
-
-const iconStyle: React.CSSProperties = {
-  fontSize: "24px",
-};
-
-const textStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: "12px",
-};
+import PortfolioIcon from "./icons/PortfolioIcon";
+import MarketIcon from "./icons/MarketIcon";
+import TournamentIcon from "./icons/TournamentIcon";
 
 const Footer: React.FC = () => {
   return (
-    <footer style={footerStyle}>
-      <Link href="/ranking" style={linkStyle}>
-        <div style={iconContainerStyle}>
-          <span style={iconStyle}><RankIcon/></span>
-          <p style={textStyle}>Ranking</p>
+    <footer className="fixed bottom-0 w-full flex justify-around bg-background text-foreground border-t border-border py-2"> {/* Apply global background, text color, and border */}
+      <Link href="/ranking" className="text-foreground no-underline">
+        <div className="flex flex-col items-center">
+          <span className="text-2xl"><RankIcon /></span>
+          <p className="m-0 text-xs">Ranking</p>
         </div>
       </Link>
-      <Link href="/portfolio" style={linkStyle}>
-        <div style={iconContainerStyle}>
-          <span style={iconStyle}>🛡️</span>
-          <p style={textStyle}>Portfolio</p>
+      <Link href="/portfolio" className="text-foreground no-underline">
+        <div className="flex flex-col items-center">
+          <span className="text-2xl"><PortfolioIcon /></span>
+          <p className="m-0 text-xs">Portfolio</p>
         </div>
       </Link>
-      <Link href="/market" style={linkStyle}>
-        <div style={iconContainerStyle}>
-          <span style={iconStyle}>🏪</span>
-          <p style={textStyle}>Market</p>
+      <Link href="/market" className="text-foreground no-underline">
+        <div className="flex flex-col items-center">
+          <span className="text-2xl"><MarketIcon /></span>
+          <p className="m-0 text-xs">Market</p>
         </div>
       </Link>
-      <Link href="/tournament" style={linkStyle}>
-        <div style={iconContainerStyle}>
-          <span style={iconStyle}>🏆</span>
-          <p style={textStyle}>Tournament</p>
+      <Link href="/tournament" className="text-foreground no-underline">
+        <div className="flex flex-col items-center">
+          <span className="text-2xl"><TournamentIcon /></span>
+          <p className="m-0 text-xs">Tournament</p>
         </div>
       </Link>
     </footer>
