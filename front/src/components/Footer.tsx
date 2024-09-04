@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import RankIcon from "./icons/RankIcon";
 
 
 const footerStyle: React.CSSProperties = {
@@ -38,8 +39,8 @@ const Footer: React.FC = () => {
     <footer style={footerStyle}>
       <Link href="/ranking" style={linkStyle}>
         <div style={iconContainerStyle}>
-          <span style={iconStyle}>🏠</span>
-          <p style={textStyle}>Home</p>
+          <span style={iconStyle}><RankIcon/></span>
+          <p style={textStyle}>Ranking</p>
         </div>
       </Link>
       <Link href="/portfolio" style={linkStyle}>

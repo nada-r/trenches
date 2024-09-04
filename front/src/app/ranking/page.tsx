@@ -43,29 +43,29 @@ export default function Ranking() {
         <h1>Trending</h1>
     </div>
     <div>
-    {/* <>{JSON.stringify(cards)}</> */}
+    {/* <>{JSON.stringify(cards)}</> test if data is loading*/} 
     {/* {cards.length > 0 && <DisplayCard card={cards[0]} />} */}
         <h1>Top Movers</h1>
     </div>
-    <Table>
-  <TableCaption>list</TableCaption>
-  <TableHeader>
-    <TableRow>
-      <TableHead className="w-[100px]">Rank</TableHead>
-      <TableHead>Name</TableHead>
-      <TableHead>Calling power</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
+    <Table className="bg-background text-foreground border-border">
+      <TableCaption className="text-muted-foreground">list</TableCaption>
+      <TableHeader className="border-border">
+        <TableRow>
+          <TableHead className="w-[100px] text-muted-foreground border-border">Rank</TableHead> 
+          <TableHead className="text-muted-foreground border-border">Name</TableHead>
+          <TableHead className="text-muted-foreground border-border">Calling power</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {cards.map((card, index) => (
-          <TableRow key={card.id}>
-            <TableCell className="font-medium">{index + 1}</TableCell>
-            <TableCell>{card.name}</TableCell>
-            <TableCell>{card.power.value}</TableCell>
+          <TableRow key={card.id} className="border-border">
+            <TableCell className="font-medium text-foreground border-border">{index + 1}</TableCell> 
+            <TableCell className="text-foreground border-border">{card.name}</TableCell>
+            <TableCell className="text-foreground border-border">{card.power.value}</TableCell>
           </TableRow>
         ))}
       </TableBody>
-</Table>
+    </Table>
 
     <Footer />
     </>
