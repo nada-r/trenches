@@ -25,7 +25,7 @@ export default function Ranking() {
   useEffect(() => {
     async function fetchCards() {
       try {
-        const response = await axios.get("http://localhost:3000/cards");
+        const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL!);
         setCards(response.data);
       } catch (error) {
         console.error("Error fetching cards:", error);
