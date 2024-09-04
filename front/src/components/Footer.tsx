@@ -36,7 +36,7 @@ const textStyle: React.CSSProperties = {
 const Footer: React.FC = () => {
   return (
     <footer style={footerStyle}>
-      <Link href="/homepage" style={linkStyle}>
+      <Link href="/ranking" style={linkStyle}>
         <div style={iconContainerStyle}>
           <span style={iconStyle}>🏠</span>
           <p style={textStyle}>Home</p>

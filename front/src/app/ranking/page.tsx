@@ -43,8 +43,8 @@ export default function Ranking() {
         <h1>Trending</h1>
     </div>
     <div>
-    <>{JSON.stringify(cards)}</>
-    {cards.length > 0 && <DisplayCard card={cards[0]} />}
+    {/* <>{JSON.stringify(cards)}</> */}
+    {/* {cards.length > 0 && <DisplayCard card={cards[0]} />} */}
         <h1>Top Movers</h1>
     </div>
     <Table>
