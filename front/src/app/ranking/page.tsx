@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import DisplayCard from "@/components/DisplayCard";
-
+import RankingImage from "@/components/ui/RankingImage";
 
 
 
@@ -45,7 +45,6 @@ export default function Ranking() {
     <div>
     {/* <>{JSON.stringify(cards)}</> test if data is loading*/} 
     {/* {cards.length > 0 && <DisplayCard card={cards[0]} />} */}
-        <h1>Top Movers</h1>
     </div>
     <Table className="bg-background text-foreground border-border">
       <TableCaption className="text-muted-foreground">list</TableCaption>
@@ -60,6 +59,9 @@ export default function Ranking() {
         {cards.map((card, index) => (
           <TableRow key={card.id} className="border-border">
             <TableCell className="font-medium text-foreground border-border">{index + 1}</TableCell> 
+            <TableCell className="border-border">
+              <RankingImage image={card.image}/>
+            </TableCell>
             <TableCell className="text-foreground border-border">{card.name}</TableCell>
             <TableCell className="text-foreground border-border">{card.power.value}</TableCell>
           </TableRow>
