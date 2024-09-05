@@ -21,12 +21,12 @@ export default function HomePage() {
       <Head>
         <title>Hi</title>
       </Head>
-      <section className='bg-white'>
+      <section >
         <div className='layout relative flex min-h-screen flex-col items-center justify-center py-12 text-center'>
           <Logo className='w-16' />
           <h1 className='mt-4'>Welcome to trenches.top</h1>
           
-          <p className='mt-2 text-sm text-gray-800'>
+          <p className='mt-2 text-sm'>
             Find alpha, discover the best callers, make it out of the trenches{' '}
           </p>
 
@@ -35,7 +35,7 @@ export default function HomePage() {
             connect wallet
           </ButtonLink>
 
-          <footer className='absolute bottom-2 text-gray-700'>
+          <footer className='absolute bottom-2'>
             © {new Date().getFullYear()} By{' '}
             <UnderlineLink href='https://trenches.top'>
               trenches.top

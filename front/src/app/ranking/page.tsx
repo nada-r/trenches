@@ -37,7 +37,7 @@ export default function Ranking() {
   return (
     <>
     <div>
-      <h1>Homepage</h1>
+      <h1>Ranking</h1>
     </div>
     <div>
         <h1>Trending</h1>
