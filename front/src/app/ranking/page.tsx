@@ -51,6 +51,7 @@ export default function Ranking() {
       <TableHeader className="border-border">
         <TableRow>
           <TableHead className="w-[100px] text-muted-foreground border-border">Rank</TableHead> 
+          <TableHead className="text-muted-foreground border-border"></TableHead>
           <TableHead className="text-muted-foreground border-border">Name</TableHead>
           <TableHead className="text-muted-foreground border-border">Calling power</TableHead>
         </TableRow>
