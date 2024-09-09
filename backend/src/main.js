@@ -38,28 +38,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var client_1 = require("@prisma/client");
 var services_1 = require("./services");
+var bootstrap_1 = require("./bootstrap");
 console.log("!here");
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var prisma, isConnected, cardService, powerService, userService;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
+        var prisma, isConnected, cardService, powerService, userService, _a, _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0: return [4 /*yield*/, (0, bootstrap_1.default)()];
+                case 1:
+                    _c.sent();
                     prisma = new client_1.PrismaClient();
                     return [4 /*yield*/, prisma.$connect().then(function () { return true; }).catch(function () { return false; })];
-                case 1:
-                    isConnected = _a.sent();
+                case 2:
+                    isConnected = _c.sent();
                     console.log("!Prisma connection status:", isConnected ? "Connected" : "Not Connected");
                     cardService = new services_1.CardService(prisma);
                     powerService = new services_1.PowerService(prisma);
                     userService = new services_1.UserService(prisma);
                     { /*await userService.createUser({name: "dumbledior", walletString: "DeAW7SyArr7Stk2U6NL8EtoXaLNPyG3wfkVfRzvcPG4S"})*/ }
-                    return [4 /*yield*/, powerService.createPower({ name: "Luca_Apes", value: 1173 })];
-                case 2:
-                    _a.sent();
-                    return [4 /*yield*/, cardService.createCard({ name: "Luca_Apes", price: 3, image: "https://trenches.fra1.cdn.digitaloceanspaces.com/Luca%20Apes.jpg" }, 2, 1)];
+                    _b = (_a = console).log;
+                    return [4 /*yield*/, powerService.createPower({ name: "SDsCASINO", value: 764 })];
                 case 3:
-                    _a.sent();
+                    _b.apply(_a, [_c.sent()]);
                     return [2 /*return*/];
             }
         });
