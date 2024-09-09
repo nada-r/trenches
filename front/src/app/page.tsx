@@ -2,17 +2,25 @@
 
 import Head from 'next/head';
 import * as React from 'react';
+import { useState } from 'react';
 import '@/lib/env';
 import UnderlineLink from '@/components/links/UnderlineLink';
 
 import Logo from '~/svg/Logo.svg';
-import { useLogin, usePrivy } from '@privy-io/react-auth';
+import {
+  useLogin,
+  usePrivy,
+  useSolanaWallets,
+  WalletWithMetadata,
+} from '@privy-io/react-auth';
 import Button from '@/components/buttons/Button';
 import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const router = useRouter();
   const { ready, authenticated } = usePrivy();
+  const { createWallet } = useSolanaWallets();
+  const [solanaWalletError, setSolanaWalletError] = useState(false);
   const { login } = useLogin({
     onComplete: (
       user,
@@ -28,15 +36,33 @@ export default function HomePage() {
         loginMethod,
         linkedAccount
       );
-      // Any logic you'd like to execute if the user is/becomes authenticated while this
-      // component is mounted
-      router.push('ranking');
+
+      const hasExistingSolanaWallet = !!user.linkedAccounts.find(
+        (account): account is WalletWithMetadata =>
+          account.type === 'wallet' &&
+          account.walletClientType === 'privy' &&
+          account.chainType === 'solana'
+      );
+
+      if (!hasExistingSolanaWallet) {
+        createWallet()
+          .then((walletWithMetadata) => {
+            router.push('ranking');
+          })
+          .catch((e) => {
+            console.log(e);
+            setSolanaWalletError(true);
+          });
+      } else {
+        router.push('ranking');
+      }
     },
   });
+
   // Disable login when Privy is not ready or the user is already authenticated
   const disableLogin = !ready || (ready && authenticated);
 
-  console.log(process.env);
+  //console.log(process.env);
   return (
     <main>
       <Head>
@@ -59,6 +85,11 @@ export default function HomePage() {
           >
             connect wallet
           </Button>
+          {solanaWalletError && (
+            <p className="text-red-500">
+              Error with wallet creation, reload the page and try again
+            </p>
+          )}
 
           <footer className="absolute bottom-2">
             © {new Date().getFullYear()} By{' '}
