@@ -34,9 +34,6 @@ export default function Ranking() {
   return (
     <>
       <div>
-        <h1>Ranking</h1>
-      </div>
-      <div>
         <h1>Trending</h1>
       </div>
       <div>

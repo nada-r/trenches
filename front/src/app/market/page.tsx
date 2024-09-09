@@ -4,9 +4,6 @@ export default function Homepage() {
   return (
     <>
     <div>
-      <h1>Market</h1>
-    </div>
-    <div>
         <h1>Trending</h1>
     </div>
     <div>

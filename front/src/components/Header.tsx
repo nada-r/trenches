@@ -1,32 +1,49 @@
-import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 import ProfileIcon from '@/components/icons/ProfileIcon';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
-  const { user } = usePrivy();
   const router = useRouter();
+  const pathname = usePathname();
 
-  const solanaWallet =
-    user &&
-    user.linkedAccounts.find(
-      (account): account is WalletWithMetadata =>
-        account.type === 'wallet' &&
-        account.walletClientType === 'privy' &&
-        account.chainType === 'solana'
-    );
+  const [title, setTitle] = useState('');
 
   const openProfile = () => {
-    localStorage.setItem('previousPage', window.location.pathname);
+    localStorage.setItem('previousPage', pathname);
     router.push('/profile');
   };
 
+  useEffect(() => {
+    // Update the page title based on the current path
+    const pageTitle = getPageTitle(pathname);
+    setTitle(pageTitle);
+  }, [pathname]);
+
+  const getPageTitle = (pathname: string) => {
+    switch (pathname) {
+      case '/ranking':
+        return 'Ranking';
+      case '/portfolio':
+        return 'Portfolio';
+      case '/market':
+        return 'Market';
+      case '/tournament':
+        return 'Tournament';
+      case '/profile':
+        return 'Profile';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <header className="text-white py-4 px-6">
-      <nav className="flex justify-between items-center">
-        <div onClick={openProfile}>
-          <ProfileIcon />
-        </div>
-      </nav>
+    <header className="text-white py-4 px-6 relative">
+      <div className="absolute top-4 left-6" onClick={openProfile}>
+        <ProfileIcon />
+      </div>
+      <div className="text-center">
+        <h1 className="text-xl font-bold">{title}</h1>
+      </div>
     </header>
   );
 }
