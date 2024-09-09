@@ -1,7 +1,10 @@
 import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
+import ProfileIcon from '@/components/icons/ProfileIcon';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const { user } = usePrivy();
+  const router = useRouter();
 
   const solanaWallet =
     user &&
@@ -12,10 +15,17 @@ export default function Header() {
         account.chainType === 'solana'
     );
 
+  const openProfile = () => {
+    localStorage.setItem('previousPage', window.location.pathname);
+    router.push('/profile');
+  };
+
   return (
-    <header className="bg-gray-900 text-white py-4 px-6">
+    <header className="text-white py-4 px-6">
       <nav className="flex justify-between items-center">
-        <div className="font-bold text-lg">{solanaWallet?.address}</div>
+        <div onClick={openProfile}>
+          <ProfileIcon />
+        </div>
       </nav>
     </header>
   );
