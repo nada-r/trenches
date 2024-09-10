@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Balance } from '@/components/ui/Balance';
+import CallerCards from '@/components/ui/CallerCards';
 
 interface Token {
   id: string;
@@ -60,6 +61,14 @@ export default function Portfolio() {
           See all
         </a>
       </div>
+      <CallerCards
+        cards={[
+          { type: 'bronze' },
+          { type: 'silver' },
+          { type: 'gold' },
+          { type: 'gold' },
+        ]}
+      />
 
       <div className="flex items-baseline mb-4">
         <h1 className="text-2xl font-bold mr-4">Tokens</h1>
