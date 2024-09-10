@@ -13,7 +13,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1 p-8">{children}</main>
 
-      <Footer />
+      {authenticated && <Footer />}
     </div>
   );
 }
