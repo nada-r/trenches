@@ -11,7 +11,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-screen">
       {authenticated && <Header />}
 
-      <main className="flex-1 p-8">{children}</main>
+      <main className="flex-1 p-4">{children}</main>
 
       {authenticated && <Footer />}
     </div>
