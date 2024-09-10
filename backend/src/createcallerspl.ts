@@ -1,4 +1,4 @@
-import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+/*import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import {
   createGenericFile,
   generateSigner,
@@ -35,5 +35,4 @@ const mint = await createMint(
   9 // We are using 9 to match the CLI decimal default exactly
 );
 
-console.log(mint.toBase58());
-// AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM
+console.log(mint.toBase58());*/
