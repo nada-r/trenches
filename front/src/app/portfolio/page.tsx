@@ -11,9 +11,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Balance } from '@/components/ui/Balance';
-import CallerCard, { CallerCardProps } from '@/components/ui/CallerCard';
+import CallerCard from '@/components/ui/CallerCard';
 
-interface Token {
+export interface Token {
   id: string;
   rank: number;
   name: string;
@@ -24,7 +24,6 @@ interface Token {
 
 export default function Portfolio() {
   const [tokens, setTokens] = useState<Token[]>([]);
-  const [callerCards, setCallerCards] = useState<CallerCardProps[]>([]);
 
   useEffect(() => {
     // Commented out original fetchTokens function
@@ -40,18 +39,6 @@ export default function Portfolio() {
     // }
     // fetchTokens();
 
-    function getSimCardType(balance: number): string {
-      if (balance >= 1e9) {
-        return 'gold';
-      } else if (balance >= 1e6) {
-        return 'silver';
-      } else if (balance >= 1e3) {
-        return 'bronze';
-      } else {
-        return 'none';
-      }
-    }
-
     // Temporary function to generate 4 random tokens
     function generateRandomTokens() {
       // prettier-ignore
@@ -62,12 +49,6 @@ export default function Portfolio() {
         { id: '4', rank: 4, name: 'wallstreetbets', marketCap: 430000, balance: 100000, image: '' },
       ];
       setTokens(fakeTokens);
-      setCallerCards(
-        fakeTokens.map((token) => ({
-          type: getSimCardType(token.balance),
-          image: token.image,
-        }))
-      );
     }
 
     generateRandomTokens();
@@ -82,8 +63,8 @@ export default function Portfolio() {
         </a>
       </div>
       <div className="flex overflow-x-auto py-4">
-        {callerCards.map((card, index) => (
-          <CallerCard key={index} {...card} />
+        {tokens.map((token, index) => (
+          <CallerCard key={index} {...token} />
         ))}
       </div>
 
