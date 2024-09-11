@@ -28,7 +28,7 @@ export default function Header() {
       case '/market':
         return 'Market';
       case '/tournament':
-        return 'Tournament';
+        return 'Tournaments';
       case '/profile':
         return 'Profile';
       default:
