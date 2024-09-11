@@ -4,7 +4,7 @@ import SimCardIcon from '@/components/icons/SimCardIcon';
 import { Token } from '@/app/portfolio/page';
 
 export function getSimCardType(balance: number): string {
-  if (balance >= 1e9) {
+  if (balance >= 1e7) {
     return 'gold';
   } else if (balance >= 1e6) {
     return 'silver';
@@ -19,10 +19,12 @@ const CallerCard: React.FC<Token> = ({ balance, image }) => {
   const type = getSimCardType(balance);
 
   return (
-    <div className="flex flex-col items-center p-4">
+    <div className="relative flex flex-col items-center px-4">
+      <div className="absolute left-3 -top-3 z-10">
+        <RankingImage image={image} />
+      </div>
       <SimCardIcon type={type} size={48} />
       <div className="my-2">{type}</div>
-      <RankingImage image={image} />
     </div>
   );
 };
