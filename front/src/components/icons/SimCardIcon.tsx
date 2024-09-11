@@ -11,15 +11,15 @@ const getColorFromType = (type: string): string => {
     case 'gold':
       return '#FFD700';
     default:
-      return '#000000'; // Default color if type doesn't match
+      return 'rgb(212 212 212)'; // Default color if type doesn't match
   }
 };
 
 interface SimCardIconProps {
-  type: string;
+  type?: string;
   size?: number;
 }
-const SimCardIcon = ({ type, size = 48 }: SimCardIconProps) => {
+const SimCardIcon = ({ type = 'none', size = 48 }: SimCardIconProps) => {
   return <FaSimCard color={getColorFromType(type)} size={size} />;
 };
 

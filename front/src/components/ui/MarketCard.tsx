@@ -1,5 +1,5 @@
 import React from 'react';
-import { SlEarphonesAlt } from 'react-icons/sl';
+import SimCardIcon from '@/components/icons/SimCardIcon';
 
 export interface MarketCardProps {
   id: string;
@@ -11,7 +11,7 @@ export interface MarketCardProps {
 const MarketCard: React.FC<MarketCardProps> = ({ rank, name, variation }) => {
   return (
     <div className="flex flex-col items-center p-4">
-      <SlEarphonesAlt size={48} />
+      <SimCardIcon size={48} />
       <div className="my-2 flex items-center">
         {name}
         <span className="ml-2 border border-red-500 text-xs text-gray-500 rounded-full px-2">
