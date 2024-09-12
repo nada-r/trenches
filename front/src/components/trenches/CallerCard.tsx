@@ -1,5 +1,5 @@
 import React from 'react';
-import RankingImage from '@/components/ui/RankingImage';
+import RankingImage from '@/components/trenches/RankingImage';
 import SimCardIcon from '@/components/icons/SimCardIcon';
 import { Token } from '@/app/portfolio/page';
 

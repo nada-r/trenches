@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import MarketCard, { MarketCardProps } from '@/components/ui/MarketCard';
+import MarketCard, { MarketCardProps } from '@/components/trenches/MarketCard';
 import { RiFilter3Fill } from 'react-icons/ri';
 
 export default function MarketPage() {

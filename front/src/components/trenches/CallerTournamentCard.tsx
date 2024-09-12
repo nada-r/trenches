@@ -1,6 +1,6 @@
 import React from 'react';
 import { Token } from '@/app/portfolio/page';
-import CallerCard from '@/components/ui/CallerCard';
+import CallerCard from '@/components/trenches/CallerCard';
 import { Button } from '@/components/ui/button';
 
 interface CallerTournamentCardProps extends Token {

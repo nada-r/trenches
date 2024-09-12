@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Balance } from '@/components/ui/Balance';
-import CallerCard from '@/components/ui/CallerCard';
+import { Balance } from '@/components/trenches/Balance';
+import CallerCard from '@/components/trenches/CallerCard';
 
 export interface Token {
   id: string;

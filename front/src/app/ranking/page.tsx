@@ -12,12 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import RankingImage from '@/components/ui/RankingImage';
+import RankingImage from '@/components/trenches/RankingImage';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 const instance = createAxiosInstance();
 
 export default function Ranking() {
   const [cards, setCards] = useState<(Card & { power: Power })[]>([]);
+
   useEffect(() => {
     console.log("check process emv", JSON.stringify(process.env.NEXT_PUBLIC_BACKEND_URL))
     async function fetchCards() {
