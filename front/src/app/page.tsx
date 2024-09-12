@@ -4,7 +4,6 @@ import Head from 'next/head';
 import * as React from 'react';
 import { useState } from 'react';
 import '@/lib/env';
-import UnderlineLink from '@/components/links/UnderlineLink';
 
 import Logo from '~/svg/Logo.svg';
 import {
@@ -16,6 +15,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
   const router = useRouter();
@@ -90,9 +90,9 @@ export default function HomePage() {
 
           <footer className="absolute bottom-2">
             © {new Date().getFullYear()} By{' '}
-            <UnderlineLink href="https://trenches.top">
+            <Link href="https://trenches.top" className="underline">
               trenches.top
-            </UnderlineLink>
+            </Link>
           </footer>
         </div>
       </section>
