@@ -13,8 +13,9 @@ import {
   useSolanaWallets,
   WalletWithMetadata,
 } from '@privy-io/react-auth';
-import Button from '@/components/buttons/Button';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
@@ -77,12 +78,8 @@ export default function HomePage() {
             Find alpha, discover the best callers, make it out of the trenches{' '}
           </p>
 
-          <Button
-            className="mt-6"
-            isLoading={disableLogin}
-            onClick={login}
-            variant="light"
-          >
+          <Button className="mt-6" onClick={login} variant="outline">
+            {disableLogin && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             connect wallet
           </Button>
           {solanaWalletError && (
