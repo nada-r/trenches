@@ -2,6 +2,21 @@
 
 This project was created with [express-generator-typescript](https://github.com/seanpmaxwell/express-generator-typescript).
 
+## Configure environment
+
+```
+1. run : npx dotenv-vault@latest keys
+2. set DOTENV_KEY envvar with the value of development environment 
+3. run : npx dotenv-vault@latest open
+4. run : npx dotenv-vault@latest pull
+
+```
+
+## Setup empty Database
+
+```
+npx prisma db push
+```
 
 ## Available Scripts
 
