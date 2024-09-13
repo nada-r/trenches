@@ -14,20 +14,20 @@ datasource db {
 }
 
 
-model Card {
+model Card { //to rename to Caller, add 
   id        Int      @id @default(autoincrement())
   name      String
   price     Int
   image     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  power     Power    @relation(fields: [powerId], references: [id])
+  power     Power    @relation(fields: [powerId], references: [id]) //to replace by value in Power
   powerId   Int      @unique
-  owner     User     @relation(fields: [ownerId], references: [id])
+  owner     User     @relation(fields: [ownerId], references: [id]) //to delete
   ownerId   Int
 }
 
-model Power {
+model Power { //to delete
   id        Int      @id @default(autoincrement())
   name      String
   value     Int
@@ -36,7 +36,7 @@ model Power {
   card      Card?
 }
 
-model User {
+model User { //to delete
   id        Int      @id @default(autoincrement())
   name      String
   walletString String
