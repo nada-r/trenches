@@ -19,6 +19,7 @@ const instance = createAxiosInstance();
 export default function Ranking() {
   const [cards, setCards] = useState<(Card & { power: Power })[]>([]);
   useEffect(() => {
+    console.log("check process emv", JSON.stringify(process.env.NEXT_PUBLIC_BACKEND_URL))
     async function fetchCards() {
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL)
       try {
