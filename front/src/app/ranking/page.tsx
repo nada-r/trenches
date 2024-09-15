@@ -22,10 +22,10 @@ export default function Ranking() {
     async function fetchCards() {
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL)
       try {
-        const response1 =await instance.get(
-          '/test'
-        );
-        console.log(response1);
+        // const response1 =await instance.get(
+        //   '/test'
+        // );
+        // console.log(response1);
         const response = await instance.get(
           '/cards'
         );
