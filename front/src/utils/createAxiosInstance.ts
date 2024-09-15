@@ -8,7 +8,7 @@ export const createAxiosInstance = (): AxiosInstance => {
   } else {
     baseURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}`;
   }
-  alert( baseURL)
+  console.log( "alert", baseURL);
   return axios.create({
     baseURL: baseURL,
     timeout: 5000,
