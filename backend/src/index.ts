@@ -53,7 +53,10 @@ const SERVER_START_MSG = ('Express server started on port: ' +
   // });
 
 server.listen(EnvVars.Port, async () => {
-  await bootStrap();
+  const result = await bootStrap();
+  if (result != 0) {
+    process.exit(result);
+  }
   const prisma = new PrismaClient();
   addService('user', UserService, prisma);
   addService('card', CardService, prisma);

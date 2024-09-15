@@ -22,9 +22,13 @@ function error(...args: any) {
 async function bootStrap() {
   try { 
     const path = findConfig('.env.vault');
-    if (!path)
-      return error("Failed to locate .env.vault");
-
+    if (!path) {
+      console.log('br1');
+      return
+    }
+    console.log('br2')
+      //return error("Failed to locate .env.vault");
+      //console.log('path: ', path);
     const dotenvResult = config({
       DOTENV_KEY: process.env.DOTENV_KEY,
       path: path!
@@ -37,7 +41,7 @@ async function bootStrap() {
       return error("No environment variables found in the parsed dotenv result");
 
     envVariables.parse(dotenvResult.parsed);
-
+    return 0;
     // if (!process.env.CORS)
     //   return error("CORS variable is missing from env");
     console.log(dotenvResult.parsed);
