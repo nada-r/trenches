@@ -13,15 +13,21 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import RankingImage from '@/components/ui/RankingImage';
+import { createAxiosInstance } from '@/utils/createAxiosInstance';
+const instance = createAxiosInstance();
 
 export default function Ranking() {
   const [cards, setCards] = useState<(Card & { power: Power })[]>([]);
-
   useEffect(() => {
     async function fetchCards() {
+      console.log(process.env.NEXT_PUBLIC_BACKEND_URL)
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL!}/cards`
+        const response1 =await instance.get(
+          '/test'
+        );
+        console.log(response1);
+        const response = await instance.get(
+          '/cards'
         );
         setCards(response.data);
       } catch (error) {
