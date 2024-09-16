@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Card, Power } from '@prisma/client';
 import {
   Table,
   TableBody,
@@ -14,23 +12,26 @@ import {
 } from '@/components/ui/table';
 import RankingImage from '@/components/trenches/RankingImage';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
+import { Card, Power } from '@/models';
+
 const instance = createAxiosInstance();
 
 export default function Ranking() {
   const [cards, setCards] = useState<(Card & { power: Power })[]>([]);
 
   useEffect(() => {
-    console.log("check process emv", JSON.stringify(process.env.NEXT_PUBLIC_BACKEND_URL))
+    console.log(
+      'check process emv',
+      JSON.stringify(process.env.NEXT_PUBLIC_BACKEND_URL)
+    );
     async function fetchCards() {
-      console.log(process.env.NEXT_PUBLIC_BACKEND_URL)
+      console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       try {
         // const response1 =await instance.get(
         //   '/test'
         // );
         // console.log(response1);
-        const response = await instance.get(
-          '/cards'
-        );
+        const response = await instance.get('/cards');
         setCards(response.data);
       } catch (error) {
         console.error('Error fetching cards:', error);

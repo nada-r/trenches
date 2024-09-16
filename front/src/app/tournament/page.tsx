@@ -1,23 +1,58 @@
 'use client';
 
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import axios from 'axios';
+import RemainingTime from '@/components/utils/RemainingTime';
+import { Tournament, TournamentSchema } from '@/models';
 
 export default function Homepage() {
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+
+  useEffect(() => {
+    async function fetchTournaments() {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL!}/tournaments`
+        );
+        setTournaments(
+          response.data.map((t: unknown) => TournamentSchema.parse(t))
+        );
+      } catch (error) {
+        console.error('Error fetching tournaments:', error);
+      }
+    }
+    fetchTournaments();
+  }, []);
+
   return (
     <>
-      <div className="bg-neutral-800 border border-gray-500 rounded-2xl p-4">
-        <div className="text-lg font-bold mb-2">Tournament</div>
-        <div className="mb-2">Time remaining: 1 hours 37 minutes</div>
-        <div className="mb-2">Price: 50 SOL</div>
-        <div className="mb-4">Supply burn: 5%</div>
-        <Button asChild className="w-full">
-          <Link href="/tournament/1" className="w-full">
-            View
-          </Link>
-        </Button>
-      </div>
+      {tournaments.map((tournament) => (
+        <div
+          key={tournament.id}
+          className="bg-neutral-800 border border-gray-500 rounded-2xl p-4 mb-4"
+        >
+          <div className="text-lg font-bold mb-2">{tournament.name}</div>
+          <div className="mb-2">
+            Time remaining:
+            <RemainingTime
+              startedAt={tournament.startedAt!}
+              durationInSeconds={tournament.metadata.endDuration}
+            />{' '}
+          </div>
+          <div className="mb-2">Prize: {tournament.metadata.prize} SOL</div>
+          <div className="mb-4">
+            Supply burn: {tournament.metadata.supplyBurn}%
+          </div>
+          <Button asChild className="w-full">
+            <Link href={`/tournament/${tournament.id}`} className="w-full">
+              View
+            </Link>
+          </Button>
+        </div>
+      ))}
     </>
   );
 }

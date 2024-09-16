@@ -13,12 +13,18 @@ generator json {
   provider = "prisma-json-types-generator"
 }
 
+/// generate types for front
+generator zod {
+  provider = "zod-prisma-types"
+  output   = "../../front/src/models"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Card { //to rename to Caller, add
+model Card {
   id                       Int                       @id @default(autoincrement())
   name                     String
   price                    Int
@@ -30,7 +36,7 @@ model Card { //to rename to Caller, add
   tournamentParticipations TournamentParticipation[]
 }
 
-model Power { //to delete
+model Power {
   id        Int      @id @default(autoincrement())
   name      String
   value     Int
@@ -39,7 +45,7 @@ model Power { //to delete
   card      Card?
 }
 
-model User { //to delete
+model User {
   id           Int      @id @default(autoincrement())
   name         String
   walletString String
@@ -60,7 +66,7 @@ model Tournament {
   status         TournamentStatus          @default(HIDDEN)
   startedAt      DateTime?
   /// [TournamentMetadata]
-  metadata       Json
+  metadata       Json /// @zod.custom.use(z.object({ openDuration: z.number(), endDuration: z.number(), prize: z.number(), supplyBurn: z.number() }))
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt
   participations TournamentParticipation[]
