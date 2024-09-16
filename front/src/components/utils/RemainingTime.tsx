@@ -43,7 +43,7 @@ const RemainingTime: React.FC<RemainingTimeProps> = ({
 
         let timeString = '';
         if (days > 0) {
-          timeString = `${days}d ${pad(hours)}h`;
+          timeString = `${days}d ${pad(hours)}h ${pad(minutes)}m`;
         } else if (hours > 0) {
           timeString = `${pad(hours)}h ${pad(minutes)}m`;
         } else {
