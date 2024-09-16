@@ -21,6 +21,24 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   >([]);
   const [isAllCardsSelected, setIsAllCardsSelected] = useState(false);
 
+  const [isTournamentClosed, setIsTournamentClosed] = useState(false);
+
+  useEffect(() => {
+    if (tournament && tournament.startedAt) {
+      const checkTournamentStatus = () => {
+        const startTime = tournament.startedAt!.getTime();
+        const currentTime = new Date().getTime();
+        const endTime = startTime + tournament.metadata.openDuration * 1000;
+        setIsTournamentClosed(currentTime >= endTime);
+      };
+
+      checkTournamentStatus();
+      const intervalId = setInterval(checkTournamentStatus, 1000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [tournament]);
+
   useEffect(() => {
     setIsAllCardsSelected(
       selectedTokens.filter((t) => t !== undefined).length === 3
@@ -88,11 +106,15 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           </h1>
           {tournament && (
             <span>
-              Starting in
+              {isTournamentClosed ? 'Finishing' : 'Starting'} in
               <RemainingTime
                 classname="m-2"
                 startedAt={tournament.startedAt!}
-                durationInSeconds={tournament.metadata.endDuration}
+                durationInSeconds={
+                  isTournamentClosed
+                    ? tournament.metadata.endDuration
+                    : tournament.metadata.openDuration
+                }
               />
             </span>
           )}
@@ -116,6 +138,15 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           <TournamentSlot key={index} token={card} onUnselect={unselectToken} />
         ))}
       </div>
+      <Button
+        disabled={isTournamentClosed || !isAllCardsSelected}
+        className="w-full"
+      >
+        {isTournamentClosed ? 'Participation closed' : 'Participate'}
+      </Button>
+      <p className="mb-16 w-full text-sm text-neutral-500 text-center mt-3">
+        234 players have entered the tournament
+      </p>
       <h1 className="text-xl font-bold mb-4">Rewards Breakdown</h1>
       <div className="bg-neutral-700 text-neutral-300 rounded-2xl p-4 mb-4">
         <p>The top 10 winners will receive the following</p>
@@ -141,12 +172,6 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           10th Place: ... SOL + x% of supply burned
         </p>
       </div>
-      <Button disabled={!isAllCardsSelected} className="w-full">
-        Participate
-      </Button>
-      <p className="mb-16 w-full text-sm text-neutral-500 text-center mt-3">
-        234 players have entered the tournament
-      </p>
     </>
   );
 };
