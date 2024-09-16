@@ -7,8 +7,14 @@ import { Token } from '@/app/portfolio/page';
 import { Button } from '@/components/ui/button';
 import TournamentSlot from '@/components/trenches/TournamentSlot';
 import CallerTournamentCard from '@/components/trenches/CallerTournamentCard';
+import { createAxiosInstance } from '@/utils/createAxiosInstance';
+import { Tournament, TournamentSchema } from '@/models';
+import RemainingTime from '@/components/utils/RemainingTime';
 
-const TournamentPage = () => {
+const instance = createAxiosInstance();
+
+const TournamentPage = ({ params }: { params: { id: string } }) => {
+  const [tournament, setTournament] = useState<Tournament>();
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<
     Array<Token | undefined>
@@ -22,18 +28,15 @@ const TournamentPage = () => {
   }, [selectedTokens]);
 
   useEffect(() => {
-    // Commented out original fetchTokens function
-    // async function fetchTokens() {
-    //   try {
-    //     const response = await axios.get(
-    //       `${process.env.NEXT_PUBLIC_BASE_URL!}/tokens`
-    //     );
-    //     setTokens(response.data);
-    //   } catch (error) {
-    //     console.error('Error fetching tokens:', error);
-    //   }
-    // }
-    // fetchTokens();
+    async function fetchTournament() {
+      try {
+        const response = await instance.get('/tournament/' + params.id);
+        setTournament(TournamentSchema.parse(response.data));
+      } catch (error) {
+        console.error('Error fetching tournament:', error);
+      }
+    }
+    fetchTournament();
 
     // Temporary function to generate 4 random tokens
     function generateRandomTokens() {
@@ -75,9 +78,27 @@ const TournamentPage = () => {
 
   return (
     <>
-      <Link href="/tournament">
-        <IoIosArrowBack />
-      </Link>
+      <div className="flex items-center mb-4">
+        <Link href="/tournament" className="mr-2">
+          <IoIosArrowBack />
+        </Link>
+        <div className="flex flex-col justify-center items-center w-full">
+          <h1 className="text-2xl font-bold text-center">
+            {tournament?.name || 'Tournament'}
+          </h1>
+          {tournament && (
+            <span>
+              Starting in
+              <RemainingTime
+                classname="m-2"
+                startedAt={tournament.startedAt!}
+                durationInSeconds={tournament.metadata.endDuration}
+              />
+            </span>
+          )}
+        </div>
+      </div>
+
       <h1 className="text-xl font-bold mb-4">Available Cards</h1>
       <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
         {availableTokens.map((card, index) => (

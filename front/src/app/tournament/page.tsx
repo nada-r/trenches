@@ -4,9 +4,11 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import axios from 'axios';
 import RemainingTime from '@/components/utils/RemainingTime';
 import { Tournament, TournamentSchema } from '@/models';
+import { createAxiosInstance } from '@/utils/createAxiosInstance';
+
+const instance = createAxiosInstance();
 
 export default function Homepage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -14,9 +16,7 @@ export default function Homepage() {
   useEffect(() => {
     async function fetchTournaments() {
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL!}/tournaments`
-        );
+        const response = await instance.get('/tournament/all');
         setTournaments(
           response.data.map((t: unknown) => TournamentSchema.parse(t))
         );
@@ -36,11 +36,11 @@ export default function Homepage() {
         >
           <div className="text-lg font-bold mb-2">{tournament.name}</div>
           <div className="mb-2">
-            Time remaining:
+            Time remaining:{' '}
             <RemainingTime
               startedAt={tournament.startedAt!}
               durationInSeconds={tournament.metadata.endDuration}
-            />{' '}
+            />
           </div>
           <div className="mb-2">Prize: {tournament.metadata.prize} SOL</div>
           <div className="mb-4">

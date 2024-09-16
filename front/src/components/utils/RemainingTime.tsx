@@ -1,14 +1,17 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 interface RemainingTimeProps {
   startedAt: Date;
   durationInSeconds: number;
+  classname?: string;
 }
 
 const RemainingTime: React.FC<RemainingTimeProps> = ({
   startedAt,
   durationInSeconds,
+  classname,
 }) => {
   const [remainingTime, setRemainingTime] = useState('');
 
@@ -22,20 +25,46 @@ const RemainingTime: React.FC<RemainingTimeProps> = ({
         setRemainingTime('Ended');
         clearInterval(intervalId);
       } else {
-        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        const days = Math.max(Math.floor(timeDiff / (1000 * 60 * 60 * 24)), 0);
+        const hours = Math.max(
+          Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          0
         );
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const minutes = Math.max(
+          Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60)),
+          0
+        );
+        const seconds = Math.max(
+          Math.floor((timeDiff % (1000 * 60)) / 1000),
+          0
+        );
 
-        setRemainingTime(`${days}d ${hours}h ${minutes}m`);
+        const pad = (num: number) => num.toString().padStart(2, '0');
+
+        let timeString = '';
+        if (days > 0) {
+          timeString = `${days}d ${pad(hours)}h`;
+        } else if (hours > 0) {
+          timeString = `${pad(hours)}h ${pad(minutes)}m`;
+        } else {
+          timeString = `${pad(minutes)}m ${pad(seconds)}s`;
+        }
+        setRemainingTime(timeString);
       }
     }, 1000);
 
     return () => clearInterval(intervalId);
   }, [startedAt, durationInSeconds]);
 
-  return <span>{remainingTime}</span>;
+  if (!remainingTime) return '';
+
+  return (
+    <Badge
+      className={`text-black bg-lime-500 rounded-sm px-1 ${classname ?? ''}`}
+    >
+      {remainingTime}
+    </Badge>
+  );
 };
 
 export default RemainingTime;
