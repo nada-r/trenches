@@ -1,6 +1,7 @@
 {
-  "name": "backend_two",
-  "version": "0.0.0",
+  "name": "trenches-back",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
     "build": "npx ts-node build.ts",
     "lint": "npx eslint src/ --ext .ts",
@@ -62,6 +63,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.10.0",
+    "@inquirer/prompts": "^5.5.0",
     "@types/cookie-parser": "^1.4.7",
     "@types/express": "^4.17.21",
     "@types/find": "^0.2.4",
