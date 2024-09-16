@@ -18,6 +18,16 @@ This project was created with [express-generator-typescript](https://github.com/
 npx prisma db push
 ```
 
+## DotEnv
+
+```
+# pull last environment state
+npx dotenv-vault@latest pull dev/production
+
+# push a new environment state
+npx dotenv-vault@latest push dev/production
+```
+
 ## Available Scripts
 
 ### `npm run dev`

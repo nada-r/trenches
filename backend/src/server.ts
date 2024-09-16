@@ -4,9 +4,8 @@
 
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import path from 'path';
 import helmet from 'helmet';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import logger from 'jet-logger';
 
 import 'express-async-errors';
@@ -18,7 +17,7 @@ import EnvVars from '@src/common/EnvVars';
 import HttpStatusCodes from '@src/common/HttpStatusCodes';
 import { RouteError } from '@src/common/classes';
 import { NodeEnvs } from '@src/common/misc';
-import cors from "cors";
+import cors from 'cors';
 import { services } from '.';
 
 // **** Variables **** //
@@ -30,17 +29,17 @@ const app = express();
 
 // Basic middleware
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(EnvVars.CookieProps.Secret));
 app.use(cors());
 
 // app.get("/nom_de_route", async (req: Request, res: Response) => {
 
 // })
-app.get("/cards", async (req: Request, res: Response) => {
+app.get('/cards', async (req: Request, res: Response) => {
   const cards = await services.card?.getAll();
   res.json(cards);
-})
+});
 
 app.get("/test", (req, res) => {
   res.json({message: process.env.DATABASE_URL});
