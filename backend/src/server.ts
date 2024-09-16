@@ -41,9 +41,20 @@ app.get('/cards', async (req: Request, res: Response) => {
   res.json(cards);
 });
 
-app.get('/tournaments', async (req: Request, res: Response) => {
+app.get('/tournament/all', async (req: Request, res: Response) => {
   const tournaments = await services.tournament?.getAvailable();
   res.json(tournaments);
+});
+
+app.get('/tournament/:id', async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const tournament = await services.tournament?.getById(id);
+
+  if (tournament) {
+    res.json(tournament);
+  } else {
+    res.status(404).json({ message: 'Tournament not found' });
+  }
 });
 
 app.get('/test', (req, res) => {

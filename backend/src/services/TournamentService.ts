@@ -16,6 +16,15 @@ export class TournamentService {
   async getAll(): Promise<Tournament[]> {
     return this.prisma.tournament.findMany({});
   }
+
+  async getById(id: number): Promise<Tournament | null> {
+    return this.prisma.tournament.findUnique({
+      where: {
+        id: id,
+      },
+    });
+  }
+
   async getAvailable(): Promise<Tournament[]> {
     return this.prisma.tournament.findMany({
       where: {
