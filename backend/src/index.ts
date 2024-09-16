@@ -3,21 +3,19 @@ import logger from 'jet-logger';
 
 import EnvVars from '@src/common/EnvVars';
 import server from './server';
-import { PrismaClient } from '@prisma/client';
-import cors from "cors";
-import bootStrap from './bootstrap';
-
 import {
   CardService,
   PowerService,
+  TournamentService,
   UserService,
 } from './services';
 import bootstrap from '@src/bootstrap';
 
 interface IServices {
-  user: UserService,
-  card: CardService,
-  power: PowerService
+  user: UserService;
+  card: CardService;
+  power: PowerService;
+  tournament: TournamentService;
 }
 
 export const services: Partial<IServices> = {};
@@ -63,6 +61,7 @@ server.listen(EnvVars.Port, async () => {
   addService('user', UserService, prisma);
   addService('card', CardService, prisma);
   addService('power', PowerService, prisma);
-  
-  logger.info(SERVER_START_MSG)}
-)
+  addService('tournament', TournamentService, prisma);
+
+  logger.info(SERVER_START_MSG);
+});

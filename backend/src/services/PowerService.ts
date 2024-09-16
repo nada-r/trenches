@@ -1,10 +1,10 @@
-import { PrismaClient, Power } from "@prisma/client";
-import { omitPrisma } from "../types";
+import { Power, PrismaClient } from '@prisma/client';
+import { OmitPrisma } from '../types';
 
 export class PowerService {
   constructor(private prisma: PrismaClient) {}
 
-  async createPower(data: omitPrisma<Power>) {
+  async createPower(data: OmitPrisma<Power>) {
     const power = await this.prisma.power.create({
       data,
     });

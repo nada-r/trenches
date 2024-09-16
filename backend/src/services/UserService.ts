@@ -1,17 +1,13 @@
-import { PrismaClient, User } from "@prisma/client";
-import { omitPrisma } from "../types";
+import { PrismaClient, User } from '@prisma/client';
+import { OmitPrisma } from '../types';
 
 export class UserService {
-  constructor(private prisma: PrismaClient) {
+  constructor(private prisma: PrismaClient) {}
 
-  }
-
-  async createUser(data: omitPrisma<User>) {
-    const user = await this.prisma.user.create(
-        {
-            data,
-        }
-    )
+  async createUser(data: OmitPrisma<User>) {
+    const user = await this.prisma.user.create({
+      data,
+    });
     return user;
   }
 

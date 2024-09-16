@@ -41,9 +41,14 @@ app.get('/cards', async (req: Request, res: Response) => {
   res.json(cards);
 });
 
-app.get("/test", (req, res) => {
-  res.json({message: process.env.DATABASE_URL});
-})
+app.get('/tournaments', async (req: Request, res: Response) => {
+  const tournaments = await services.tournament?.getAvailable();
+  res.json(tournaments);
+});
+
+app.get('/test', (req, res) => {
+  res.json({ message: process.env.DATABASE_URL });
+});
 
 // Show routes called in console during development
 if (EnvVars.NodeEnv === NodeEnvs.Dev.valueOf()) {

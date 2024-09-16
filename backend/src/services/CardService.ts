@@ -1,26 +1,23 @@
-import { PrismaClient, Card, Power, User } from "@prisma/client";
+import { Card, Power, PrismaClient } from '@prisma/client';
+import { OmitPrisma } from '@src/types';
 
 export class CardService {
   constructor(private prisma: PrismaClient) {}
 
-  async createCard(data: Omit<Card, 'id' | 'createdAt' | 'updatedAt' | 'power' | 'owner' | 'powerId' | 'ownerId'>, powerId: Power["id"], userId: User["id"])
-   {
+  async createCard(data: OmitPrisma<Card, 'powerId'>, powerId: Power['id']) {
     const card = await this.prisma.card.create({
       data: {
         ...data,
         power: {
-          connect: { id: powerId }
+          connect: { id: powerId },
         },
-        owner: {
-          connect: { id: userId }
-        }
-      }
+      },
     });
     return card;
   }
 
   async getAll(): Promise<Card[]> {
-    const cards = await this.prisma.card.findMany({include: {power: true}});
+    const cards = await this.prisma.card.findMany({ include: { power: true } });
     return cards;
   }
 }
