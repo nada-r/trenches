@@ -61,7 +61,7 @@ app.get('/tournament/:id', async (req: Request, res: Response) => {
 app.post('/tournament/join', async (req: Request, res: Response) => {
   const { tournamentId, walletPubkey, callers } = req.body;
 
-  if (!tournamentId || !walletPubkey || !Array.isArray(callers)) {
+  if (!tournamentId || !walletPubkey || !Array.isArray(callers) || callers.length !== 3) {
     return res.status(400).json({ message: 'Invalid request body' });
   }
 
