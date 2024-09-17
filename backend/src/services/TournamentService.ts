@@ -78,19 +78,26 @@ export class TournamentService {
         id: tournamentId,
       },
       data: {
-        status: 'STARTED',  // Set the tournament status to 'STARTED'
-        startedAt: new Date(),  // Set the start time to the current date and time
+        status: 'STARTED', // Set the tournament status to 'STARTED'
+        startedAt: new Date(), // Set the start time to the current date and time
       },
     });
   }
 
-async joinTournament(data: OmitPrisma<TournamentParticipation>) {
-  return this.prisma.tournamentParticipation.create({
-    data: {
-      ... data,
-    },
-  });
-}
+  /**
+   * Joins a user to a tournament by creating a new tournament participation.
+   * @param data - The tournament participation data to create, excluding Prisma-specific fields.
+   * @returns A Promise that resolves to the created TournamentParticipation object.
+   */
+  async joinTournament(data: OmitPrisma<TournamentParticipation>) {
+
+    // TODO validate that sender is the owner of the walletPubkey by signing his message
+    return this.prisma.tournamentParticipation.create({
+      data: {
+        ...data,
+      },
+    });
+  }
 
 
 }
