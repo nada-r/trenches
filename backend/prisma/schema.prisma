@@ -101,4 +101,6 @@ model TournamentParticipation {
   updatedAt    DateTime   @updatedAt
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId Int
+
+  @@unique(name: "unique_participation", [walletPubkey, tournamentId])
 }
