@@ -99,7 +99,19 @@ export class TournamentService {
     });
   }
 
-
+  async getMyTournamentParticipation(
+    tournamentId: number,
+    walletPubkey: string
+  ): Promise<TournamentParticipation | null> {
+    return this.prisma.tournamentParticipation.findUnique({
+      where: {
+        unique_participation: {
+          tournamentId: tournamentId,
+          walletPubkey: walletPubkey,
+        },
+      },
+    });
+  }
 }
 
 export default TournamentService;

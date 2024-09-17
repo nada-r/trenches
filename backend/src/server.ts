@@ -77,6 +77,30 @@ app.post('/tournament/join', async (req: Request, res: Response) => {
   }
 });
 
+app.get('/tournament/:id/:walletPubkey', async (req: Request, res: Response) => {
+  const tournamentId = Number(req.params.id);
+  const walletPubkey = req.params.walletPubkey;
+
+  if (!tournamentId || !walletPubkey) {
+    return res.status(400).json({ message: 'Wallet public key is required' });
+  }
+
+  try {
+    const participation = await services.tournament?.getMyTournamentParticipation(tournamentId, walletPubkey);
+    if (participation) {
+      res.json(participation);
+    } else {
+      res.status(404).json({ message: 'No participations found for this wallet' });
+    }
+  } catch (error) {
+    const errorMessage = `Error fetching wallet tournament participation: ${(error as Error).message}`;
+    morgan('combined')(req, res, () => {
+      console.error(errorMessage);
+    });
+    res.status(500).json({ message: 'Error fetching your tournament participation', error: (error as Error).message });
+  }
+});
+
 
 app.get('/test', (req, res) => {
   res.json({ message: process.env.DATABASE_URL });

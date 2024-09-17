@@ -8,13 +8,19 @@ import { Button } from '@/components/ui/button';
 import TournamentSlot from '@/components/trenches/TournamentSlot';
 import CallerTournamentCard from '@/components/trenches/CallerTournamentCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
-import { Tournament, TournamentSchema } from '@/models';
+import {
+  Tournament,
+  TournamentParticipation,
+  TournamentParticipationSchema,
+  TournamentSchema,
+} from '@/models';
 import RemainingTime from '@/components/utils/RemainingTime';
 import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 
 const instance = createAxiosInstance();
 
 const TournamentPage = ({ params }: { params: { id: string } }) => {
+  const tournamentId = Number(params.id);
   const { user } = usePrivy();
   const solanaWallet =
     user &&
@@ -26,12 +32,13 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     );
 
   const [tournament, setTournament] = useState<Tournament>();
+  const [participation, setParticipation] = useState<TournamentParticipation>();
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<
     Array<Token | undefined>
   >([]);
   const [isAllCardsSelected, setIsAllCardsSelected] = useState(false);
-
+  const [isAlreadyParticipate, setIsAlreadyParticipate] = useState(false);
   const [isTournamentClosed, setIsTournamentClosed] = useState(false);
 
   useEffect(() => {
@@ -51,12 +58,41 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   }, [tournament]);
 
   useEffect(() => {
+    if (solanaWallet && availableTokens.length > 0) {
+      const fetchParticipation = async () => {
+        try {
+          const address = solanaWallet.address;
+          const response = await instance.get(
+            `/tournament/${tournamentId}/${address}`
+          );
+          const participation = TournamentParticipationSchema.parse(
+            response.data
+          );
+
+          setIsAlreadyParticipate(true);
+          setSelectedTokens(
+            participation.callers.map((c) =>
+              availableTokens.find((t) => t.id === c)
+            )
+          );
+        } catch (error) {
+          console.error('Error fetching user tokens:', error);
+        }
+      };
+      fetchParticipation();
+    }
+  }, [solanaWallet, availableTokens]);
+
+  useEffect(() => {
     setIsAllCardsSelected(
       selectedTokens.filter((t) => t !== undefined).length === 3
     );
   }, [selectedTokens]);
 
   useEffect(() => {
+    // Initialize selectedTokens with 3 undefined elements
+    setSelectedTokens([undefined, undefined, undefined]);
+
     async function fetchTournament() {
       try {
         const response = await instance.get('/tournament/' + params.id);
@@ -99,11 +135,6 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       setSelectedTokens(newSelected);
     }
   };
-
-  // Initialize selectedTokens with 3 undefined elements
-  useEffect(() => {
-    setSelectedTokens([undefined, undefined, undefined]);
-  }, []);
 
   const handleJoinTournament = async () => {
     try {
@@ -169,11 +200,17 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
         ))}
       </div>
       <Button
-        disabled={isTournamentClosed || !isAllCardsSelected}
+        disabled={
+          isTournamentClosed || !isAllCardsSelected || isAlreadyParticipate
+        }
         className="w-full"
         onClick={() => handleJoinTournament()}
       >
-        {isTournamentClosed ? 'Participation closed' : 'Participate'}
+        {isTournamentClosed
+          ? 'Participation closed'
+          : isAlreadyParticipate
+            ? 'Already participate'
+            : 'Participate'}
       </Button>
       <p className="mb-16 w-full text-sm text-neutral-500 text-center mt-3">
         234 players have entered the tournament
