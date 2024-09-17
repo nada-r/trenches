@@ -10,7 +10,6 @@ import CallerTournamentCard from '@/components/trenches/CallerTournamentCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import {
   Tournament,
-  TournamentParticipation,
   TournamentParticipationSchema,
   TournamentSchema,
 } from '@/models';
@@ -34,7 +33,6 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   const [tournament, setTournament] = useState<
     Tournament & { participationCount: number }
   >();
-  const [participation, setParticipation] = useState<TournamentParticipation>();
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<
     Array<Token | undefined>
