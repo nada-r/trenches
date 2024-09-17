@@ -28,6 +28,7 @@ const app = express();
 // **** Setup **** //
 
 // Basic middleware
+app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(EnvVars.CookieProps.Secret));
@@ -56,6 +57,26 @@ app.get('/tournament/:id', async (req: Request, res: Response) => {
     res.status(404).json({ message: 'Tournament not found' });
   }
 });
+
+app.post('/tournament/join', async (req: Request, res: Response) => {
+  const { tournamentId, walletPubkey, callers } = req.body;
+
+  if (!tournamentId || !walletPubkey || !Array.isArray(callers)) {
+    return res.status(400).json({ message: 'Invalid request body' });
+  }
+
+  try {
+    const result = await services.tournament?.joinTournament({tournamentId, walletPubkey, callers});
+    res.json(result);
+  } catch (error) {
+    const errorMessage = `Error participating in tournament: ${(error as Error).message}`;
+    morgan('combined')(req, res, () => {
+      console.error(errorMessage);
+    });
+    res.status(500).json({ message: 'Error participating in tournament', error: (error as Error).message });
+  }
+});
+
 
 app.get('/test', (req, res) => {
   res.json({ message: process.env.DATABASE_URL });

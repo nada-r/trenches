@@ -10,10 +10,21 @@ import CallerTournamentCard from '@/components/trenches/CallerTournamentCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { Tournament, TournamentSchema } from '@/models';
 import RemainingTime from '@/components/utils/RemainingTime';
+import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 
 const instance = createAxiosInstance();
 
 const TournamentPage = ({ params }: { params: { id: string } }) => {
+  const { user } = usePrivy();
+  const solanaWallet =
+    user &&
+    user.linkedAccounts.find(
+      (account): account is WalletWithMetadata =>
+        account.type === 'wallet' &&
+        account.walletClientType === 'privy' &&
+        account.chainType === 'solana'
+    );
+
   const [tournament, setTournament] = useState<Tournament>();
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<
@@ -94,6 +105,25 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     setSelectedTokens([undefined, undefined, undefined]);
   }, []);
 
+  const handleJoinTournament = async () => {
+    try {
+      // Assuming you have access to the wallet public key and caller ID
+      const walletPubkey = 'YOUR_WALLET_PUBKEY'; // Replace with actual wallet public key
+      const callerIds = 'YOUR_CALLER_ID'; // Replace with actual caller ID
+
+      const response = await instance.post('/tournament/join', {
+        tournamentId: Number(params.id),
+        walletPubkey: solanaWallet?.address,
+        callers: selectedTokens.map((t) => t?.id),
+      });
+
+      console.log('Joined tournament:', response.data);
+      // You might want to update the UI or refetch tournaments here
+    } catch (error) {
+      console.error('Error joining tournament:', error);
+    }
+  };
+
   return (
     <>
       <div className="flex items-center mb-4">
@@ -141,6 +171,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       <Button
         disabled={isTournamentClosed || !isAllCardsSelected}
         className="w-full"
+        onClick={() => handleJoinTournament()}
       >
         {isTournamentClosed ? 'Participation closed' : 'Participate'}
       </Button>
