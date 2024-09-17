@@ -104,3 +104,26 @@ model TournamentParticipation {
 
   @@unique(name: "unique_participation", [walletPubkey, tournamentId])
 }
+
+model Caller {
+  id         Int      @id @default(autoincrement())
+  name       String 
+  image      String?
+  telegramId String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  calls      Call[]
+}
+
+model Call {
+  id           Int      @id @default(autoincrement())
+  tokenAddress String
+  startPrice   Float
+  callTime     DateTime
+  highestPrice Float
+  caller       Caller     @relation(fields: [callerId], references: [id])
+  callerId     Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  data         Json?
+}
