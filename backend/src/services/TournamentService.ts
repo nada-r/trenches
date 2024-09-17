@@ -35,12 +35,27 @@ export class TournamentService {
    * @param id - The ID of the tournament to retrieve.
    * @returns A Promise that resolves to the Tournament object, or `null` if not found.
    */
-  async getById(id: number): Promise<Tournament | null> {
-    return this.prisma.tournament.findUnique({
+  async getById(id: number): Promise<(Tournament & { participationCount: number }) | null> {
+    const tournament = await this.prisma.tournament.findUnique({
       where: {
         id: id,
       },
     });
+
+    if (!tournament) {
+      return null;
+    }
+
+    const participationCount = await this.prisma.tournamentParticipation.count({
+      where: {
+        tournamentId: id,
+      },
+    });
+
+    return {
+      ...tournament,
+      participationCount,
+    };
   }
 
   /**
@@ -112,6 +127,7 @@ export class TournamentService {
       },
     });
   }
+
 }
 
 export default TournamentService;

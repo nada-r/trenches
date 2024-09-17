@@ -31,7 +31,9 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
         account.chainType === 'solana'
     );
 
-  const [tournament, setTournament] = useState<Tournament>();
+  const [tournament, setTournament] = useState<
+    Tournament & { participationCount: number }
+  >();
   const [participation, setParticipation] = useState<TournamentParticipation>();
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<
@@ -96,7 +98,10 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     async function fetchTournament() {
       try {
         const response = await instance.get('/tournament/' + params.id);
-        setTournament(TournamentSchema.parse(response.data));
+        setTournament({
+          ...TournamentSchema.parse(response.data),
+          participationCount: response.data.participationCount,
+        });
       } catch (error) {
         console.error('Error fetching tournament:', error);
       }
@@ -138,10 +143,6 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
 
   const handleJoinTournament = async () => {
     try {
-      // Assuming you have access to the wallet public key and caller ID
-      const walletPubkey = 'YOUR_WALLET_PUBKEY'; // Replace with actual wallet public key
-      const callerIds = 'YOUR_CALLER_ID'; // Replace with actual caller ID
-
       const response = await instance.post('/tournament/join', {
         tournamentId: Number(params.id),
         walletPubkey: solanaWallet?.address,
@@ -213,7 +214,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
             : 'Participate'}
       </Button>
       <p className="mb-16 w-full text-sm text-neutral-500 text-center mt-3">
-        234 players have entered the tournament
+        {tournament?.participationCount} players have entered the tournament
       </p>
       <h1 className="text-xl font-bold mb-4">Rewards Breakdown</h1>
       <div className="bg-neutral-700 text-neutral-300 rounded-2xl p-4 mb-4">
