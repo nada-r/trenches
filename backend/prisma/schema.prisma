@@ -38,6 +38,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// generate types for front
 model Card {
   id        Int      @id @default(autoincrement())
   name      String
@@ -45,8 +46,8 @@ model Card {
   image     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  power     Power    @relation(fields: [powerId], references: [id]) //to replace by value in Power
   powerId   Int      @unique
+  power     Power    @relation(fields: [powerId], references: [id])
 }
 
 model Power {
@@ -107,7 +108,7 @@ model TournamentParticipation {
 
 model Caller {
   id         Int      @id @default(autoincrement())
-  name       String 
+  name       String
   image      String?
   telegramId String   @unique
   createdAt  DateTime @default(now())
@@ -121,7 +122,7 @@ model Call {
   startPrice   Float
   callTime     DateTime
   highestPrice Float
-  caller       Caller     @relation(fields: [callerId], references: [id])
+  caller       Caller   @relation(fields: [callerId], references: [id])
   callerId     Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -37,8 +37,8 @@ app.use(cors());
 // app.get("/nom_de_route", async (req: Request, res: Response) => {
 
 // })
-app.get('/cards', async (req: Request, res: Response) => {
-  const cards = await services.card?.getAll();
+app.get('/callers', async (req: Request, res: Response) => {
+  const cards = await services.caller?.getAll();
   res.json(cards);
 });
 

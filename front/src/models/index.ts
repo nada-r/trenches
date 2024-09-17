@@ -68,9 +68,15 @@ export const TournamentScalarFieldEnumSchema = z.enum(['id','name','status','sta
 
 export const TournamentParticipationScalarFieldEnumSchema = z.enum(['id','walletPubkey','callers','createdAt','updatedAt','tournamentId']);
 
+export const CallerScalarFieldEnumSchema = z.enum(['id','name','image','telegramId','createdAt','updatedAt']);
+
+export const CallScalarFieldEnumSchema = z.enum(['id','tokenAddress','startPrice','callTime','highestPrice','callerId','createdAt','updatedAt','data']);
+
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
+
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
@@ -179,3 +185,36 @@ export const TournamentParticipationSchema = z.object({
 })
 
 export type TournamentParticipation = z.infer<typeof TournamentParticipationSchema>
+
+/////////////////////////////////////////
+// CALLER SCHEMA
+/////////////////////////////////////////
+
+export const CallerSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  image: z.string().nullable(),
+  telegramId: z.string(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+})
+
+export type Caller = z.infer<typeof CallerSchema>
+
+/////////////////////////////////////////
+// CALL SCHEMA
+/////////////////////////////////////////
+
+export const CallSchema = z.object({
+  id: z.number().int(),
+  tokenAddress: z.string(),
+  startPrice: z.number(),
+  callTime: z.coerce.date(),
+  highestPrice: z.number(),
+  callerId: z.number().int(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  data: JsonValueSchema.nullable(),
+})
+
+export type Call = z.infer<typeof CallSchema>
