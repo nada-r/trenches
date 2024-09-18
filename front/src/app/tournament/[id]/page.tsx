@@ -97,7 +97,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           setIsAlreadyParticipate(true);
           setSelectedTokens(
             participation.callers.map((c) =>
-              availableTokens.find((t) => t.id === c)
+              availableTokens.find((t) => t.id.toString() === c)
             )
           );
         } catch (error) {
@@ -155,10 +155,18 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       const response = await instance.post('/tournament/join', {
         tournamentId: Number(params.id),
         walletPubkey: solanaWallet?.address,
-        callers: selectedTokens.map((t) => t?.id),
+        callers: selectedTokens.map((t) => t?.id.toString()),
       });
 
       console.log('Joined tournament:', response.data);
+      const participation = TournamentParticipationSchema.parse(response.data);
+
+      setIsAlreadyParticipate(true);
+      setSelectedTokens(
+        participation.callers.map((c) =>
+          availableTokens.find((t) => t.id === c)
+        )
+      );
       // You might want to update the UI or refetch tournaments here
     } catch (error) {
       console.error('Error joining tournament:', error);
