@@ -58,6 +58,31 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   }, [tournament]);
 
   useEffect(() => {
+    if (solanaWallet) {
+      const fetchTokens = async () => {
+        try {
+          const callerResponse = await instance.get('/callers');
+          const response = await instance.get(
+            `/portfolio/${solanaWallet?.address}`
+          );
+
+          setAvailableTokens(
+            response.data.portfolio.map((t: any, i: number) => ({
+              ...callerResponse.data.find((c: any) => c.id === t.callerId),
+              marketCap: 430000,
+              balance: t.balance,
+            }))
+          );
+        } catch (error) {
+          console.error('Error fetching tokens:', error);
+        }
+      };
+
+      fetchTokens();
+    }
+  }, [solanaWallet]);
+
+  useEffect(() => {
     if (solanaWallet && availableTokens.length > 0) {
       const fetchParticipation = async () => {
         try {
@@ -105,20 +130,6 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       }
     }
     fetchTournament();
-
-    // Temporary function to generate 4 random tokens
-    function generateRandomTokens() {
-      // prettier-ignore
-      const fakeTokens: Token[] = [
-        { id: '1', rank: 1, name: 'greg', marketCap: 430000, balance: 13000000, image: 'https://assets.api.uizard.io/api/cdn/stream/ddcabbc0-9002-4ebc-8bfc-2a47b3f636b1.png' },
-        { id: '2', rank: 2, name: 'Ansem', marketCap: 430000, balance: 3000000, image: 'https://assets.api.uizard.io/api/cdn/stream/848ade87-3e76-42a4-9842-ebacf29c9749.png' },
-        { id: '3', rank: 3, name: 'bqsed16z', marketCap: 430000, balance: 1000000, image: 'https://assets.api.uizard.io/api/cdn/stream/e53ae5aa-f673-43e7-b711-a691a3603a64.png' },
-        { id: '4', rank: 4, name: 'wallstreetbets', marketCap: 430000, balance: 100000, image: 'https://assets.api.uizard.io/api/cdn/stream/5d1295d1-654a-47cd-a559-f4eea99a0f7c.png' },
-      ];
-      setAvailableTokens(fakeTokens);
-    }
-
-    generateRandomTokens();
   }, []);
 
   const selectToken = (token: Token) => {
