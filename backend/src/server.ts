@@ -69,11 +69,12 @@ app.post('/tournament/join', async (req: Request, res: Response) => {
     const result = await services.tournament?.joinTournament({tournamentId, walletPubkey, callers});
     res.json(result);
   } catch (error) {
-    const errorMessage = `Error participating in tournament: ${(error as Error).message}`;
     morgan('combined')(req, res, () => {
-      console.error(errorMessage);
+      console.error(
+        `Error participating in tournament: ${(error as Error).message}`
+      );
     });
-    res.status(500).json({ message: 'Error participating in tournament', error: (error as Error).message });
+    res.status(500).json({ message: 'Error participating in tournament', error: (error as Error).name });
   }
 });
 
@@ -93,11 +94,12 @@ app.get('/tournament/:id/:walletPubkey', async (req: Request, res: Response) => 
       res.status(404).json({ message: 'No participations found for this wallet' });
     }
   } catch (error) {
-    const errorMessage = `Error fetching wallet tournament participation: ${(error as Error).message}`;
     morgan('combined')(req, res, () => {
-      console.error(errorMessage);
+      console.error(
+        `Error fetching wallet tournament participation: ${(error as Error).message}`
+      );
     });
-    res.status(500).json({ message: 'Error fetching your tournament participation', error: (error as Error).message });
+    res.status(500).json({ message: 'Error fetching your tournament participation', error: (error as Error).name });
   }
 });
 
@@ -116,11 +118,10 @@ app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
       res.status(404).json({ message: 'Portfolio not found for this wallet' });
     }
   } catch (error) {
-    const errorMessage = `Error fetching portfolio: ${(error as Error).message}`;
     morgan('combined')(req, res, () => {
-      console.error(errorMessage);
+      console.error(`Error fetching portfolio: ${(error as Error).message}`);
     });
-    res.status(500).json({ message: 'Error fetching portfolio', error: (error as Error).message });
+    res.status(500).json({ message: 'Error fetching portfolio', error: (error as Error).name });
   }
 });
 
