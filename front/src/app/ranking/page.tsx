@@ -12,12 +12,13 @@ import {
 } from '@/components/ui/table';
 import RankingImage from '@/components/trenches/RankingImage';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
-import { Card, Power } from '@/models';
+import { Caller } from '@/models';
+import { PiLightningFill } from 'react-icons/pi';
 
 const instance = createAxiosInstance();
 
 export default function Ranking() {
-  const [cards, setCards] = useState<(Card & { power: Power })[]>([]);
+  const [callers, setCallers] = useState<Caller[]>([]);
 
   useEffect(() => {
     console.log(
@@ -27,14 +28,10 @@ export default function Ranking() {
     async function fetchCards() {
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       try {
-        // const response1 =await instance.get(
-        //   '/test'
-        // );
-        // console.log(response1);
-        const response = await instance.get('/cards');
-        setCards(response.data);
+        const response = await instance.get('/callers');
+        setCallers(response.data);
       } catch (error) {
-        console.error('Error fetching cards:', error);
+        console.error('Error fetching callers:', error);
       }
     }
     fetchCards();
@@ -46,8 +43,8 @@ export default function Ranking() {
         <h1>Trending</h1>
       </div>
       <div>
-        {/* <>{JSON.stringify(cards)}</> test if data is loading*/}
-        {/* {cards.length > 0 && <DisplayCard card={cards[0]} />} */}
+        {/* <>{JSON.stringify(callers)}</> test if data is loading*/}
+        {/* {callers.length > 0 && <DisplayCard card={callers[0]} />} */}
       </div>
       <Table className="bg-background text-foreground border-border">
         <TableCaption className="text-muted-foreground">list</TableCaption>
@@ -66,19 +63,24 @@ export default function Ranking() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {cards.map((card, index) => (
-            <TableRow key={card.id} className="border-border">
+          {callers.map((caller, index) => (
+            <TableRow key={caller.id} className="border-border">
               <TableCell className="font-medium text-foreground border-border">
                 {index + 1}
               </TableCell>
               <TableCell className="border-border">
-                <RankingImage image={card.image} />
+                {caller.image && <RankingImage image={caller.image} />}
               </TableCell>
               <TableCell className="text-foreground border-border">
-                {card.name}
+                {caller.name}
               </TableCell>
               <TableCell className="text-foreground border-border">
-                {card.power.value}
+                <div className="flex justify-center items-center">
+                  <PiLightningFill
+                    size={20}
+                    className="text-yellow-400 animate-pulse"
+                  />
+                </div>
               </TableCell>
             </TableRow>
           ))}

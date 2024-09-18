@@ -1,6 +1,4 @@
-export { CardService } from './CardService';
-export { UserService } from './UserService';
-export { PowerService } from './PowerService';
-export { TournamentService } from './TournamentService';
-export { CallService } from './CallService';
 export { CallerService } from './CallerService';
+export { CallService } from './CallService';
+export { TournamentService} from './TournamentService';
+export { ClaimService } from './ClaimService';

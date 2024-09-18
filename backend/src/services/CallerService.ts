@@ -1,4 +1,4 @@
-import { PrismaClient, Caller, Prisma } from '@prisma/client';
+import { Caller, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
 
 export class CallerService {
@@ -9,6 +9,11 @@ export class CallerService {
       data,
     });
     return caller;
+  }
+
+  async getAll(): Promise<Caller[]> {
+    const callers = await this.prisma.caller.findMany({});
+    return callers;
   }
 
   async getCallerByTelegramId(telegramId: string): Promise<Caller | null> {

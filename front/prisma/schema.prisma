@@ -13,21 +13,40 @@ generator json {
   provider = "prisma-json-types-generator"
 }
 
+/// generate types for front
+generator zod {
+  provider                         = "zod-prisma-types"
+  output                           = "../../front/src/models"
+  useMultipleFiles                 = false // default is false
+  writeBarrelFiles                 = false // default is true
+  createInputTypes                 = false // default is true
+  createModelTypes                 = true // default is true
+  addInputTypeValidation           = false // default is true
+  addIncludeType                   = false // default is true
+  addSelectType                    = false // default is true
+  validateWhereUniqueInput         = false // default is true
+  createOptionalDefaultValuesTypes = false // default is false
+  createRelationValuesTypes        = false // default is false
+  createPartialTypes               = false // default is false
+  useDefaultValidators             = true // default is true
+  coerceDate                       = true // default is true
+  writeNullishInModelTypes         = flase // default is false
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Card {
-  id                       Int                       @id @default(autoincrement())
-  name                     String
-  price                    Int
-  image                    String
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
-  power                    Power                     @relation(fields: [powerId], references: [id]) //to replace by value in Power
-  powerId                  Int                       @unique
-  tournamentParticipations TournamentParticipation[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Int
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  power     Power    @relation(fields: [powerId], references: [id]) //to replace by value in Power
+  powerId   Int      @unique
 }
 
 model Power {
@@ -76,8 +95,10 @@ enum TournamentStatus {
 
 model TournamentParticipation {
   id           Int        @id @default(autoincrement())
-  walletString String
-  cardIds      Card[]
+  walletPubkey String
+  callers      String[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId Int
 }
