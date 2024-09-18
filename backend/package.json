@@ -12,6 +12,7 @@
     "prisma:gen": "npx prisma generate",
     "prisma:pull-prod": "dotenv -e .env.production -- npx prisma db pull",
     "prisma:migrate-prod": "npx prisma migrate deploy",
+    "prisma:migrate-dev": "npx prisma migrate dev",
     "prisma:push": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
     "dotenv:pull": "npx dotenv-vault@latest pull",
