@@ -3,37 +3,29 @@
 import React, { useEffect, useState } from 'react';
 import MarketCard, { MarketCardProps } from '@/components/trenches/MarketCard';
 import { RiFilter3Fill } from 'react-icons/ri';
+import { createAxiosInstance } from '@/utils/createAxiosInstance';
+
+const instance = createAxiosInstance();
 
 export default function MarketPage() {
   const [marketCard, setMarketCard] = useState<MarketCardProps[]>([]);
 
   useEffect(() => {
-    // Commented out original fetchTokens function
-    // async function fetchTokens() {
-    //   try {
-    //     const response = await axios.get(
-    //       `${process.env.NEXT_PUBLIC_BASE_URL!}/tokens`
-    //     );
-    //     setTokens(response.data);
-    //   } catch (error) {
-    //     console.error('Error fetching tokens:', error);
-    //   }
-    // }
-    // fetchTokens();
-
-    // Temporary function to generate 4 random tokens
-    function generateRandomTokens() {
-      // prettier-ignore
-      const fakeTokens: MarketCardProps[] = [
-        { id: '1', rank: 1, name: 'greg', variation: 387 },
-        { id: '2', rank: 2, name: 'Ansem', variation: 387 },
-        { id: '3', rank: 3, name: 'bqsed16z', variation: 387 },
-        { id: '4', rank: 4, name: 'wallstreetbets', variation: 387 },
-      ];
-      setMarketCard(fakeTokens);
+    async function fetchTokens() {
+      try {
+        const response = await instance.get('/callers');
+        setMarketCard(
+          response.data.map((c: any, i: number) => ({
+            ...c,
+            rank: i,
+            variation: 387,
+          }))
+        );
+      } catch (error) {
+        console.error('Error fetching tokens:', error);
+      }
     }
-
-    generateRandomTokens();
+    fetchTokens();
   }, []);
 
   return (
