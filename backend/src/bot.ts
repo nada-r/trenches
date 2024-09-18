@@ -1,6 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import axios from "axios";
 import bootstrap from "./bootstrap";
+import { env } from "process";
 
 interface TokenInfo {
     address: string;
@@ -24,7 +25,11 @@ async function startBot() {
         process.exit(0);
     });
 
-    const BOT_TOKEN = "7356258303:AAHBDm9YFGRa-VZ7DVmv2Su58dKGSMRh3UU";
+    const BOT_TOKEN = env.BOT_TOKEN;
+    if (!BOT_TOKEN) {
+        console.error("BOT_TOKEN is not set");
+        process.exit(1);
+    }
     const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
     bot.on("polling_error", (error) => console.log(error));
