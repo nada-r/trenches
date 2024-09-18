@@ -4,11 +4,11 @@ import SimCardIcon from '@/components/icons/SimCardIcon';
 import { Token } from '@/app/portfolio/page';
 
 export function getSimCardType(balance: number): string {
-  if (balance >= 1e7) {
+  if (balance >= 3_000_000) {
     return 'gold';
-  } else if (balance >= 1e6) {
+  } else if (balance >= 1_000_000) {
     return 'silver';
-  } else if (balance >= 1e3) {
+  } else if (balance >= 100_000) {
     return 'bronze';
   } else {
     return 'none';
