@@ -9,7 +9,7 @@ import {
   TournamentService,
   UserService,
   CallService,
-  CallerService
+  CallerService,
 } from './services';
 import bootstrap from '@src/bootstrap';
 
