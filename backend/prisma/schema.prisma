@@ -128,3 +128,12 @@ model Call {
   updatedAt    DateTime @updatedAt
   data         Json?
 }
+
+model Claim {
+  id           Int      @id @default(autoincrement())
+  walletPubkey String   @unique
+  /// [ClaimMetadata]
+  portfolio    Json /// @zod.custom.use(z.array(z.object({ callerId: z.number(), balance: z.number() })))
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

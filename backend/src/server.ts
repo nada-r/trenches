@@ -101,6 +101,29 @@ app.get('/tournament/:id/:walletPubkey', async (req: Request, res: Response) => 
   }
 });
 
+app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
+  const walletPubkey = req.params.walletPubkey;
+
+  if (!walletPubkey) {
+    return res.status(400).json({ message: 'Wallet public key is required' });
+  }
+
+  try {
+    const portfolio = await services.claim?.claim(walletPubkey);
+    if (portfolio) {
+      res.json(portfolio);
+    } else {
+      res.status(404).json({ message: 'Portfolio not found for this wallet' });
+    }
+  } catch (error) {
+    const errorMessage = `Error fetching portfolio: ${(error as Error).message}`;
+    morgan('combined')(req, res, () => {
+      console.error(errorMessage);
+    });
+    res.status(500).json({ message: 'Error fetching portfolio', error: (error as Error).message });
+  }
+});
+
 
 app.get('/test', (req, res) => {
   res.json({ message: process.env.DATABASE_URL });

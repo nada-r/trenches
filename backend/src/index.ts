@@ -3,13 +3,19 @@ import logger from 'jet-logger';
 
 import EnvVars from '@src/common/EnvVars';
 import server from './server';
-import { CallerService, CallService, TournamentService } from './services';
+import {
+  CallerService,
+  CallService,
+  ClaimService,
+  TournamentService,
+} from './services';
 import bootstrap from '@src/bootstrap';
 
 interface IServices {
   caller: CallerService;
   call: CallService;
   tournament: TournamentService;
+  claim: ClaimService;
 }
 
 export const services: Partial<IServices> = {};
@@ -55,6 +61,7 @@ server.listen(EnvVars.Port, async () => {
   addService('caller', CallerService, prisma);
   addService('call', CallService, prisma);
   addService('tournament', TournamentService, prisma);
+  addService('claim', ClaimService, prisma);
 
   logger.info(SERVER_START_MSG);
 });

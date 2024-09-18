@@ -72,6 +72,8 @@ export const CallerScalarFieldEnumSchema = z.enum(['id','name','image','telegram
 
 export const CallScalarFieldEnumSchema = z.enum(['id','tokenAddress','startPrice','callTime','highestPrice','callerId','createdAt','updatedAt','data']);
 
+export const ClaimScalarFieldEnumSchema = z.enum(['id','walletPubkey','portfolio','createdAt','updatedAt']);
+
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
@@ -218,3 +220,20 @@ export const CallSchema = z.object({
 })
 
 export type Call = z.infer<typeof CallSchema>
+
+/////////////////////////////////////////
+// CLAIM SCHEMA
+/////////////////////////////////////////
+
+export const ClaimSchema = z.object({
+  id: z.number().int(),
+  walletPubkey: z.string(),
+  /**
+   * [ClaimMetadata]
+   */
+  portfolio: z.array(z.object({ callerId: z.number(), balance: z.number() })),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+})
+
+export type Claim = z.infer<typeof ClaimSchema>
