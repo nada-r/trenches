@@ -11,14 +11,19 @@ import { createAxiosInstance } from '@/utils/createAxiosInstance';
 const instance = createAxiosInstance();
 
 export default function Homepage() {
-  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [tournaments, setTournaments] = useState<
+    Array<Tournament & { isClosed: boolean }>
+  >([]);
 
   useEffect(() => {
     async function fetchTournaments() {
       try {
         const response = await instance.get('/tournament/all');
         setTournaments(
-          response.data.map((t: unknown) => TournamentSchema.parse(t))
+          response.data.map((t: unknown) => ({
+            ...TournamentSchema.parse(t),
+            isClosed: false,
+          }))
         );
       } catch (error) {
         console.error('Error fetching tournaments:', error);
@@ -36,10 +41,15 @@ export default function Homepage() {
         >
           <div className="text-lg font-bold mb-2">{tournament.name}</div>
           <div className="mb-2">
-            Time remaining:{' '}
+            {tournament.isClosed ? 'Finishing' : 'Starting'} in:
             <RemainingTime
+              classname="m-2"
               startedAt={tournament.startedAt!}
-              durationInSeconds={tournament.metadata.endDuration}
+              durationInSeconds={
+                tournament.isClosed
+                  ? tournament.metadata.endDuration
+                  : tournament.metadata.openDuration
+              }
             />
           </div>
           <div className="mb-2">Prize: {tournament.metadata.prize} SOL</div>
