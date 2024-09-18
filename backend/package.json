@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "npx run prisma:migrate-prod && npx ts-node build.ts",
+    "build": "npx ts-node build.ts",
     "lint": "npx eslint src/ --ext .ts",
     "lint:tests": "npx eslint spec/ --ext .ts",
-    "start": "node -r module-alias/register ./dist --env=production",
+    "start": "npm run prisma:migrate-prod && node -r module-alias/register ./dist --env=production",
     "dev": "PORT=80 nodemon",
     "console": "npx ts-node src/console.ts",
     "prisma:gen": "npx prisma generate",
