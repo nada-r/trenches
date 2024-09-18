@@ -5,24 +5,21 @@ export class CallerService {
   constructor(private prisma: PrismaClient) {}
 
   async createCaller(data: OmitPrisma<Caller>): Promise<Caller> {
-    const caller = await this.prisma.caller.create({
+    return this.prisma.caller.create({
       data,
     });
-    return caller;
   }
 
   async getAll(): Promise<Caller[]> {
-    const callers = await this.prisma.caller.findMany({});
-    return callers;
+    return this.prisma.caller.findMany({});
   }
 
   async getCallerByTelegramId(telegramId: string): Promise<Caller | null> {
-    const caller = await this.prisma.caller.findUnique({
+    return this.prisma.caller.findUnique({
       where: {
         telegramId: telegramId,
       },
     });
-    return caller;
   }
 
   async getOrCreateCaller(
