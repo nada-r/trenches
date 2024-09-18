@@ -101,9 +101,8 @@ model Caller {
 model Call {
   id           Int      @id @default(autoincrement())
   tokenAddress String
-  startPrice   Float
-  callTime     DateTime
-  highestPrice Float
+  startFDV     Float
+  highestFDV   Float
   caller       Caller     @relation(fields: [callerId], references: [id])
   callerId     Int
   createdAt    DateTime @default(now())

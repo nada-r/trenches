@@ -44,7 +44,7 @@ export class CallService {
     async getActiveCalls(): Promise<Call[]> {
         const activeCalls = await this.prisma.call.findMany({
             where: {
-                callTime: {
+                createdAt: {
                     gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
                 },
             },
@@ -52,20 +52,17 @@ export class CallService {
         return activeCalls;
     }
 
-    async updateHighestPriceByToken(
-        token: string,
-        newPrice: number
-    ): Promise<any> {
+    async updateHighestFdvByToken(token: string, newFDV: number): Promise<any> {
         const result = await this.prisma.call.updateMany({
             where: {
                 tokenAddress: token,
-                highestPrice: { lt: newPrice },
-                callTime: {
+                highestFDV: { lt: newFDV },
+                createdAt: {
                     gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
                 },
             },
             data: {
-                highestPrice: newPrice,
+                highestFDV: newFDV,
                 updatedAt: new Date(),
             },
         });
