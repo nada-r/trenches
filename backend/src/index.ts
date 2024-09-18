@@ -8,6 +8,8 @@ import {
   PowerService,
   TournamentService,
   UserService,
+  CallService,
+  CallerService
 } from './services';
 import bootstrap from '@src/bootstrap';
 
@@ -16,6 +18,8 @@ interface IServices {
   card: CardService;
   power: PowerService;
   tournament: TournamentService;
+  call: CallService;
+  caller: CallerService;
 }
 
 export const services: Partial<IServices> = {};
@@ -62,6 +66,8 @@ server.listen(EnvVars.Port, async () => {
   addService('card', CardService, prisma);
   addService('power', PowerService, prisma);
   addService('tournament', TournamentService, prisma);
+  addService('call', CallService, prisma);
+  addService('caller', CallerService, prisma);
 
   logger.info(SERVER_START_MSG);
 });
