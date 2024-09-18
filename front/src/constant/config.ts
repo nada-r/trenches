@@ -1,7 +1,6 @@
 export const siteConfig = {
-  title: 'Next.js + Tailwind CSS + TypeScript Starter',
+  title: 'Trenches.top',
   description:
-    'A starter for Next.js, Tailwind CSS, and TypeScript with Absolute Import, Seo, Link component, pre-configured with Husky',
-  /** Without additional '/' on the end, e.g. https://theodorusclarence.com */
-  url: 'https://tsnext-tw.thcl.dev',
+    'Trenches.top: Your crypto battlefield HQ. Dive into meme coin madness, discover alpha callers, and join the ultimate tech tournaments with your squad. From the trenches to the moon!',
+  url: 'https://trenches.top',
 };
