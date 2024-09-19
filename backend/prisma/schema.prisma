@@ -111,6 +111,8 @@ model Caller {
   name       String
   image      String?
   telegramId String   @unique
+  /// [CallerData]
+  data       Json     @default("{}") /// @zod.custom.use(z.object({ power: z.number() }))
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   calls      Call[]

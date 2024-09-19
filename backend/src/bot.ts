@@ -11,7 +11,8 @@ interface TokenInfo {
 }
 
 async function startBot() {
-  const { callerService, callService, prisma } = await bootstrap();
+  const { callerService, callService, callingPowerService, prisma } =
+    await bootstrap();
 
   process.on('SIGINT', async () => {
     await prisma.$disconnect();
@@ -100,6 +101,8 @@ async function startBot() {
         console.log(`Updated ${result.count} objects for token ${token}`);
       }
     }
+
+    await callingPowerService.updateCallingPower();
   }, 60000);
 }
 
