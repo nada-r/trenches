@@ -14,6 +14,31 @@ export class CallerService {
     return this.prisma.caller.findMany({});
   }
 
+  async getCallersWithCallsOnTokens(
+    tokenAddresses: string[]
+  ): Promise<Caller[]> {
+    return this.prisma.caller.findMany({
+      where: {
+        calls: {
+          some: {
+            tokenAddress: {
+              in: tokenAddresses,
+            },
+          },
+        },
+      },
+      // include: {
+      //   calls: {
+      //     where: {
+      //       tokenAddress: {
+      //         in: tokenAddresses
+      //       }
+      //     }
+      //   }
+      // }
+    });
+  }
+
   async getCallerByTelegramId(telegramId: string): Promise<Caller | null> {
     return this.prisma.caller.findUnique({
       where: {

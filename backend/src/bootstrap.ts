@@ -1,7 +1,11 @@
 import { cleanEnv, str } from 'envalid';
 import { PrismaClient } from '@prisma/client';
-import { CallerService, CallService, TournamentService } from './services';
-import { CallingPowerService } from '@src/services/CallingPowerService';
+import {
+  CallerService,
+  CallingPowerService,
+  CallService,
+  TournamentService,
+} from './services';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables

@@ -93,16 +93,24 @@ async function startBot() {
       ...new Set(activeCalls.map((call) => call.tokenAddress)),
     ];
 
+    const updatedTokens = [];
+
     for (const token of uniqueTokens) {
       const tokenInfo = await getSolanaToken(token);
       if (tokenInfo) {
         const newFDV = tokenInfo.fdv;
         const result = await callService.updateHighestFdvByToken(token, newFDV);
         console.log(`Updated ${result.count} objects for token ${token}`);
+        if (result.count > 0) {
+          updatedTokens.push(token);
+        }
       }
     }
 
-    await callingPowerService.updateCallingPower();
+    if (updatedTokens.length > 0) {
+      await callingPowerService.updateCallingPower(updatedTokens);
+      console.log(`Updated calling power for ${updatedTokens.length} tokens`);
+    }
   }, 60000);
 }
 

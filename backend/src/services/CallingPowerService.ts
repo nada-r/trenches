@@ -8,16 +8,17 @@ export class CallingPowerService {
     private callService: CallService
   ) {}
 
-  async updateCallingPower(): Promise<void> {
-    const callers = await this.callerService.getAll();
+  async updateCallingPower(uniqueTokens: string[]): Promise<void> {
+    const callers =
+      await this.callerService.getCallersWithCallsOnTokens(uniqueTokens);
     for (const c of callers) {
       const calls = await this.callService.getCallsByTelegramId(c.telegramId);
-      const callerPower = this.calculateCallerPower(calls);
+      const callerPower = this.computePower(calls);
       await this.callerService.updateCallingPower(c.telegramId, callerPower);
     }
   }
 
-  calculateCallerPower(calls: Array<Call>): number {
+  computePower(calls: Array<Call>): number {
     if (calls.length === 0) return 0;
 
     // Calculer la performance de chaque appel
