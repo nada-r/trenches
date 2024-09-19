@@ -1,7 +1,10 @@
 import TelegramBot from 'node-telegram-bot-api';
+import AWS from 'aws-sdk';
+require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 import axios from 'axios';
 import bootstrap from './bootstrap';
-import { env } from 'process';
+import dotenv from 'dotenv';
+dotenv.config();
 
 interface TokenInfo {
   address: string;
@@ -25,11 +28,28 @@ async function startBot() {
     process.exit(0);
   });
 
-  const BOT_TOKEN = env.BOT_TOKEN;
+  const BOT_TOKEN = process.env.BOT_TOKEN;
   if (!BOT_TOKEN) {
     console.error('BOT_TOKEN is not set');
     process.exit(1);
   }
+
+  if (
+    !process.env.CDN_ENDPOINT ||
+    !process.env.CDN_KEY ||
+    !process.env.CDN_SECRET ||
+    !process.env.CDN_SPACE_NAME
+  ) {
+    console.error('CDN environment variables are not set');
+    process.exit(1);
+  }
+
+  const s3 = new AWS.S3({
+    endpoint: process.env.CDN_ENDPOINT,
+    accessKeyId: process.env.CDN_KEY,
+    secretAccessKey: process.env.CDN_SECRET,
+  });
+
   const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
   bot.on('polling_error', (error) => console.log(error));
@@ -50,9 +70,16 @@ async function startBot() {
     let splTokens = message.match(/[1-9A-HJ-NP-Za-z]{32,44}/g);
 
     if (splTokens) {
+      const imageUrl = await handleUserProfileImage(
+        bot,
+        user.id,
+        s3,
+        BOT_TOKEN
+      );
       const caller = await callerService.getOrCreateCaller(
         telegramId,
-        username
+        username,
+        imageUrl
       );
 
       for (let i = 0; i < splTokens.length; i++) {
@@ -73,14 +100,14 @@ async function startBot() {
               callerId: caller.id,
               data: null,
             });
-            console.log(
-              `Created call for token ${token} and caller ${caller.name}`
-            );
-          } else {
-            console.log(
-              `Call already exists for token ${token} and caller ${caller.name}`
-            );
-          }
+            // console.log(
+            //     `Created call for token ${token} and caller ${caller.name}`
+            // );
+          } // else {
+          //     console.log(
+          //         `Call already exists for token ${token} and caller ${caller.name}`
+          //     );
+          // }
         }
       }
     }
@@ -97,10 +124,71 @@ async function startBot() {
       if (tokenInfo) {
         const newFDV = tokenInfo.fdv;
         const result = await callService.updateHighestFdvByToken(token, newFDV);
-        console.log(`Updated ${result.count} objects for token ${token}`);
+        // console.log(
+        //     `Updated ${result.count} objects for token ${token}`
+        // );
       }
     }
   }, 60000);
+}
+
+async function handleUserProfileImage(
+  bot: TelegramBot,
+  userId: number,
+  s3: AWS.S3,
+  botToken: string
+): Promise<string | undefined> {
+  const s3Key = `profile_pictures/${userId}.jpg`;
+
+  try {
+    try {
+      await s3
+        .headObject({
+          Bucket: process.env.CDN_SPACE_NAME as string,
+          Key: s3Key,
+        })
+        .promise();
+
+      // console.log(`Profile picture already exists: ${s3Key}`);
+      return `https://${process.env.CDN_SPACE_NAME}.${process.env.CDN_ENDPOINT}/profile_pictures/${userId}.jpg`;
+    } catch (err) {
+      if (err.code !== 'NotFound') {
+        throw err; // Handle other errors
+      }
+      console.log('Image does not exist, proceeding with upload...');
+    }
+
+    const photos = await bot.getUserProfilePhotos(userId);
+    if (photos.total_count > 0) {
+      const fileId = photos.photos[0][0].file_id;
+      const file = await bot.getFile(fileId);
+
+      const fileUrl = `https://api.telegram.org/file/bot${botToken}/${file.file_path}`;
+      const response = await axios.get(fileUrl, {
+        responseType: 'arraybuffer',
+      });
+
+      const params = {
+        Bucket: process.env.CDN_SPACE_NAME as string,
+        Key: s3Key,
+        Body: response.data,
+        ACL: 'public-read',
+        ContentType: 'image/jpeg',
+      };
+
+      const uploadResult = await s3.putObject(params).promise();
+      console.log(
+        `Successfully uploaded image to DigitalOcean Space: ${uploadResult}`
+      );
+
+      return `https://${process.env.CDN_SPACE_NAME}.${process.env.CDN_ENDPOINT}/profile_pictures/${userId}.jpg`;
+    }
+  } catch (error) {
+    console.error('Error fetching or uploading profile photo:', error);
+    return undefined;
+  }
+
+  return undefined;
 }
 
 async function getSolanaToken(token: string): Promise<TokenInfo | null> {
@@ -130,7 +218,7 @@ async function getSolanaToken(token: string): Promise<TokenInfo | null> {
       }
     })
     .catch((error) => {
-      console.error('Error fetching token pair data:', error);
+      console.error('Error fetching token data:', error);
       return null;
     });
 }
