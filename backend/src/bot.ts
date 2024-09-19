@@ -2,13 +2,34 @@ import TelegramBot from 'node-telegram-bot-api';
 import axios from 'axios';
 import bootstrap from './bootstrap';
 import { env } from 'process';
+import { CallMetric, TokenInfo } from '@src/types';
 
-interface TokenInfo {
-  address: string;
-  fdv: number;
-  symbol: string;
-  chain: string;
-}
+const initCallMetric = (value: number | undefined): CallMetric | undefined => {
+  if (value === undefined) return undefined;
+
+  return {
+    start: value,
+    highest: value,
+    final: value,
+    history: [value],
+  };
+};
+
+const updateCallMetric = (
+  metric: CallMetric | undefined,
+  last: number | undefined
+): CallMetric | undefined => {
+  if (!metric) return undefined;
+
+  if (last === undefined) last = -1;
+
+  return {
+    ...metric,
+    highest: Math.max(metric.highest, last),
+    final: last,
+    history: [...metric.history, last],
+  };
+};
 
 async function startBot() {
   const { callerService, callService, prisma } = await bootstrap();
@@ -68,10 +89,13 @@ async function startBot() {
           if (!existingCall) {
             await callService.createCall({
               tokenAddress: tokenInfo.address,
-              startFDV: tokenInfo.fdv,
-              highestFDV: tokenInfo.fdv,
               callerId: caller.id,
-              data: null,
+              data: {
+                source: tokenInfo.source,
+                fdv: initCallMetric(tokenInfo.fdv),
+                mcap: initCallMetric(tokenInfo.mcap),
+                price: initCallMetric(tokenInfo.price),
+              },
             });
             console.log(
               `Created call for token ${token} and caller ${caller.name}`
@@ -92,12 +116,27 @@ async function startBot() {
       ...new Set(activeCalls.map((call) => call.tokenAddress)),
     ];
 
+    const tokenInfoList: { [key: string]: TokenInfo } = {};
+
+    // Fetch and store token info for each unique token
     for (const token of uniqueTokens) {
       const tokenInfo = await getSolanaToken(token);
       if (tokenInfo) {
-        const newFDV = tokenInfo.fdv;
-        const result = await callService.updateHighestFdvByToken(token, newFDV);
-        console.log(`Updated ${result.count} objects for token ${token}`);
+        tokenInfoList[token] = tokenInfo;
+      }
+    }
+
+    // Update each call individually
+    for (const call of activeCalls) {
+      const tokenInfo = tokenInfoList[call.tokenAddress];
+      if (tokenInfo) {
+        const newData = {
+          ...call.data,
+          fdv: updateCallMetric(call.data.fdv, tokenInfo.fdv),
+          mcap: updateCallMetric(call.data.mcap, tokenInfo.mcap),
+          price: updateCallMetric(call.data.price, tokenInfo.price),
+        };
+        const updatedCall = await callService.updateCallData(call.id, newData);
       }
     }
   }, 60000);
@@ -118,10 +157,11 @@ async function getSolanaToken(token: string): Promise<TokenInfo | null> {
         // let price = response.data.pairs[0].priceUsd;
         // fdv = formatNumber(fdv);
         let tokenInfo: TokenInfo = {
+          source: 'dexscreener',
           address: ca,
-          fdv: parseFloat(fdv),
           symbol: symbol,
           chain: 'solana',
+          fdv: parseFloat(fdv),
         };
         return tokenInfo;
       } else {
@@ -146,6 +186,7 @@ async function getSolanaPool(address: string): Promise<TokenInfo | null> {
         // let price = response.data.pairs[0].priceUsd;
         // fdv = formatNumber(fdv);
         let tokenInfo: TokenInfo = {
+          source: 'dexscreener-pool',
           address: ca,
           fdv: parseFloat(fdv),
           symbol: symbol,
@@ -174,6 +215,7 @@ async function getPumpfunToken(token: string): Promise<TokenInfo | null> {
         let fdv = response.data.usd_market_cap;
         // fdv = formatNumber(fdv);
         let tokenInfo: TokenInfo = {
+          source: 'pumpfun',
           address: ca,
           fdv: parseFloat(fdv),
           symbol: symbol,

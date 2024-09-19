@@ -1,5 +1,5 @@
-import { Call, Prisma, PrismaClient } from '@prisma/client';
-import { OmitPrisma } from '@src/types';
+import { Call, PrismaClient } from '@prisma/client';
+import { CallData, OmitPrisma } from '@src/types';
 
 export class CallService {
   constructor(private prisma: PrismaClient) {}
@@ -8,8 +8,6 @@ export class CallService {
     return this.prisma.call.create({
       data: {
         ...data,
-        // Assurez-vous que le champ `data` respecte le type `InputJsonValue`
-        data: data.data as Prisma.InputJsonValue,
       },
     });
   }
@@ -48,19 +46,30 @@ export class CallService {
     });
   }
 
-  async updateHighestFdvByToken(token: string, newFDV: number): Promise<any> {
+  async updateCallData(id: number, data: CallData): Promise<any> {
     return this.prisma.call.updateMany({
       where: {
-        tokenAddress: token,
-        highestFDV: { lt: newFDV },
-        createdAt: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        },
+        id: id,
       },
       data: {
-        highestFDV: newFDV,
-        updatedAt: new Date(),
+        data: data,
       },
     });
   }
+
+  // async updateHighestFdvByToken(token: string, newFDV: number): Promise<any> {
+  //   return this.prisma.call.updateMany({
+  //     where: {
+  //       tokenAddress: token,
+  //       highestFDV: { lt: newFDV },
+  //       createdAt: {
+  //         gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+  //       },
+  //     },
+  //     data: {
+  //       highestFDV: newFDV,
+  //       updatedAt: new Date(),
+  //     },
+  //   });
+  // }
 }

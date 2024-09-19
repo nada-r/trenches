@@ -70,15 +70,13 @@ export const TournamentParticipationScalarFieldEnumSchema = z.enum(['id','wallet
 
 export const CallerScalarFieldEnumSchema = z.enum(['id','name','image','telegramId','createdAt','updatedAt']);
 
-export const CallScalarFieldEnumSchema = z.enum(['id','tokenAddress','startFDV','highestFDV','callerId','createdAt','updatedAt','data']);
+export const CallScalarFieldEnumSchema = z.enum(['id','tokenAddress','callerId','createdAt','updatedAt','data']);
 
 export const ClaimScalarFieldEnumSchema = z.enum(['id','walletPubkey','portfolio','createdAt','updatedAt']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
-
-export const NullableJsonNullValueInputSchema = z.enum(['DbNull','JsonNull',]).transform((value) => value === 'JsonNull' ? Prisma.JsonNull : value === 'DbNull' ? Prisma.DbNull : value);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
@@ -210,12 +208,13 @@ export type Caller = z.infer<typeof CallerSchema>
 export const CallSchema = z.object({
   id: z.number().int(),
   tokenAddress: z.string(),
-  startFDV: z.number(),
-  highestFDV: z.number(),
   callerId: z.number().int(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  data: JsonValueSchema.nullable(),
+  /**
+   * [CallData]
+   */
+  data: JsonValueSchema,
 })
 
 export type Call = z.infer<typeof CallSchema>
