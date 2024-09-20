@@ -47,7 +47,7 @@ export default function Ranking() {
         {/* {callers.length > 0 && <DisplayCard card={callers[0]} />} */}
       </div>
       <Table className="bg-background text-foreground border-border">
-        <TableCaption className="text-muted-foreground">list</TableCaption>
+        <TableCaption className="text-muted-foreground"></TableCaption>
         <TableHeader className="border-border">
           <TableRow>
             <TableHead className="w-[100px] text-muted-foreground border-border">
