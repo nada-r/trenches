@@ -16,6 +16,7 @@ export class CallingPowerService {
       const callerPower = this.computePower(calls);
       await this.callerService.updateCallingPower(c.telegramId, callerPower);
     }
+    console.log(`Calling power updated for ${callers.length} callers.`);
   }
 
   computePower(calls: Array<Call>): number {

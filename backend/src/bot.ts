@@ -1,9 +1,10 @@
 import TelegramBot from 'node-telegram-bot-api';
 import AWS from 'aws-sdk';
-require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 import axios from 'axios';
 import bootstrap from './bootstrap';
 import dotenv from 'dotenv';
+
+require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 dotenv.config();
 
 interface TokenInfo {
@@ -101,14 +102,14 @@ async function startBot() {
               callerId: caller.id,
               data: null,
             });
-            // console.log(
-            //     `Created call for token ${token} and caller ${caller.name}`
-            // );
-          } // else {
-          //     console.log(
-          //         `Call already exists for token ${token} and caller ${caller.name}`
-          //     );
-          // }
+            console.log(
+              `Created call for token ${token} and caller ${caller.name}`
+            );
+          } else {
+            console.log(
+              `Call already exists for token ${token} and caller ${caller.name}`
+            );
+          }
         }
       }
     }
@@ -119,6 +120,9 @@ async function startBot() {
     const uniqueTokens = [
       ...new Set(activeCalls.map((call) => call.tokenAddress)),
     ];
+    console.log(
+      `Total of ${activeCalls.length} active calls to update, ${uniqueTokens.length} unique tokens`
+    );
 
     const updatedTokens = [];
 
@@ -127,16 +131,15 @@ async function startBot() {
       if (tokenInfo) {
         const newFDV = tokenInfo.fdv;
         const result = await callService.updateHighestFdvByToken(token, newFDV);
-        console.log(`Updated ${result.count} objects for token ${token}`);
         if (result.count > 0) {
           updatedTokens.push(token);
         }
       }
     }
 
+    console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
     if (updatedTokens.length > 0) {
       await callingPowerService.updateCallingPower(updatedTokens);
-      console.log(`Updated calling power for ${updatedTokens.length} tokens`);
     }
   }, 60000);
 }
