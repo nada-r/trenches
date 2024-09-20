@@ -13,7 +13,6 @@ import {
 import RankingImage from '@/components/trenches/RankingImage';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { Caller } from '@/models';
-import { PiLightningFill } from 'react-icons/pi';
 
 const instance = createAxiosInstance();
 
@@ -29,7 +28,17 @@ export default function Ranking() {
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       try {
         const response = await instance.get('/callers');
-        setCallers(response.data);
+        const updatedCallers = response.data.map((caller: Caller) => ({
+          ...caller,
+          data: {
+            ...caller.data,
+            power: Math.floor(Math.random() * (150 - 50 + 1)) + 50,
+          },
+        }));
+        const sortedCallers = updatedCallers.sort(
+          (a: Caller, b: Caller) => b.data.power - a.data.power
+        );
+        setCallers(sortedCallers);
       } catch (error) {
         console.error('Error fetching callers:', error);
       }
@@ -77,10 +86,6 @@ export default function Ranking() {
               <TableCell className="text-foreground border-border">
                 <div className="flex justify-center items-center">
                   {caller.data.power}
-                  <PiLightningFill
-                    size={20}
-                    className="text-yellow-400 animate-pulse"
-                  />
                 </div>
               </TableCell>
             </TableRow>
