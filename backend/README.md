@@ -28,6 +28,8 @@ npx dotenv-vault@latest pull dev/production
 npx dotenv-vault@latest push dev/production
 ```
 
+## bot
+
 ## Available Scripts
 
 ### `npm run dev`
