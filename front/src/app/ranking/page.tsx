@@ -76,6 +76,7 @@ export default function Ranking() {
               </TableCell>
               <TableCell className="text-foreground border-border">
                 <div className="flex justify-center items-center">
+                  {caller.data.power}
                   <PiLightningFill
                     size={20}
                     className="text-yellow-400 animate-pulse"

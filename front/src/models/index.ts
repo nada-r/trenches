@@ -68,7 +68,7 @@ export const TournamentScalarFieldEnumSchema = z.enum(['id','name','status','sta
 
 export const TournamentParticipationScalarFieldEnumSchema = z.enum(['id','walletPubkey','callers','createdAt','updatedAt','tournamentId']);
 
-export const CallerScalarFieldEnumSchema = z.enum(['id','name','image','telegramId','createdAt','updatedAt']);
+export const CallerScalarFieldEnumSchema = z.enum(['id','name','image','telegramId','data','createdAt','updatedAt']);
 
 export const CallScalarFieldEnumSchema = z.enum(['id','tokenAddress','startFDV','highestFDV','callerId','createdAt','updatedAt','data']);
 
@@ -197,6 +197,10 @@ export const CallerSchema = z.object({
   name: z.string(),
   image: z.string().nullable(),
   telegramId: z.string(),
+  /**
+   * [CallerData]
+   */
+  data: z.object({ power: z.number() }),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 })

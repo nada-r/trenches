@@ -1,8 +1,17 @@
 declare global {
   namespace PrismaJson {
-    type TournamentMetadata = { openDuration: number; endDuration: number; prize: number, supplyBurn: number }
-    type ClaimMetadata = Array<{callerId: number, balance: number}>
+    type CallerData = { power?: number };
+    type TournamentMetadata = {
+      openDuration: number;
+      endDuration: number;
+      prize: number;
+      supplyBurn: number;
+    };
+    type ClaimMetadata = Array<{ callerId: number; balance: number }>;
   }
 }
 
-export type OmitPrisma<T, K extends keyof T = never> = Omit<T, K | 'id' | 'createdAt' | 'updatedAt'>;
+export type OmitPrisma<T, K extends keyof T = never> = Omit<
+  T,
+  K | 'id' | 'createdAt' | 'updatedAt'
+>;
