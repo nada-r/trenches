@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import RankingImage from '@/components/trenches/RankingImage';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { Caller } from '@/models';
 import CallingPower from '@/components/trenches/CallingPower';
@@ -84,7 +83,6 @@ export default function Ranking() {
                   name={caller.name}
                   image={caller.image === null ? undefined : caller.image}
                 />
-                {caller.image && <RankingImage image={caller.image} />}
               </TableCell>
               <TableCell className="text-foreground border-border">
                 {caller.name}
