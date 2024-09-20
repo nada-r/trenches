@@ -28,6 +28,7 @@ const app = express();
 // **** Setup **** //
 
 // Basic middleware
+app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(EnvVars.CookieProps.Secret));
@@ -36,15 +37,94 @@ app.use(cors());
 // app.get("/nom_de_route", async (req: Request, res: Response) => {
 
 // })
-app.get('/cards', async (req: Request, res: Response) => {
-  const cards = await services.card?.getAll();
+app.get('/callers', async (req: Request, res: Response) => {
+  const cards = await services.caller?.getAll();
   res.json(cards);
 });
 
-app.get('/tournaments', async (req: Request, res: Response) => {
+app.get('/tournament/all', async (req: Request, res: Response) => {
   const tournaments = await services.tournament?.getAvailable();
   res.json(tournaments);
 });
+
+app.get('/tournament/:id', async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const tournament = await services.tournament?.getById(id);
+
+  if (tournament) {
+    res.json(tournament);
+  } else {
+    res.status(404).json({ message: 'Tournament not found' });
+  }
+});
+
+app.post('/tournament/join', async (req: Request, res: Response) => {
+  const { tournamentId, walletPubkey, callers } = req.body;
+
+  if (!tournamentId || !walletPubkey || !Array.isArray(callers) || callers.length !== 3) {
+    return res.status(400).json({ message: 'Invalid request body' });
+  }
+
+  try {
+    const result = await services.tournament?.joinTournament({tournamentId, walletPubkey, callers});
+    res.json(result);
+  } catch (error) {
+    morgan('combined')(req, res, () => {
+      console.error(
+        `Error participating in tournament: ${(error as Error).message}`
+      );
+    });
+    res.status(500).json({ message: 'Error participating in tournament', error: (error as Error).name });
+  }
+});
+
+app.get('/tournament/:id/:walletPubkey', async (req: Request, res: Response) => {
+  const tournamentId = Number(req.params.id);
+  const walletPubkey = req.params.walletPubkey;
+
+  if (!tournamentId || !walletPubkey) {
+    return res.status(400).json({ message: 'Wallet public key is required' });
+  }
+
+  try {
+    const participation = await services.tournament?.getMyTournamentParticipation(tournamentId, walletPubkey);
+    if (participation) {
+      res.json(participation);
+    } else {
+      res.status(404).json({ message: 'No participations found for this wallet' });
+    }
+  } catch (error) {
+    morgan('combined')(req, res, () => {
+      console.error(
+        `Error fetching wallet tournament participation: ${(error as Error).message}`
+      );
+    });
+    res.status(500).json({ message: 'Error fetching your tournament participation', error: (error as Error).name });
+  }
+});
+
+app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
+  const walletPubkey = req.params.walletPubkey;
+
+  if (!walletPubkey) {
+    return res.status(400).json({ message: 'Wallet public key is required' });
+  }
+
+  try {
+    const portfolio = await services.claim?.claim(walletPubkey);
+    if (portfolio) {
+      res.json(portfolio);
+    } else {
+      res.status(404).json({ message: 'Portfolio not found for this wallet' });
+    }
+  } catch (error) {
+    morgan('combined')(req, res, () => {
+      console.error(`Error fetching portfolio: ${(error as Error).message}`);
+    });
+    res.status(500).json({ message: 'Error fetching portfolio', error: (error as Error).name });
+  }
+});
+
 
 app.get('/test', (req, res) => {
   res.json({ message: process.env.DATABASE_URL });

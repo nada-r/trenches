@@ -4,22 +4,18 @@ import logger from 'jet-logger';
 import EnvVars from '@src/common/EnvVars';
 import server from './server';
 import {
-  CardService,
-  PowerService,
-  TournamentService,
-  UserService,
-  CallService,
   CallerService,
+  CallService,
+  ClaimService,
+  TournamentService,
 } from './services';
 import bootstrap from '@src/bootstrap';
 
 interface IServices {
-  user: UserService;
-  card: CardService;
-  power: PowerService;
-  tournament: TournamentService;
-  call: CallService;
   caller: CallerService;
+  call: CallService;
+  tournament: TournamentService;
+  claim: ClaimService;
 }
 
 export const services: Partial<IServices> = {};
@@ -62,12 +58,10 @@ const SERVER_START_MSG =
 
 server.listen(EnvVars.Port, async () => {
   const { prisma } = await bootstrap();
-  addService('user', UserService, prisma);
-  addService('card', CardService, prisma);
-  addService('power', PowerService, prisma);
-  addService('tournament', TournamentService, prisma);
-  addService('call', CallService, prisma);
   addService('caller', CallerService, prisma);
+  addService('call', CallService, prisma);
+  addService('tournament', TournamentService, prisma);
+  addService('claim', ClaimService, prisma);
 
   logger.info(SERVER_START_MSG);
 });

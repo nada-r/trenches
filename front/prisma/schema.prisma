@@ -18,16 +18,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// generate types for front
 model Card {
-  id                       Int                       @id @default(autoincrement())
-  name                     String
-  price                    Int
-  image                    String
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
-  power                    Power                     @relation(fields: [powerId], references: [id]) //to replace by value in Power
-  powerId                  Int                       @unique
-  tournamentParticipations TournamentParticipation[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Int
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  powerId   Int      @unique
+  power     Power    @relation(fields: [powerId], references: [id])
 }
 
 model Power {
@@ -76,8 +76,43 @@ enum TournamentStatus {
 
 model TournamentParticipation {
   id           Int        @id @default(autoincrement())
-  walletString String
-  cardIds      Card[]
+  walletPubkey String
+  callers      String[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId Int
+
+  @@unique(name: "unique_participation", [walletPubkey, tournamentId])
+}
+
+model Caller {
+  id         Int      @id @default(autoincrement())
+  name       String
+  image      String?
+  telegramId String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  calls      Call[]
+}
+
+model Call {
+  id           Int      @id @default(autoincrement())
+  tokenAddress String
+  startFDV     Float
+  highestFDV   Float
+  caller       Caller   @relation(fields: [callerId], references: [id])
+  callerId     Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  data         Json?
+}
+
+model Claim {
+  id           Int      @id @default(autoincrement())
+  walletPubkey String   @unique
+  /// [ClaimMetadata]
+  portfolio    Json /// @zod.custom.use(z.array(z.object({ callerId: z.number(), balance: z.number() })))
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

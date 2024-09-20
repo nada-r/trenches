@@ -1,13 +1,6 @@
 import { cleanEnv, str } from 'envalid';
 import { PrismaClient } from '@prisma/client';
-import {
-  CardService,
-  PowerService,
-  UserService,
-  TournamentService,
-  CallService,
-  CallerService,
-} from './services';
+import { CallerService, CallService, TournamentService } from './services';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -30,20 +23,14 @@ export default async function bootstrap() {
     isConnected ? 'Connected' : 'Not Connected'
   );
 
-  const cardService = new CardService(prisma);
-  const powerService = new PowerService(prisma);
-  const userService = new UserService(prisma);
-  const tournamentService = new TournamentService(prisma);
-  const callService = new CallService(prisma);
   const callerService = new CallerService(prisma);
+  const callService = new CallService(prisma);
+  const tournamentService = new TournamentService(prisma);
 
   return {
-    cardService,
-    powerService,
-    userService,
-    tournamentService,
-    callService,
     callerService,
+    callService,
+    tournamentService,
     prisma,
   };
 }

@@ -3,14 +3,17 @@ import { TournamentService } from '@src/services';
 import { TournamentStatus } from '@prisma/client';
 
 export async function createTournament(tournamentService: TournamentService) {
+  const name = await input({ message: 'Tournament name:' });
+  const openDuration = await number({ message: 'Open duration (days):' });
+  const endDuration = await number({ message: 'End duration (days):' });
   const tournament = {
-    name: await input({ message: 'Tournament name:' }),
+    name: name,
     status: TournamentStatus.HIDDEN,
     metadata: {
-      openDuration: (await number({ message: 'Duration:' })) || 0,
-      endDuration: (await number({ message: 'Duration:' })) || 0,
-      prize: (await number({ message: 'Prize:' })) || 0,
-      supplyBurn: (await number({ message: 'Supply burn:' })) || 0,
+      openDuration: openDuration ? openDuration * 24 * 60 * 60 || 0 : 0,
+      endDuration: endDuration ? endDuration * 24 * 60 * 60 || 0 : 0,
+      prize: (await number({ message: 'Prize (SOL):' })) || 0,
+      supplyBurn: (await number({ message: 'Supply burn (%):' })) || 0,
     },
   };
 

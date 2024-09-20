@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/table';
 import { Balance } from '@/components/trenches/Balance';
 import CallerCard from '@/components/trenches/CallerCard';
+import { createAxiosInstance } from '@/utils/createAxiosInstance';
+import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 
 export interface Token {
   id: string;
@@ -22,37 +24,45 @@ export interface Token {
   image: string;
 }
 
+const instance = createAxiosInstance();
+
 export default function Portfolio() {
   const [tokens, setTokens] = useState<Token[]>([]);
 
+  const { user } = usePrivy();
+  const solanaWallet =
+    user &&
+    user.linkedAccounts.find(
+      (account): account is WalletWithMetadata =>
+        account.type === 'wallet' &&
+        account.walletClientType === 'privy' &&
+        account.chainType === 'solana'
+    );
+
   useEffect(() => {
-    // Commented out original fetchTokens function
-    // async function fetchTokens() {
-    //   try {
-    //     const response = await axios.get(
-    //       `${process.env.NEXT_PUBLIC_BASE_URL!}/tokens`
-    //     );
-    //     setTokens(response.data);
-    //   } catch (error) {
-    //     console.error('Error fetching tokens:', error);
-    //   }
-    // }
-    // fetchTokens();
+    if (solanaWallet) {
+      const fetchTokens = async () => {
+        try {
+          const callerResponse = await instance.get('/callers');
+          const response = await instance.get(
+            `/portfolio/${solanaWallet?.address}`
+          );
 
-    // Temporary function to generate 4 random tokens
-    function generateRandomTokens() {
-      // prettier-ignore
-      const fakeTokens: Token[] = [
-        { id: '1', rank: 1, name: 'greg', marketCap: 430000, balance: 13000000, image: 'https://assets.api.uizard.io/api/cdn/stream/ddcabbc0-9002-4ebc-8bfc-2a47b3f636b1.png' },
-        { id: '2', rank: 2, name: 'Ansem', marketCap: 430000, balance: 3000000, image: 'https://assets.api.uizard.io/api/cdn/stream/848ade87-3e76-42a4-9842-ebacf29c9749.png' },
-        { id: '3', rank: 3, name: 'bqsed16z', marketCap: 430000, balance: 1000000, image: 'https://assets.api.uizard.io/api/cdn/stream/e53ae5aa-f673-43e7-b711-a691a3603a64.png' },
-        { id: '4', rank: 4, name: 'wallstreetbets', marketCap: 430000, balance: 100000, image: 'https://assets.api.uizard.io/api/cdn/stream/5d1295d1-654a-47cd-a559-f4eea99a0f7c.png' },
-      ];
-      setTokens(fakeTokens);
+          setTokens(
+            response.data.portfolio.map((t: any, i: number) => ({
+              ...callerResponse.data.find((c: any) => c.id === t.callerId),
+              marketCap: 430000,
+              balance: t.balance,
+            }))
+          );
+        } catch (error) {
+          console.error('Error fetching tokens:', error);
+        }
+      };
+
+      fetchTokens();
     }
-
-    generateRandomTokens();
-  }, []);
+  }, [solanaWallet]);
 
   return (
     <>
