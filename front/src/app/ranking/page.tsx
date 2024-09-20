@@ -32,7 +32,10 @@ export default function Ranking() {
           ...caller,
           data: {
             ...caller.data,
-            power: Math.floor(Math.random() * (150 - 50 + 1)) + 50,
+            power:
+              caller.data.power === undefined
+                ? Math.floor(Math.random() * (150 - 50 + 1)) + 50
+                : caller.data.power,
           },
         }));
         const sortedCallers = updatedCallers.sort(
