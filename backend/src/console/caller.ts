@@ -9,6 +9,7 @@ export async function addCaller(callerService: CallerService) {
     name: await input({ message: "Caller's name:" }),
     image: await input({ message: 'Image URL:' }),
     telegramId: await input({ message: 'Telegram ID:' }),
+    data: {},
   };
 
   console.log('Create caller:', caller);
