@@ -30,7 +30,7 @@ generator zod {
   createPartialTypes               = false // default is false
   useDefaultValidators             = true // default is true
   coerceDate                       = true // default is true
-  writeNullishInModelTypes         = flase // default is false
+  writeNullishInModelTypes         = true // default is false
 }
 
 datasource db {

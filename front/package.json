@@ -19,6 +19,7 @@
   "dependencies": {
     "@prisma/client": "^5.18.0",
     "@privy-io/react-auth": "^1.82.0",
+    "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "axios": "^1.7.5",
     "class-variance-authority": "^0.7.0",

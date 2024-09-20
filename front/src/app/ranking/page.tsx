@@ -13,6 +13,8 @@ import {
 import RankingImage from '@/components/trenches/RankingImage';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { Caller } from '@/models';
+import CallingPower from '@/components/trenches/CallingPower';
+import CallerAvatar from '@/components/trenches/CallerAvatar';
 
 const instance = createAxiosInstance();
 
@@ -32,10 +34,7 @@ export default function Ranking() {
           ...caller,
           data: {
             ...caller.data,
-            power:
-              caller.data.power === undefined
-                ? Math.floor(Math.random() * (150 - 50 + 1)) + 50
-                : caller.data.power,
+            power: caller.data.power || 0,
           },
         }));
         const sortedCallers = updatedCallers.sort(
@@ -81,6 +80,10 @@ export default function Ranking() {
                 {index + 1}
               </TableCell>
               <TableCell className="border-border">
+                <CallerAvatar
+                  name={caller.name}
+                  image={caller.image === null ? undefined : caller.image}
+                />
                 {caller.image && <RankingImage image={caller.image} />}
               </TableCell>
               <TableCell className="text-foreground border-border">
@@ -88,7 +91,7 @@ export default function Ranking() {
               </TableCell>
               <TableCell className="text-foreground border-border">
                 <div className="flex justify-center items-center">
-                  {caller.data.power}
+                  <CallingPower value={caller.data.power} />
                 </div>
               </TableCell>
             </TableRow>
