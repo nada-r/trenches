@@ -14,7 +14,12 @@
     "@metaplex-foundation/umi": "^0.9.2",
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
     "@solana/web3.js": "^1.95.3",
+    "@types/node": "^22.5.5",
+    "@types/node-fetch": "^2.6.11",
     "bs58": "^6.0.0",
+    "dotenv": "^16.4.5",
+    "esrun": "^3.2.26",
+    "form-data": "^4.0.0",
     "pinata-web3": "^0.4.1"
   }
 }
