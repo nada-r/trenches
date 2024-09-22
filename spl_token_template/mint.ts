@@ -6,12 +6,26 @@ import bs58 from "bs58";
 import { pinata } from './utils/config'
 
 
-async function loadURL(){
+async function loadCallerImage(){
     const upload = await pinata.upload.url("https://trenches.fra1.cdn.digitaloceanspaces.com/profile_pictures/6255998913.jpg");
     console.log(upload);
 }
 
-loadURL();
+loadCallerImage();
+
+
+const metadata = {
+    name: "luigiscalls",
+    symbol: "LGC",
+    uri: "https://turquoise-quickest-wasp-930.mypinata.cloud/ipfs/QmWqkf64nxiZfsLgrVBRdrp6eFAwJfSvAUYvzDnZVEkP2D",
+};
+
+async function loadMetadata(){
+
+}
+
+
+
 // const umi = createUmi('https://divine-necessary-scion.solana-devnet.quiknode.pro/c6f57b9e59ed38a658fa9516d87df8a8f4351ec9');
 
 // const secretKey = bs58.decode(secret.skey);
