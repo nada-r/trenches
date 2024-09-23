@@ -14,10 +14,12 @@ import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { Caller } from '@/models';
 import CallingPower from '@/components/trenches/CallingPower';
 import CallerAvatar from '@/components/trenches/CallerAvatar';
+import { useRouter } from 'next/navigation';
 
 const instance = createAxiosInstance();
 
 export default function Ranking() {
+  const router = useRouter();
   const [callers, setCallers] = useState<Caller[]>([]);
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export default function Ranking() {
       'check process emv',
       JSON.stringify(process.env.NEXT_PUBLIC_BACKEND_URL)
     );
+
     async function fetchCards() {
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       try {
@@ -44,8 +47,13 @@ export default function Ranking() {
         console.error('Error fetching callers:', error);
       }
     }
+
     fetchCards();
   }, []);
+
+  const displayCallerPage = (callerId: number) => {
+    router.push(`/caller/${callerId}`);
+  };
 
   return (
     <>
@@ -74,7 +82,11 @@ export default function Ranking() {
         </TableHeader>
         <TableBody>
           {callers.map((caller, index) => (
-            <TableRow key={caller.id} className="border-border">
+            <TableRow
+              key={caller.id}
+              className="border-border"
+              onClick={() => displayCallerPage(caller.id)}
+            >
               <TableCell className="font-medium text-foreground border-border">
                 {index + 1}
               </TableCell>

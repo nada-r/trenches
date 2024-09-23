@@ -2,9 +2,13 @@ import React from 'react';
 
 interface TruncatedAddressProps {
   address: string | undefined;
+  showEnd?: boolean;
 }
 
-const TruncatedAddress: React.FC<TruncatedAddressProps> = ({ address }) => {
+const TruncatedAddress: React.FC<TruncatedAddressProps> = ({
+  address,
+  showEnd = true,
+}) => {
   const truncateAddress = (addr: string | undefined): string => {
     if (!addr) {
       return '';
@@ -13,8 +17,11 @@ const TruncatedAddress: React.FC<TruncatedAddressProps> = ({ address }) => {
       return addr;
     }
     const start = addr.slice(0, 4);
-    const end = addr.slice(-4);
-    return `${start}...${end}`;
+    if (showEnd) {
+      const end = addr.slice(-4);
+      return `${start}...${end}`;
+    }
+    return `${start}...`;
   };
 
   return <span>{truncateAddress(address)}</span>;

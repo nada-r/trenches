@@ -41,6 +41,11 @@ app.get('/callers', async (req: Request, res: Response) => {
   const cards = await services.caller?.getAll();
   res.json(cards);
 });
+app.get('/caller/:id', async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const caller = await services.caller?.getCallerWithCall(id);
+  res.json(caller);
+});
 
 app.get('/tournament/all', async (req: Request, res: Response) => {
   const tournaments = await services.tournament?.getAvailable();

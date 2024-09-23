@@ -47,6 +47,17 @@ export class CallerService {
     });
   }
 
+  async getCallerWithCall(id: number): Promise<Caller | null> {
+    return this.prisma.caller.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        calls: true,
+      },
+    });
+  }
+
   async getOrCreateCaller(
     telegramId: string,
     username: string,
