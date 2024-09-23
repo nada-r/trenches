@@ -1,4 +1,4 @@
-import { Caller, PrismaClient } from '@prisma/client';
+import { Call, Caller, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
 
 export class CallerService {
@@ -47,8 +47,10 @@ export class CallerService {
     });
   }
 
-  async getCallerWithCall(id: number): Promise<Caller | null> {
-    return this.prisma.caller.findUnique({
+  async getCallerWithCall(
+    id: number
+  ): Promise<(Caller & { openCalls: Call[]; closedCalls: Call[] }) | null> {
+    const caller = await this.prisma.caller.findUnique({
       where: {
         id: id,
       },
@@ -56,6 +58,31 @@ export class CallerService {
         calls: true,
       },
     });
+
+    if (!caller) return null;
+
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const openCalls = caller.calls
+      .filter((call: Call) => new Date(call.createdAt) >= twentyFourHoursAgo)
+      .sort(
+        (a: Call, b: Call) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+    const closedCalls = caller.calls
+      .filter((call: Call) => new Date(call.createdAt) < twentyFourHoursAgo)
+      .sort(
+        (a: Call, b: Call) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+    return {
+      ...caller,
+      openCalls,
+      closedCalls,
+    };
   }
 
   async getOrCreateCaller(

@@ -21,42 +21,16 @@ const instance = createAxiosInstance();
 const Page = ({ params }: { params: { id: string } }) => {
   const [caller, setCaller] = useState<
     Caller & {
-      calls: Call[];
+      openCalls: Call[];
+      closedCalls: Call[];
     }
   >();
-  const [openCalls, setOpenCalls] = useState<Call[]>([]);
-  const [closedCalls, setClosedCalls] = useState<Call[]>([]);
 
   useEffect(() => {
     async function fetchCaller() {
       try {
         const response = await instance.get(`/caller/${params.id}`);
         setCaller(response.data);
-        const now = new Date();
-        const twentyFourHoursAgo = new Date(
-          now.getTime() - 24 * 60 * 60 * 1000
-        );
-
-        setOpenCalls(
-          (
-            response.data?.calls.filter(
-              (call: Call) => new Date(call.createdAt) >= twentyFourHoursAgo
-            ) || []
-          ).sort(
-            (a: Call, b: Call) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-        );
-        setClosedCalls(
-          (
-            response.data?.calls.filter(
-              (call: Call) => new Date(call.createdAt) < twentyFourHoursAgo
-            ) || []
-          ).sort(
-            (a: Call, b: Call) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-        );
       } catch (error) {
         console.error('Error fetching callers:', error);
       }
@@ -67,26 +41,22 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   return (
     <>
-      <div className="flex items-center mb-4">
-        <Link href="/ranking" className="mr-2">
-          <IoIosArrowBack />
-        </Link>
+      <Link href="/ranking" className="mr-2">
+        <IoIosArrowBack />
+      </Link>
+      <h1 className="text-2xl font-bold">{caller?.name}</h1>
+      {caller?.telegramId && (
+        <a
+          href={`https://t.me/${caller.name}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 flex items-center text-blue-500 hover:text-blue-600"
+        >
+          <FaTelegram className="mr-2" />
+          Telegram
+        </a>
+      )}
 
-        <div className="flex flex-col justify-center items-center w-full">
-          <h1 className="text-2xl font-bold text-center">{caller?.name}</h1>
-          {caller?.telegramId && (
-            <a
-              href={`https://t.me/${caller.name}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 flex items-center text-blue-500 hover:text-blue-600"
-            >
-              <FaTelegram className="mr-2" />
-              Telegram
-            </a>
-          )}
-        </div>
-      </div>
       <h1 className="text-2xl font-bold ">Opened Calls</h1>
       <Table>
         <TableHeader>
@@ -97,7 +67,7 @@ const Page = ({ params }: { params: { id: string } }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {openCalls.map((call, index) => (
+          {caller?.openCalls.map((call, index) => (
             <TableRow key={index}>
               <TableCell className="font-medium">
                 <SlicedAddress address={call.tokenAddress} showEnd={false} />
@@ -126,7 +96,7 @@ const Page = ({ params }: { params: { id: string } }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {closedCalls.map((call, index) => (
+          {caller?.closedCalls.map((call, index) => (
             <TableRow key={index}>
               <TableCell className="font-medium">
                 <SlicedAddress address={call.tokenAddress} showEnd={false} />
