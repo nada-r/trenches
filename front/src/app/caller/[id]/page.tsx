@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { FaTelegramPlane } from 'react-icons/fa';
-import { Call, Caller, PlayerSchema } from '@/models';
+import { Call, Caller } from '@/models';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import {
   Table,
@@ -17,12 +17,14 @@ import SlicedAddress from '@/components/utils/SlicedAddress';
 import FDV from '@/components/trenches/FDV';
 import CallerAvatar from '@/components/trenches/CallerAvatar';
 import CallingPower from '@/components/trenches/CallingPower';
-import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 const instance = createAxiosInstance();
 
 const Page = ({ params }: { params: { id: string } }) => {
+  const { profile, walletPubkey } = useProfileContext();
+
   const [caller, setCaller] = useState<
     Caller & {
       openCalls: Call[];
@@ -30,16 +32,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     }
   >();
   const [isFollowing, setIsFollowing] = useState(false);
-
-  const { user } = usePrivy();
-  const solanaWallet =
-    user &&
-    user.linkedAccounts.find(
-      (account): account is WalletWithMetadata =>
-        account.type === 'wallet' &&
-        account.walletClientType === 'privy' &&
-        account.chainType === 'solana'
-    );
 
   useEffect(() => {
     async function fetchCaller() {
@@ -55,28 +47,16 @@ const Page = ({ params }: { params: { id: string } }) => {
   }, []);
 
   useEffect(() => {
-    if (solanaWallet) {
-      const fetchProfile = async () => {
-        try {
-          const response = await instance.post('/profile/my', {
-            walletPubkey: solanaWallet?.address,
-          });
-          const profile = PlayerSchema.parse(response.data);
-
-          setIsFollowing(profile.data.favorites.includes(Number(params.id)));
-        } catch (error) {
-          console.error('Error fetching profile:', error);
-        }
-      };
-      fetchProfile();
+    if (profile) {
+      setIsFollowing(profile.data.favorites.includes(Number(params.id)));
     }
-  }, [solanaWallet]);
+  }, [profile]);
 
   const handleFollowToggle = async () => {
     try {
       const endpoint = isFollowing ? 'unfollow' : 'follow';
       await instance.post(`/caller/${params.id}/${endpoint}`, {
-        walletPubkey: solanaWallet?.address, // Replace with actual user wallet pubkey
+        walletPubkey,
       });
       setIsFollowing(!isFollowing);
     } catch (error) {

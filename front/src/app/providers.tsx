@@ -1,6 +1,7 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
+import { ProfileProvider } from '@/contexts/ProfileContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +19,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      {children}
+      <ProfileProvider>{children}</ProfileProvider>
     </PrivyProvider>
   );
 }
