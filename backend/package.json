@@ -13,7 +13,6 @@
     "dev": "PORT=80 nodemon",
     "console": "npx ts-node src/console.ts",
     "prisma:gen": "npx prisma generate",
-    "prisma:pull-prod": "dotenv -e .env.production -- npx prisma db pull",
     "prisma:migrate-prod": "npx prisma migrate deploy",
     "prisma:migrate-dev": "npx prisma migrate dev",
     "prisma:push": "npx prisma db push",
