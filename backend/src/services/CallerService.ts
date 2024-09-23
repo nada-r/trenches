@@ -11,7 +11,12 @@ export class CallerService {
   }
 
   async getAll(): Promise<Caller[]> {
-    return this.prisma.caller.findMany({});
+    const callers = await this.prisma.caller.findMany({});
+    return callers.sort((a, b) => {
+      const rankA = a.data?.rank || Number.MAX_SAFE_INTEGER;
+      const rankB = b.data?.rank || Number.MAX_SAFE_INTEGER;
+      return rankA - rankB;
+    });
   }
 
   async getCallersWithCallsOnTokens(

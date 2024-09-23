@@ -15,21 +15,23 @@ import { Caller } from '@/models';
 import CallingPower from '@/components/trenches/CallingPower';
 import CallerAvatar from '@/components/trenches/CallerAvatar';
 import { useRouter } from 'next/navigation';
+import { useProfileContext } from '@/contexts/ProfileContext';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 const instance = createAxiosInstance();
 
 export default function Ranking() {
   const router = useRouter();
+  const { profile } = useProfileContext();
   const [callers, setCallers] = useState<Caller[]>([]);
+  const [allCallers, setAllCallers] = useState<Caller[]>([]);
+  const [followingCallers, setFollowingCallers] = useState<Caller[]>([]);
+  const [selectedView, setSelectedView] = useState<'trending' | 'following'>(
+    'trending'
+  );
 
   useEffect(() => {
-    console.log(
-      'check process emv',
-      JSON.stringify(process.env.NEXT_PUBLIC_BACKEND_URL)
-    );
-
     async function fetchCards() {
-      console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       try {
         const response = await instance.get('/callers');
         const updatedCallers = response.data.map((caller: Caller) => ({
@@ -39,10 +41,8 @@ export default function Ranking() {
             power: caller.data.power || 0,
           },
         }));
-        const sortedCallers = updatedCallers.sort(
-          (a: Caller, b: Caller) => b.data.power - a.data.power
-        );
-        setCallers(sortedCallers);
+        setAllCallers(updatedCallers);
+        setCallers(updatedCallers);
       } catch (error) {
         console.error('Error fetching callers:', error);
       }
@@ -51,19 +51,59 @@ export default function Ranking() {
     fetchCards();
   }, []);
 
+  useEffect(() => {
+    if (profile) {
+      setFollowingCallers(
+        allCallers.filter((caller) =>
+          profile.data.favorites.includes(caller.id)
+        )
+      );
+    }
+  }, [allCallers, profile]);
+
+  const viewTrending = () => {
+    setCallers(allCallers);
+  };
+
+  const viewFollowing = () => {
+    setCallers(followingCallers);
+  };
+
   const displayCallerPage = (callerId: number) => {
     router.push(`/caller/${callerId}`);
   };
 
   return (
     <>
-      <div>
-        <h1>Trending</h1>
-      </div>
-      <div>
-        {/* <>{JSON.stringify(callers)}</> test if data is loading*/}
-        {/* {callers.length > 0 && <DisplayCard card={callers[0]} />} */}
-      </div>
+      <ToggleGroup
+        type="single"
+        value={selectedView}
+        className="justify-start"
+        onValueChange={(value) => {
+          if (value === 'trending') {
+            viewTrending();
+          } else if (value === 'followed') {
+            viewFollowing();
+          }
+          setSelectedView(value as 'trending' | 'following');
+        }}
+      >
+        <ToggleGroupItem
+          className="h-6 rounded-full"
+          onClick={() => viewTrending()}
+          value="trending"
+        >
+          Trending
+        </ToggleGroupItem>
+        <ToggleGroupItem
+          className="h-6 rounded-full"
+          onClick={() => viewFollowing()}
+          value="followed"
+        >
+          Followed
+        </ToggleGroupItem>
+      </ToggleGroup>
+
       <Table className="bg-background text-foreground border-border">
         <TableCaption className="text-muted-foreground"></TableCaption>
         <TableHeader className="border-border">
