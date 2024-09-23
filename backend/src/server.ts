@@ -24,7 +24,6 @@ import { services } from '.';
 
 const app = express();
 
-
 // **** Setup **** //
 
 // Basic middleware
@@ -66,12 +65,21 @@ app.get('/tournament/:id', async (req: Request, res: Response) => {
 app.post('/tournament/join', async (req: Request, res: Response) => {
   const { tournamentId, walletPubkey, callers } = req.body;
 
-  if (!tournamentId || !walletPubkey || !Array.isArray(callers) || callers.length !== 3) {
+  if (
+    !tournamentId ||
+    !walletPubkey ||
+    !Array.isArray(callers) ||
+    callers.length !== 3
+  ) {
     return res.status(400).json({ message: 'Invalid request body' });
   }
 
   try {
-    const result = await services.tournament?.joinTournament({tournamentId, walletPubkey, callers});
+    const result = await services.tournament?.joinTournament({
+      tournamentId,
+      walletPubkey,
+      callers,
+    });
     res.json(result);
   } catch (error) {
     morgan('combined')(req, res, () => {
@@ -79,34 +87,53 @@ app.post('/tournament/join', async (req: Request, res: Response) => {
         `Error participating in tournament: ${(error as Error).message}`
       );
     });
-    res.status(500).json({ message: 'Error participating in tournament', error: (error as Error).name });
+    res
+      .status(500)
+      .json({
+        message: 'Error participating in tournament',
+        error: (error as Error).name,
+      });
   }
 });
 
-app.get('/tournament/:id/:walletPubkey', async (req: Request, res: Response) => {
-  const tournamentId = Number(req.params.id);
-  const walletPubkey = req.params.walletPubkey;
+app.get(
+  '/tournament/:id/:walletPubkey',
+  async (req: Request, res: Response) => {
+    const tournamentId = Number(req.params.id);
+    const walletPubkey = req.params.walletPubkey;
 
-  if (!tournamentId || !walletPubkey) {
-    return res.status(400).json({ message: 'Wallet public key is required' });
-  }
-
-  try {
-    const participation = await services.tournament?.getMyTournamentParticipation(tournamentId, walletPubkey);
-    if (participation) {
-      res.json(participation);
-    } else {
-      res.status(404).json({ message: 'No participations found for this wallet' });
+    if (!tournamentId || !walletPubkey) {
+      return res.status(400).json({ message: 'Wallet public key is required' });
     }
-  } catch (error) {
-    morgan('combined')(req, res, () => {
-      console.error(
-        `Error fetching wallet tournament participation: ${(error as Error).message}`
-      );
-    });
-    res.status(500).json({ message: 'Error fetching your tournament participation', error: (error as Error).name });
+
+    try {
+      const participation =
+        await services.tournament?.getMyTournamentParticipation(
+          tournamentId,
+          walletPubkey
+        );
+      if (participation) {
+        res.json(participation);
+      } else {
+        res
+          .status(404)
+          .json({ message: 'No participations found for this wallet' });
+      }
+    } catch (error) {
+      morgan('combined')(req, res, () => {
+        console.error(
+          `Error fetching wallet tournament participation: ${(error as Error).message}`
+        );
+      });
+      res
+        .status(500)
+        .json({
+          message: 'Error fetching your tournament participation',
+          error: (error as Error).name,
+        });
+    }
   }
-});
+);
 
 app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
   const walletPubkey = req.params.walletPubkey;
@@ -126,10 +153,14 @@ app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
     morgan('combined')(req, res, () => {
       console.error(`Error fetching portfolio: ${(error as Error).message}`);
     });
-    res.status(500).json({ message: 'Error fetching portfolio', error: (error as Error).name });
+    res
+      .status(500)
+      .json({
+        message: 'Error fetching portfolio',
+        error: (error as Error).name,
+      });
   }
 });
-
 
 app.get('/test', (req, res) => {
   res.json({ message: process.env.DATABASE_URL });
@@ -149,22 +180,24 @@ if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
 app.use(Paths.Base, BaseRouter);
 
 // Add error handler
-app.use((
-  err: Error,
-  _: Request,
-  res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: NextFunction,
-) => {
-  if (EnvVars.NodeEnv !== NodeEnvs.Test.valueOf()) {
-    logger.err(err, true);
+app.use(
+  (
+    err: Error,
+    _: Request,
+    res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    next: NextFunction
+  ) => {
+    if (EnvVars.NodeEnv !== NodeEnvs.Test.valueOf()) {
+      logger.err(err, true);
+    }
+    let status = HttpStatusCodes.BAD_REQUEST;
+    if (err instanceof RouteError) {
+      status = err.status;
+    }
+    return res.status(status).json({ error: err.message });
   }
-  let status = HttpStatusCodes.BAD_REQUEST;
-  if (err instanceof RouteError) {
-    status = err.status;
-  }
-  return res.status(status).json({ error: err.message });
-});
+);
 
 // **** Export default **** //
 

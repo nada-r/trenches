@@ -1,6 +1,6 @@
 declare global {
   namespace PrismaJson {
-    type CallerData = { power?: number };
+    type CallerData = { power?: number, rank?: number };
     type TournamentMetadata = {
       openDuration: number;
       endDuration: number;

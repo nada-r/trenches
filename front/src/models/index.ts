@@ -111,7 +111,7 @@ export const CallerSchema = z.object({
   /**
    * [CallerData]
    */
-  data: z.object({ power: z.number() }),
+  data: z.object({ power: z.number() , rank: z.number()}),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 })

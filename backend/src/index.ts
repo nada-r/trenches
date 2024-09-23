@@ -5,6 +5,7 @@ import EnvVars from '@src/common/EnvVars';
 import server from './server';
 import {
   CallerService,
+  CallingPowerService,
   CallService,
   ClaimService,
   TournamentService,
@@ -14,6 +15,7 @@ import bootstrap from '@src/bootstrap';
 interface IServices {
   caller: CallerService;
   call: CallService;
+  callingPower: CallingPowerService;
   tournament: TournamentService;
   claim: ClaimService;
 }
@@ -64,10 +66,16 @@ const SERVER_START_MSG =
 // });
 
 server.listen(EnvVars.Port, async () => {
-  const { callerService, callService, claimService, tournamentService } =
-    await bootstrap();
+  const {
+    callerService,
+    callService,
+    callingPowerService,
+    claimService,
+    tournamentService,
+  } = await bootstrap();
   addExistingService('caller', callerService);
   addExistingService('call', callService);
+  addExistingService('callingPower', callingPowerService);
   addExistingService('tournament', tournamentService);
   addExistingService('claim', claimService);
 

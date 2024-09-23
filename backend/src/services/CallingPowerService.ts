@@ -16,6 +16,20 @@ export class CallingPowerService {
       const callerPower = this.computePower(calls);
       await this.callerService.updateCallingPower(c.telegramId, callerPower);
     }
+    this.callerService.updateCallerRanks();
+
+    console.log(`Calling power updated for ${callers.length} callers.`);
+  }
+
+  async updateAllCallingPower(): Promise<void> {
+    const callers = await this.callerService.getAll();
+    for (const c of callers) {
+      const calls = await this.callService.getCallsByTelegramId(c.telegramId);
+      const callerPower = this.computePower(calls);
+      await this.callerService.updateCallingPower(c.telegramId, callerPower);
+    }
+    this.callerService.updateCallerRanks();
+
     console.log(`Calling power updated for ${callers.length} callers.`);
   }
 

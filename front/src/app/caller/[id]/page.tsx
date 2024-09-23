@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { FaTelegram } from 'react-icons/fa';
+import { FaTelegramPlane } from 'react-icons/fa';
 import { Call, Caller } from '@/models';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import {
@@ -15,6 +15,8 @@ import Link from 'next/link';
 import { IoIosArrowBack } from 'react-icons/io';
 import SlicedAddress from '@/components/utils/SlicedAddress';
 import FDV from '@/components/trenches/FDV';
+import CallerAvatar from '@/components/trenches/CallerAvatar';
+import CallingPower from '@/components/trenches/CallingPower';
 
 const instance = createAxiosInstance();
 
@@ -44,20 +46,43 @@ const Page = ({ params }: { params: { id: string } }) => {
       <Link href="/ranking" className="mr-2">
         <IoIosArrowBack />
       </Link>
-      <h1 className="text-2xl font-bold">{caller?.name}</h1>
-      {caller?.telegramId && (
-        <a
-          href={`https://t.me/${caller.name}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 flex items-center text-blue-500 hover:text-blue-600"
-        >
-          <FaTelegram className="mr-2" />
-          Telegram
-        </a>
-      )}
 
-      <h1 className="text-2xl font-bold ">Opened Calls</h1>
+      <div className="flex flex-col">
+        <div className="flex flex-row items-center">
+          <CallerAvatar
+            name={caller?.name || ''}
+            image={caller?.image === null ? undefined : caller?.image}
+            className="w-10 h-10 mr-4"
+          />
+          <h1 className="text-2xl font-bold">{caller?.name}</h1>
+          {caller?.name && (
+            <a
+              href={`https://t.me/${caller.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-blue-600 pl-2"
+            >
+              <FaTelegramPlane />
+            </a>
+          )}
+        </div>
+        <div className="grid grid-rows-2 gap-1 rounded-lg bg-neutral-900 mt-3 p-3">
+          <div className="flex items-center gap-x-2">
+            <p className="text-sm font-semibold text-light-gray">Rank:</p>
+            <p className="text-sm text-light-gray ">
+              #{caller?.data.rank || 0}
+            </p>
+          </div>
+          <div className="flex items-center gap-x-2">
+            <p className="text-sm font-semibold text-light-gray">Power:</p>
+            <p className="text-sm text-light-gray ">
+              <CallingPower value={caller?.data.power || 0} />
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <h1 className="text-2xl font-bold mt-4">Opened Calls</h1>
       <Table>
         <TableHeader>
           <TableRow>

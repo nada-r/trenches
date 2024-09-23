@@ -114,4 +114,17 @@ export class CallerService {
       },
     });
   }
+
+  async updateCallerRanks(): Promise<void> {
+    const callers = await this.prisma.caller.findMany({});
+
+    callers.sort((a, b) => (b.data?.power || 0) - (a.data?.power || 0));
+
+    for (let i = 0; i < callers.length; i++) {
+      await this.prisma.caller.update({
+        where: { id: callers[i].id },
+        data: { data: { ...callers[i].data, rank: i + 1 } },
+      });
+    }
+  }
 }
