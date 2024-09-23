@@ -115,7 +115,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         <TableHeader>
           <TableRow>
             <TableHead>Token</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>Since</TableHead>
             <TableHead>Start</TableHead>
             <TableHead>Highest</TableHead>
           </TableRow>
@@ -127,13 +127,15 @@ const Page = ({ params }: { params: { id: string } }) => {
                 <SlicedAddress address={call.tokenAddress} showEnd={false} />
               </TableCell>
               <TableCell>
-                {new Date(call.createdAt)
-                  .toLocaleString('en-GB', {
-                    year: '2-digit',
-                    month: '2-digit',
-                    day: '2-digit',
-                  })
-                  .replace(',', '')}
+                {(() => {
+                  const createdAt = new Date(call.createdAt);
+                  const now = new Date();
+                  const diffTime = Math.abs(
+                    now.getTime() - createdAt.getTime()
+                  );
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  return `${diffDays}d`;
+                })()}
               </TableCell>
               <TableCell>
                 <FDV value={call.startFDV} />
