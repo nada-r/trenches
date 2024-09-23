@@ -113,11 +113,12 @@ const Page = ({ params }: { params: { id: string } }) => {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold mt-4">Opened Calls</h1>
-      <Table>
+      <Table className="mt-4">
         <TableHeader>
-          <TableRow>
-            <TableHead>Token</TableHead>
+          <TableRow className="border-b-gray-600">
+            <TableHead className="font-bold text-lg text-white">
+              Opened Calls
+            </TableHead>
             <TableHead>Start</TableHead>
             <TableHead>Highest</TableHead>
           </TableRow>
@@ -141,12 +142,13 @@ const Page = ({ params }: { params: { id: string } }) => {
           ))}
         </TableBody>
       </Table>
-      <h1 className="text-2xl font-bold mt-4">Closed Calls</h1>
-      <Table>
+      <Table className="mt-4">
         <TableHeader>
-          <TableRow>
-            <TableHead>Token</TableHead>
-            <TableHead>Since</TableHead>
+          <TableRow className="border-b-gray-600">
+            <TableHead className="font-bold text-lg text-white">
+              Closed Calls
+            </TableHead>
+            {/*<TableHead>Since</TableHead>*/}
             <TableHead>Start</TableHead>
             <TableHead>Highest</TableHead>
           </TableRow>
@@ -157,7 +159,7 @@ const Page = ({ params }: { params: { id: string } }) => {
               <TableCell className="font-medium">
                 <SlicedAddress address={call.tokenAddress} showEnd={false} />
               </TableCell>
-              <TableCell>
+              {/*<TableCell>
                 {(() => {
                   const createdAt = new Date(call.createdAt);
                   const now = new Date();
@@ -167,7 +169,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                   return `${diffDays}d`;
                 })()}
-              </TableCell>
+              </TableCell>*/}
               <TableCell>
                 <FDV value={call.startFDV} />
               </TableCell>
