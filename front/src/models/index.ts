@@ -62,6 +62,8 @@ export const CallScalarFieldEnumSchema = z.enum(['id','tokenAddress','startFDV',
 
 export const ClaimScalarFieldEnumSchema = z.enum(['id','walletPubkey','portfolio','createdAt','updatedAt']);
 
+export const PlayerScalarFieldEnumSchema = z.enum(['id','walletPubkey','data','createdAt','updatedAt']);
+
 export const TournamentScalarFieldEnumSchema = z.enum(['id','name','status','startedAt','metadata','createdAt','updatedAt']);
 
 export const TournamentParticipationScalarFieldEnumSchema = z.enum(['id','walletPubkey','callers','createdAt','updatedAt','tournamentId']);
@@ -151,6 +153,23 @@ export const ClaimSchema = z.object({
 })
 
 export type Claim = z.infer<typeof ClaimSchema>
+
+/////////////////////////////////////////
+// PLAYER SCHEMA
+/////////////////////////////////////////
+
+export const PlayerSchema = z.object({
+  id: z.number().int(),
+  walletPubkey: z.string(),
+  /**
+   * [ProfileMetadata]
+   */
+  data: z.object({ favorites: z.array(z.number()) }),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+})
+
+export type Player = z.infer<typeof PlayerSchema>
 
 /////////////////////////////////////////
 // TOURNAMENT SCHEMA

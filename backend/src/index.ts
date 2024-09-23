@@ -7,7 +7,7 @@ import {
   CallerService,
   CallingPowerService,
   CallService,
-  ClaimService,
+  ProfileService,
   TournamentService,
 } from './services';
 import bootstrap from '@src/bootstrap';
@@ -17,7 +17,7 @@ interface IServices {
   call: CallService;
   callingPower: CallingPowerService;
   tournament: TournamentService;
-  claim: ClaimService;
+  profile: ProfileService;
 }
 
 export const services: Partial<IServices> = {};
@@ -70,14 +70,14 @@ server.listen(EnvVars.Port, async () => {
     callerService,
     callService,
     callingPowerService,
-    claimService,
+    profileService,
     tournamentService,
   } = await bootstrap();
   addExistingService('caller', callerService);
   addExistingService('call', callService);
   addExistingService('callingPower', callingPowerService);
   addExistingService('tournament', tournamentService);
-  addExistingService('claim', claimService);
+  addExistingService('profile', profileService);
 
   logger.info(SERVER_START_MSG);
 });

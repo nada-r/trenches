@@ -45,6 +45,21 @@ app.get('/caller/:id', async (req: Request, res: Response) => {
   const caller = await services.caller?.getCallerWithCall(id);
   res.json(caller);
 });
+app.post('/caller/:id/follow', async (req: Request, res: Response) => {
+  const { walletPubkey } = req.body;
+  const id = Number(req.params.id);
+  await services.profile?.followCaller(walletPubkey, id);
+
+  res.status(200).json({ message: 'Follow successful' });
+});
+app.post('/caller/:id/unfollow', async (req: Request, res: Response) => {
+  const { walletPubkey } = req.body;
+  const id = Number(req.params.id);
+  await services.profile?.unfollowCaller(walletPubkey, id);
+
+  res.status(200).json({ message: 'Follow successful' });
+});
+
 
 app.get('/tournament/all', async (req: Request, res: Response) => {
   const tournaments = await services.tournament?.getAvailable();
@@ -135,6 +150,33 @@ app.get(
   }
 );
 
+app.post('/profile/my', async (req: Request, res: Response) => {
+  const { walletPubkey } = req.body;
+
+  if (!walletPubkey) {
+    return res.status(400).json({ message: 'Wallet public key is required' });
+  }
+
+  try {
+    const profile = await services.profile?.getProfile(walletPubkey);
+    if (profile) {
+      res.json(profile);
+    } else {
+      res.status(404).json({ message: 'Profile not found for this wallet' });
+    }
+  } catch (error) {
+    morgan('combined')(req, res, () => {
+      console.error(`Error fetching profile: ${(error as Error).message}`);
+    });
+    res
+      .status(500)
+      .json({
+        message: 'Error fetching profile',
+        error: (error as Error).name,
+      });
+  }
+});
+
 app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
   const walletPubkey = req.params.walletPubkey;
 
@@ -143,7 +185,7 @@ app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
   }
 
   try {
-    const portfolio = await services.claim?.claim(walletPubkey);
+    const portfolio = await services.profile?.claim(walletPubkey);
     if (portfolio) {
       res.json(portfolio);
     } else {

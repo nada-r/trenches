@@ -4,7 +4,7 @@ import {
   CallerService,
   CallingPowerService,
   CallService,
-  ClaimService,
+  ProfileService,
   TournamentScoreService,
   TournamentService,
 } from './services';
@@ -47,13 +47,13 @@ export default async function bootstrap() {
     tournamentScoreService,
     prisma
   );
-  const claimService = new ClaimService(prisma);
+  const profileService = new ProfileService(prisma);
 
   return {
     callerService,
     callService,
     callingPowerService,
-    claimService,
+    profileService,
     tournamentService,
     prisma,
   };

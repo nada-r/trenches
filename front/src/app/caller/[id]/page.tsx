@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { FaTelegramPlane } from 'react-icons/fa';
-import { Call, Caller } from '@/models';
+import { Call, Caller, PlayerSchema } from '@/models';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import {
   Table,
@@ -17,6 +17,8 @@ import SlicedAddress from '@/components/utils/SlicedAddress';
 import FDV from '@/components/trenches/FDV';
 import CallerAvatar from '@/components/trenches/CallerAvatar';
 import CallingPower from '@/components/trenches/CallingPower';
+import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
+import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 
 const instance = createAxiosInstance();
 
@@ -27,6 +29,17 @@ const Page = ({ params }: { params: { id: string } }) => {
       closedCalls: Call[];
     }
   >();
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  const { user } = usePrivy();
+  const solanaWallet =
+    user &&
+    user.linkedAccounts.find(
+      (account): account is WalletWithMetadata =>
+        account.type === 'wallet' &&
+        account.walletClientType === 'privy' &&
+        account.chainType === 'solana'
+    );
 
   useEffect(() => {
     async function fetchCaller() {
@@ -40,6 +53,36 @@ const Page = ({ params }: { params: { id: string } }) => {
 
     fetchCaller();
   }, []);
+
+  useEffect(() => {
+    if (solanaWallet) {
+      const fetchProfile = async () => {
+        try {
+          const response = await instance.post('/profile/my', {
+            walletPubkey: solanaWallet?.address,
+          });
+          const profile = PlayerSchema.parse(response.data);
+
+          setIsFollowing(profile.data.favorites.includes(Number(params.id)));
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+        }
+      };
+      fetchProfile();
+    }
+  }, [solanaWallet]);
+
+  const handleFollowToggle = async () => {
+    try {
+      const endpoint = isFollowing ? 'unfollow' : 'follow';
+      await instance.post(`/caller/${params.id}/${endpoint}`, {
+        walletPubkey: solanaWallet?.address, // Replace with actual user wallet pubkey
+      });
+      setIsFollowing(!isFollowing);
+    } catch (error) {
+      console.error('Error toggling follow status:', error);
+    }
+  };
 
   return (
     <>
@@ -56,14 +99,22 @@ const Page = ({ params }: { params: { id: string } }) => {
           />
           <h1 className="text-2xl font-bold">{caller?.name}</h1>
           {caller?.name && (
-            <a
-              href={`https://t.me/${caller.name}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-blue-600 pl-2"
-            >
-              <FaTelegramPlane />
-            </a>
+            <>
+              <a
+                href={`https://t.me/${caller.name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-blue-600 pl-2"
+              >
+                <FaTelegramPlane />
+              </a>
+              <button
+                onClick={handleFollowToggle}
+                className="ml-2 hover:text-yellow-400"
+              >
+                {isFollowing ? <AiFillStar /> : <AiOutlineStar />}
+              </button>
+            </>
           )}
         </div>
         <div className="grid grid-rows-2 gap-1 rounded-lg bg-neutral-900 mt-3 p-3">
@@ -153,5 +204,4 @@ const Page = ({ params }: { params: { id: string } }) => {
     </>
   );
 };
-
 export default Page;

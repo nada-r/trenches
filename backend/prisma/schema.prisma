@@ -74,6 +74,15 @@ model Claim {
   updatedAt    DateTime @updatedAt
 }
 
+model Player {
+  id           Int      @id @default(autoincrement())
+  walletPubkey String   @unique
+  /// [ProfileMetadata]
+  data         Json /// @zod.custom.use(z.object({ favorites: z.array(z.number()) }))
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 enum TournamentStatus {
   HIDDEN
   UPCOMING
