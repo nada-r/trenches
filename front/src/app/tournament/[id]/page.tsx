@@ -10,6 +10,7 @@ import CallerTournamentCard from '@/components/trenches/CallerTournamentCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import {
   Tournament,
+  TournamentParticipation,
   TournamentParticipationSchema,
   TournamentSchema,
 } from '@/models';
@@ -32,6 +33,9 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
 
   const [tournament, setTournament] = useState<
     Tournament & { participationCount: number }
+  >();
+  const [participation, setParticipation] = useState<
+    TournamentParticipation & { score: number }
   >();
   const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<
@@ -95,6 +99,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           );
 
           setIsAlreadyParticipate(true);
+          setParticipation({ ...participation, score: response.data.score });
           setSelectedTokens(
             participation.callers.map((c) =>
               availableTokens.find((t) => t.id.toString() === c)
@@ -212,6 +217,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
         ))}
       </div>
       <h1 className="text-xl font-bold mb-4">Your Tournament Cards</h1>
+      <span>Actual score: {participation?.score}</span>
       <div className="grid grid-cols-3 gap-4 py-4">
         {selectedTokens.map((card, index) => (
           <TournamentSlot key={index} token={card} onUnselect={unselectToken} />

@@ -1,12 +1,16 @@
 import { PrismaClient, Tournament, TournamentParticipation } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
+import TournamentScoreService from '@src/services/TournamentScoreService';
 
 /**
  * TournamentService is a class that provides CRUD operations for tournaments.
  * It uses the Prisma client to interact with the database.
  */
 export class TournamentService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(
+    private tournamentScoreService: TournamentScoreService,
+    private prisma: PrismaClient
+  ) {}
 
   /**
    * Creates a new tournament.
@@ -35,7 +39,9 @@ export class TournamentService {
    * @param id - The ID of the tournament to retrieve.
    * @returns A Promise that resolves to the Tournament object, or `null` if not found.
    */
-  async getById(id: number): Promise<(Tournament & { participationCount: number }) | null> {
+  async getById(
+    id: number
+  ): Promise<(Tournament & { participationCount: number }) | null> {
     const tournament = await this.prisma.tournament.findUnique({
       where: {
         id: id,
@@ -105,7 +111,6 @@ export class TournamentService {
    * @returns A Promise that resolves to the created TournamentParticipation object.
    */
   async joinTournament(data: OmitPrisma<TournamentParticipation>) {
-
     // TODO validate that sender is the owner of the walletPubkey by signing his message
     return this.prisma.tournamentParticipation.create({
       data: {
@@ -117,17 +122,32 @@ export class TournamentService {
   async getMyTournamentParticipation(
     tournamentId: number,
     walletPubkey: string
-  ): Promise<TournamentParticipation | null> {
-    return this.prisma.tournamentParticipation.findUnique({
+  ): Promise<TournamentParticipation & { score: number } | null> {
+    const participation = await this.prisma.tournamentParticipation.findUnique({
       where: {
         unique_participation: {
           tournamentId: tournamentId,
           walletPubkey: walletPubkey,
         },
       },
-    });
-  }
+      include: {
+        tournament: true,
+      }
 
+    });
+
+
+    if (!participation) {
+      return null;
+    }
+
+    const score = await this.tournamentScoreService.getPlayerScore(participation.tournament, participation);
+
+    return {
+      ...participation,
+      score,
+    };
+  }
 }
 
 export default TournamentService;

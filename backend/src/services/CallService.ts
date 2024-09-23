@@ -14,12 +14,20 @@ export class CallService {
     });
   }
 
-  async getCallsByTelegramId(telegramId: string): Promise<Call[]> {
+  async getCallsByTelegramId(
+    telegramId: string,
+    start?: Date,
+    end?: Date
+  ): Promise<Call[]> {
     return this.prisma.call.findMany({
       where: {
-        caller: {
-          telegramId: telegramId,
-        },
+        caller: { telegramId },
+        ...((start || end) && {
+          createdAt: {
+            ...(start && { gte: start }),
+            ...(end && { lt: end }),
+          },
+        }),
       },
     });
   }

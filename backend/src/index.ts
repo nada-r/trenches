@@ -46,6 +46,13 @@ export function addService<T extends keyof IServices>(
   if (dependencies.length) services[name] = new newService(...dependencies);
   else services[name] = new newService();
 }
+
+export function addExistingService<T extends keyof IServices>(
+  name: T,
+  service: IServices[T]
+): void {
+  services[name] = service;
+}
 // **** Run **** //
 
 const SERVER_START_MSG =
@@ -57,11 +64,12 @@ const SERVER_START_MSG =
 // });
 
 server.listen(EnvVars.Port, async () => {
-  const { prisma } = await bootstrap();
-  addService('caller', CallerService, prisma);
-  addService('call', CallService, prisma);
-  addService('tournament', TournamentService, prisma);
-  addService('claim', ClaimService, prisma);
+  const { callerService, callService, claimService, tournamentService } =
+    await bootstrap();
+  addExistingService('caller', callerService);
+  addExistingService('call', callService);
+  addExistingService('tournament', tournamentService);
+  addExistingService('claim', claimService);
 
   logger.info(SERVER_START_MSG);
 });

@@ -39,6 +39,88 @@ datasource db {
 }
 
 /// generate types for front
+
+model Caller {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  image                String?
+  telegramId           String                 @unique
+  /// [CallerData]
+  data                 Json                   @default("{}") /// @zod.custom.use(z.object({ power: z.number() }))
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  calls                Call[]
+  TournamenCallerPower TournamenCallerPower[]
+}
+
+model Call {
+  id           Int      @id @default(autoincrement())
+  tokenAddress String
+  startFDV     Float
+  highestFDV   Float
+  caller       Caller   @relation(fields: [callerId], references: [id])
+  callerId     Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  data         Json?
+}
+
+model Claim {
+  id           Int      @id @default(autoincrement())
+  walletPubkey String   @unique
+  /// [ClaimMetadata]
+  portfolio    Json /// @zod.custom.use(z.array(z.object({ callerId: z.number(), balance: z.number() })))
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum TournamentStatus {
+  HIDDEN
+  UPCOMING
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+model Tournament {
+  id             Int                       @id @default(autoincrement())
+  name           String
+  status         TournamentStatus          @default(HIDDEN)
+  startedAt      DateTime?
+  /// [TournamentMetadata]
+  metadata       Json /// @zod.custom.use(z.object({ openDuration: z.number(), endDuration: z.number(), prize: z.number(), supplyBurn: z.number() }))
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  participations TournamentParticipation[]
+  callerPower    TournamenCallerPower[]
+}
+
+model TournamentParticipation {
+  id           Int        @id @default(autoincrement())
+  walletPubkey String
+  callers      String[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+
+  @@unique(name: "unique_participation", [walletPubkey, tournamentId])
+}
+
+model TournamenCallerPower {
+  id           Int        @id @default(autoincrement())
+  callerId     Int
+  power        Float
+  tournamentId Int
+  updatedAt    DateTime   @default(now())
+  caller       Caller     @relation(fields: [callerId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@unique(name: "power_by_tournament", [callerId, tournamentId])
+}
+
+/// deprecated
+
 model Card {
   id        Int      @id @default(autoincrement())
   name      String
@@ -72,69 +154,4 @@ model Test {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model Tournament {
-  id             Int                       @id @default(autoincrement())
-  name           String
-  status         TournamentStatus          @default(HIDDEN)
-  startedAt      DateTime?
-  /// [TournamentMetadata]
-  metadata       Json /// @zod.custom.use(z.object({ openDuration: z.number(), endDuration: z.number(), prize: z.number(), supplyBurn: z.number() }))
-  createdAt      DateTime                  @default(now())
-  updatedAt      DateTime                  @updatedAt
-  participations TournamentParticipation[]
-}
-
-enum TournamentStatus {
-  HIDDEN
-  UPCOMING
-  STARTED
-  COMPLETED
-  CANCELLED
-}
-
-model TournamentParticipation {
-  id           Int        @id @default(autoincrement())
-  walletPubkey String
-  callers      String[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId Int
-
-  @@unique(name: "unique_participation", [walletPubkey, tournamentId])
-}
-
-model Caller {
-  id         Int      @id @default(autoincrement())
-  name       String
-  image      String?
-  telegramId String   @unique
-  /// [CallerData]
-  data       Json     @default("{}") /// @zod.custom.use(z.object({ power: z.number() }))
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  calls      Call[]
-}
-
-model Call {
-  id           Int      @id @default(autoincrement())
-  tokenAddress String
-  startFDV     Float
-  highestFDV   Float
-  caller       Caller   @relation(fields: [callerId], references: [id])
-  callerId     Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  data         Json?
-}
-
-model Claim {
-  id           Int      @id @default(autoincrement())
-  walletPubkey String   @unique
-  /// [ClaimMetadata]
-  portfolio    Json /// @zod.custom.use(z.array(z.object({ callerId: z.number(), balance: z.number() })))
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 }
