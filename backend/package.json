@@ -8,7 +8,7 @@
     "lint:tests": "npx eslint spec/ --ext .ts",
     "start": "npm run prisma:migrate-prod && node -r module-alias/register ./dist --env=production",
     "start:withbot": "concurrently \"npm run bot\" \"npm run start\"",
-    "bot": "node ./dist/bot.js",
+    "bot": "node -r module-alias/register ./dist/bot.js",
     "bot:dev": "npx ts-node src/bot.ts",
     "dev": "PORT=80 nodemon",
     "console": "npx ts-node --files -r tsconfig-paths/register ./src/console.ts",
