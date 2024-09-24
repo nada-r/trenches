@@ -1,61 +1,41 @@
 import { Call } from '@prisma/client';
 import { ICallingPowerCalculator } from '@src/calculator/PowerCalculatorFactory';
+import dayjs from 'dayjs';
 
 export class PremiumCallingPowerCalculator implements ICallingPowerCalculator {
   computePower(calls: Array<Call>, enableLogging: boolean = false): number {
-    let performanceGlobale = 0;
-    let poidsTotal = 0;
-    const dateActuelle = new Date();
+    let globalPerformance = 0;
+    let totalWeight = 0;
+    const currentDate = dayjs();
 
     console.log('Starting calculation for calls:');
 
     for (const call of calls) {
-      const ratioPerformance =
+      // Calculate the performance
+      const performance =
         ((call.highestFDV - call.startFDV) / call.startFDV) * 100;
-      const ageMilliseconds = dateActuelle.getTime() - call.createdAt.getTime();
-      const ageHeures = ageMilliseconds / (60 * 60 * 1000);
-      const ageSemaines = ageMilliseconds / (7 * 24 * 60 * 60 * 1000);
 
-      let multiplicateurTemporel;
-      if (ageHeures < 24) {
-        // Utilisation de la suite de Bernoulli pour les calls de moins de 24h
-        multiplicateurTemporel = 1 - Math.pow(0.5, ageHeures / 24);
+      // Calculate the age of the call
+      const callCreatedAt = dayjs(call.createdAt);
+      const ageDuration = dayjs.duration(currentDate.diff(callCreatedAt));
+
+      let temporalWeight;
+      if (ageDuration.asHours() < 24) {
+        // Use Bernoulli series to give progressive weight on call
+        temporalWeight = 1 - Math.pow(0.5, ageDuration.asHours() / 24);
       } else {
-        // Pénalisation des vieux calls comme avant
-        multiplicateurTemporel = 1 / (1 + ageSemaines);
+        // or penalize older calls
+        temporalWeight = 1 / (1 + ageDuration.asWeeks());
       }
-      const scoreCall = ratioPerformance * multiplicateurTemporel;
-      const poids = multiplicateurTemporel; // Le poids diminue avec le temps
 
-      performanceGlobale += scoreCall * poids;
-      poidsTotal += poids;
-
-      if (enableLogging) {
-        console.log(`Call details:
-        Ratio Performance: ${ratioPerformance.toFixed(4)}
-        Age (hours): ${ageHeures.toFixed(2)}
-        Multiplicateur Temporel: ${multiplicateurTemporel.toFixed(4)}
-        Score Call: ${scoreCall.toFixed(4)}
-        Poids: ${poids.toFixed(4)}
-      `);
-      }
+      // Accumulate the weighted performance and total weight
+      globalPerformance += performance * temporalWeight;
+      totalWeight += temporalWeight;
     }
 
-    const performanceFinale =
-      poidsTotal > 0 ? performanceGlobale / poidsTotal : 0;
-
-    if (enableLogging) {
-      console.log(`
-      Calculation summary:
-      Performance Globale: ${performanceGlobale.toFixed(4)}
-      Poids Total: ${poidsTotal.toFixed(4)}
-      Performance Finale: ${performanceFinale.toFixed(4)}
-    `);
-
-      console.log(
-        `Caller power: ${performanceFinale.toFixed(2)} = ${performanceGlobale.toFixed(4)} / ${poidsTotal.toFixed(4)}`
-      );
-    }
-    return performanceFinale;
+    // Calculate the final performance
+    const finalPerformance =
+      totalWeight > 0 ? globalPerformance / totalWeight : 0;
+    return finalPerformance;
   }
 }

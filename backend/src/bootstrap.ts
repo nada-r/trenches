@@ -9,6 +9,8 @@ import {
   TournamentService,
 } from './services';
 import 'dotenv/config';
+import duration from 'dayjs/plugin/duration';
+import dayjs from 'dayjs'; // ES 2015
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -20,6 +22,7 @@ function validateEnv() {
 
 export default async function bootstrap() {
   validateEnv();
+  dayjs.extend(duration);
   const prisma = new PrismaClient();
   // Show connection status
   const isConnected = await prisma

@@ -63,25 +63,11 @@ const explainCallerPower = async (
             (c) => c.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
           )
         );
-      const power18h = callingPowerFactory
-        .getCalculator('premium')
-        ?.computePower(
-          calls.filter(
-            (c) => c.createdAt < new Date(Date.now() - 18 * 60 * 60 * 1000)
-          )
-        );
       const power12h = callingPowerFactory
         .getCalculator('premium')
         ?.computePower(
           calls.filter(
             (c) => c.createdAt < new Date(Date.now() - 12 * 60 * 60 * 1000)
-          )
-        );
-      const power6h = callingPowerFactory
-        .getCalculator('premium')
-        ?.computePower(
-          calls.filter(
-            (c) => c.createdAt < new Date(Date.now() - 6 * 60 * 60 * 1000)
           )
         );
       const powerNow = callingPowerFactory
@@ -90,9 +76,7 @@ const explainCallerPower = async (
       results.push({
         name: caller.name,
         power24h,
-        power18h,
         power12h,
-        power6h,
         powerNow,
       });
     }
