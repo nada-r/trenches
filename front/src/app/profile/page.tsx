@@ -3,22 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IoClose } from 'react-icons/io5';
-import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 import TruncatedAddress from '@/components/utils/SlicedAddress';
+import { useProfileContext } from '@/contexts/ProfileContext';
+import { Button } from '@/components/ui/button';
 
 export default function ProfilePage() {
   const router = useRouter();
   const [previousPage, setPreviousPage] = useState('/');
 
-  const { user } = usePrivy();
-  const solanaWallet =
-    user &&
-    user.linkedAccounts.find(
-      (account): account is WalletWithMetadata =>
-        account.type === 'wallet' &&
-        account.walletClientType === 'privy' &&
-        account.chainType === 'solana'
-    );
+  const { walletPubkey, logout } = useProfileContext();
 
   useEffect(() => {
     const storedPreviousPage = localStorage.getItem('previousPage');
@@ -41,10 +34,15 @@ export default function ProfilePage() {
           className="text-2xl cursor-pointer"
         />
       </div>
-      {solanaWallet && (
-        <div className="">
-          <TruncatedAddress address={solanaWallet?.address} />
-        </div>
+      {walletPubkey && (
+        <>
+          <div className="">
+            <TruncatedAddress address={walletPubkey} />
+          </div>
+          <Button variant="link" className="mt-4" onClick={logout}>
+            Logout
+          </Button>
+        </>
       )}
     </div>
   );

@@ -6,12 +6,14 @@ import React, {
   useState,
 } from 'react';
 import { Player, PlayerSchema } from '@/models';
-import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
+import { useLogout, usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
+import { useRouter } from 'next/navigation';
 
 type ProfileContext = {
   profile: Player | undefined;
   walletPubkey: string | undefined;
+  logout: () => Promise<void>;
 };
 
 const ProfileContext = createContext<ProfileContext | undefined>(undefined);
@@ -20,8 +22,10 @@ const instance = createAxiosInstance();
 
 export const ProfileProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [profile, setProfile] = useState<Player>();
+  const router = useRouter();
 
   const { user } = usePrivy();
+
   const solanaWallet =
     user &&
     user.linkedAccounts.find(
@@ -49,8 +53,15 @@ export const ProfileProvider: React.FC<PropsWithChildren> = ({ children }) => {
     }
   }, [solanaWallet]);
 
+  const { logout } = useLogout({
+    onSuccess: () => {
+      setProfile(undefined);
+      router.push('/');
+    },
+  });
+
   return (
-    <ProfileContext.Provider value={{ profile, walletPubkey }}>
+    <ProfileContext.Provider value={{ profile, walletPubkey, logout }}>
       {children}
     </ProfileContext.Provider>
   );
