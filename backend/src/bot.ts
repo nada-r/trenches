@@ -230,7 +230,11 @@ async function getSolanaToken(token: string): Promise<TokenInfo | null> {
       }
     })
     .catch((error) => {
-      console.error('Error fetching token data:', error);
+      if (error.response && error.response.status === 429) {
+        console.log(`429 on ${error.config.url}`);
+      } else {
+        console.error('Error fetching token data:', error);
+      }
       return null;
     });
 }
@@ -259,7 +263,11 @@ async function getSolanaPool(address: string): Promise<TokenInfo | null> {
       }
     })
     .catch((error) => {
-      console.error('Error fetching token pair data:', error);
+      if (error.response && error.response.status === 429) {
+        console.log(`429 on ${error.config.url}`);
+      } else {
+        console.error('Error fetching token', error);
+      }
       return null;
     });
 }
@@ -284,6 +292,14 @@ async function getPumpfunToken(token: string): Promise<TokenInfo | null> {
         // console.log("Token not found in pumpfun");
         return null;
       }
+    })
+    .catch((error) => {
+      if (error.response && error.response.status === 429) {
+        console.log(`429 on ${error.config.url}`);
+      } else {
+        console.error('Error fetching token', error);
+      }
+      return null;
     });
 }
 
