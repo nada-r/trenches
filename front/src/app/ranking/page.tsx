@@ -128,7 +128,7 @@ export default function Ranking() {
               onClick={() => displayCallerPage(caller.id)}
             >
               <TableCell className="font-medium text-foreground border-border">
-                {index + 1}
+                #{caller.data.rank}
               </TableCell>
               <TableCell className="border-border">
                 <CallerAvatar
