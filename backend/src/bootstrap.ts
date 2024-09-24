@@ -40,7 +40,6 @@ export default async function bootstrap() {
   const tournamentScoreService = new TournamentScoreService(
     callerService,
     callService,
-    callingPowerService,
     prisma
   );
   const tournamentService = new TournamentService(

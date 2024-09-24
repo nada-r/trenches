@@ -1,8 +1,32 @@
 import { input, number, select } from '@inquirer/prompts';
 import { TournamentService } from '@src/services';
 import { TournamentStatus } from '@prisma/client';
+import { EnvType } from '@src/console';
 
-export async function createTournament(tournamentService: TournamentService) {
+export async function displayTournamentActions(
+  env: EnvType,
+  tournamentService: TournamentService
+) {
+  const action = await select({
+    message: 'Select an action:',
+    choices: [
+      { name: 'Create tournament', value: 'create' },
+      { name: 'Start tournament', value: 'start' },
+    ],
+  });
+
+  switch (action) {
+    case 'create':
+      await createTournament(tournamentService);
+      break;
+    case 'start':
+      await startTournament(tournamentService);
+      break;
+    default:
+      console.log('Invalid action');
+  }
+}
+async function createTournament(tournamentService: TournamentService) {
   const name = await input({ message: 'Tournament name:' });
   const openDuration = await number({ message: 'Open duration (days):' });
   const endDuration = await number({ message: 'End duration (days):' });
@@ -21,7 +45,7 @@ export async function createTournament(tournamentService: TournamentService) {
   await tournamentService.createTournament(tournament);
 }
 
-export async function startTournament(tournamentService: TournamentService) {
+async function startTournament(tournamentService: TournamentService) {
   try {
     const tournamentId = await select({
       message: 'Enter tournament ID:',

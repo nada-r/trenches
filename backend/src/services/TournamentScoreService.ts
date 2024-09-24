@@ -2,7 +2,7 @@ import { PrismaClient, Tournament, TournamentParticipation } from '@prisma/clien
 import dayjs from 'dayjs';
 import { CallerService } from '@src/services/CallerService';
 import { CallService } from '@src/services/CallService';
-import { CallingPowerService } from '@src/services/CallingPowerService';
+import { PowerCalculatorFactory } from '../calculator/PowerCalculatorFactory';
 
 /**
  * TournamentService is a class that provides CRUD operations for tournaments.
@@ -12,18 +12,24 @@ export class TournamentScoreService {
   constructor(
     private callerService: CallerService,
     private callService: CallService,
-    private callingPowerService: CallingPowerService,
-    private prisma: PrismaClient
+    private prisma: PrismaClient,
+    private powerCalculatorFactory: PowerCalculatorFactory = new PowerCalculatorFactory()
   ) {}
 
   async updateCallerPowers(tournament: Tournament): Promise<void> {
     const callers = await this.callerService.getAll();
 
     const start = dayjs(tournament.startedAt);
-    const end = start.add(tournament.metadata.endDuration, 'second').subtract(1, 'day');
+    const end = start
+      .add(tournament.metadata.endDuration, 'second')
+      .subtract(1, 'day');
 
     for (const caller of callers) {
-      const power = await this.getCallerPowerAt(caller.telegramId, start.toDate(), end.toDate());
+      const power = await this.getCallerPowerAt(
+        caller.telegramId,
+        start.toDate(),
+        end.toDate()
+      );
 
       await this.prisma.tournamenCallerPower.upsert({
         where: {
@@ -42,19 +48,31 @@ export class TournamentScoreService {
     }
   }
 
-  async  getCallerPower(tournament: Tournament, telegramId: string): Promise<number> {
-
+  async getCallerPower(
+    tournament: Tournament,
+    telegramId: string
+  ): Promise<number> {
     const start = dayjs(tournament.startedAt);
-    const end = start.add(tournament.metadata.endDuration, 'second').subtract(1, 'day');
+    const end = start
+      .add(tournament.metadata.endDuration, 'second')
+      .subtract(1, 'day');
 
     return this.getCallerPowerAt(telegramId, start.toDate(), end.toDate());
   }
 
-  private async  getCallerPowerAt(telegramId: string,
-                       start?: Date,
-                       end?: Date): Promise<number> {
-    const calls = await this.callService.getCallsByTelegramId(telegramId, start, end);
-    return this.callingPowerService.computePower(calls);
+  private async getCallerPowerAt(
+    telegramId: string,
+    start?: Date,
+    end?: Date
+  ): Promise<number> {
+    const calls = await this.callService.getCallsByTelegramId(
+      telegramId,
+      start,
+      end
+    );
+    return this.powerCalculatorFactory
+      .getCalculator('standard')
+      .computePower(calls);
   }
 
   // async updatePlayerScores(tournamentId: number): Promise<void> {
@@ -81,50 +99,57 @@ export class TournamentScoreService {
   //   }
   // }
 
-  async getPlayerScore(tournament:Tournament, participation: TournamentParticipation): Promise<number> {
-
+  async getPlayerScore(
+    tournament: Tournament,
+    participation: TournamentParticipation
+  ): Promise<number> {
     const start = dayjs(tournament.startedAt);
-    const end = start.add(tournament.metadata.endDuration, 'second').subtract(1, 'day');
-
+    const end = start
+      .add(tournament.metadata.endDuration, 'second')
+      .subtract(1, 'day');
 
     let playerScore = 0;
     for (const caller of participation.callers) {
-      playerScore += await this.getCallerPowerAt(caller, start.toDate(), end.toDate());
+      playerScore += await this.getCallerPowerAt(
+        caller,
+        start.toDate(),
+        end.toDate()
+      );
     }
 
     return playerScore;
   }
 
-// async calculatePlayerRankings(playerBets: PlayerBet[]): Promise<PlayerScore[]> {
-//   const callerPowers = await this.getAllCallerPowers();
-//
-//   const playerScores = playerBets.map(bet => {
-//     const score = this.calculatePlayerScore(bet, callerPowers);
-//     return { playerId: bet.playerId, score };
-//   });
-//
-//   return playerScores.sort((a, b) => b.score - a.score);
-// }
-//
-// private async getAllCallerPowers(): Promise<Map<string, number>> {
-//   const callers = await this.callerService.getAllCallers();
-//   const callerPowers = new Map<string, number>();
-//
-//   for (const caller of callers) {
-//   const calls = await this.callService.getCallsByTelegramId(caller.telegramId);
-//   const power = this.computePower(calls);
-//   callerPowers.set(caller.telegramId, power);
-// }
-//
-// return callerPowers;
-// }
-//
-// private calculatePlayerScore(bet: PlayerBet, callerPowers: Map<string, number>): number {
-//   return bet.callerBets.reduce((score, callerBet) => {
-//     const callerPower = callerPowers.get(callerBet.callerId) || 0;
-//     return score + (callerPower * callerBet.weight);
-//   }, 0);
-// }
+  // async calculatePlayerRankings(playerBets: PlayerBet[]): Promise<PlayerScore[]> {
+  //   const callerPowers = await this.getAllCallerPowers();
+  //
+  //   const playerScores = playerBets.map(bet => {
+  //     const score = this.calculatePlayerScore(bet, callerPowers);
+  //     return { playerId: bet.playerId, score };
+  //   });
+  //
+  //   return playerScores.sort((a, b) => b.score - a.score);
+  // }
+  //
+  // private async getAllCallerPowers(): Promise<Map<string, number>> {
+  //   const callers = await this.callerService.getAllCallers();
+  //   const callerPowers = new Map<string, number>();
+  //
+  //   for (const caller of callers) {
+  //   const calls = await this.callService.getCallsByTelegramId(caller.telegramId);
+  //   const power = this.computePower(calls);
+  //   callerPowers.set(caller.telegramId, power);
+  // }
+  //
+  // return callerPowers;
+  // }
+  //
+  // private calculatePlayerScore(bet: PlayerBet, callerPowers: Map<string, number>): number {
+  //   return bet.callerBets.reduce((score, callerBet) => {
+  //     const callerPower = callerPowers.get(callerBet.callerId) || 0;
+  //     return score + (callerPower * callerBet.weight);
+  //   }, 0);
+  // }
 }
 
 export default TournamentScoreService;
