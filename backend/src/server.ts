@@ -204,10 +204,6 @@ app.get('/portfolio/:walletPubkey', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/test', (req, res) => {
-  res.json({ message: process.env.DATABASE_URL });
-});
-
 // Show routes called in console during development
 if (EnvVars.NodeEnv === NodeEnvs.Dev.valueOf()) {
   app.use(morgan('dev'));
