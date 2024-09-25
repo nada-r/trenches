@@ -1,28 +1,28 @@
 import React from 'react';
-import { Token } from '@/app/portfolio/page';
 import CallerCard from '@/components/trenches/CallerCard';
 import { FaTimes } from 'react-icons/fa';
+import { Caller } from '@/models';
 
 interface CallerTournamentCardProps {
   participationClosed: boolean;
-  token: Token | undefined;
-  onUnselect: (token: Token) => void;
+  caller: Caller | undefined;
+  onUnselect: (caller: Caller) => void;
 }
 
 const TournamentSlot: React.FC<CallerTournamentCardProps> = ({
   participationClosed,
-  token,
+  caller,
   onUnselect,
 }) => {
   return (
     <>
       <div className="text-neutral-500 bg-neutral-800 border border-neutral-500 rounded-2xl text-center min-h-36 flex items-center justify-center">
-        {token ? (
+        {caller ? (
           <div className="flex flex-col items-center justify-center w-full h-full">
-            <CallerCard {...token} />
+            <CallerCard {...caller} marketCap={0} balance={0} />
             {!participationClosed && (
               <FaTimes
-                onClick={() => onUnselect(token)}
+                onClick={() => onUnselect(caller)}
                 className="mt-1 cursor-pointer"
               />
             )}
