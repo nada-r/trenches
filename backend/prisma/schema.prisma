@@ -83,6 +83,17 @@ model Player {
   updatedAt    DateTime @updatedAt
 }
 
+model Token {
+  id        Int      @id @default(autoincrement())
+  address   String   @unique
+  name      String
+  ticker    String
+  url       String
+  image_uri String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum TournamentStatus {
   HIDDEN
   UPCOMING

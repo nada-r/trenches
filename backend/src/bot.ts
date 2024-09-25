@@ -3,20 +3,19 @@ import AWS from 'aws-sdk';
 import axios from 'axios';
 import bootstrap from './bootstrap';
 import dotenv from 'dotenv';
+import { TokenInfo } from '@src/services/TokenService';
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 dotenv.config();
 
-interface TokenInfo {
-  address: string;
-  fdv: number;
-  symbol: string;
-  chain: string;
-}
-
 async function startBot() {
-  const { callerService, callService, callingPowerService, prisma } =
-    await bootstrap();
+  const {
+    callerService,
+    callService,
+    callingPowerService,
+    tokenService,
+    prisma,
+  } = await bootstrap();
 
   process.on('SIGINT', async () => {
     await prisma.$disconnect();
@@ -140,6 +139,7 @@ async function startBot() {
         let token = splTokens[i];
         let tokenInfo = await getSolanaToken(token);
         if (tokenInfo != null) {
+          await tokenService.createToken(tokenInfo);
           // record the call if there is not already one for this token and caller
           const existingCall = await callService.getCallByTelegramIdAndToken(
             telegramId,
@@ -243,16 +243,15 @@ async function getSolanaToken(token: string): Promise<TokenInfo | null> {
         response.data.pairs.length > 0 &&
         response.data.pairs[0].chainId == 'solana'
       ) {
-        let ca = response.data.pairs[0].baseToken.address;
-        let symbol = response.data.pairs[0].baseToken.symbol;
-        let fdv = response.data.pairs[0].fdv;
-        // let price = response.data.pairs[0].priceUsd;
-        // fdv = formatNumber(fdv);
+        const pair = response.data.pairs[0];
         let tokenInfo: TokenInfo = {
-          address: ca,
-          fdv: parseFloat(fdv),
-          symbol: symbol,
+          address: pair.baseToken.address,
+          fdv: parseFloat(pair.fdv),
+          symbol: pair.baseToken.symbol,
           chain: 'solana',
+          url: pair.url,
+          name: pair.baseToken.name,
+          image_uri: pair.info.imageUrl,
         };
         return tokenInfo;
       } else {
@@ -274,17 +273,20 @@ async function getSolanaPool(address: string): Promise<TokenInfo | null> {
   return axios
     .get(`https://api.dexscreener.com/latest/dex/pairs/solana/${address}`)
     .then((response) => {
-      if (response.data.pairs != null && response.data.pairs.length > 0) {
-        let ca = response.data.pairs[0].baseToken.address;
-        let symbol = response.data.pairs[0].baseToken.symbol;
-        let fdv = response.data.pairs[0].fdv;
-        // let price = response.data.pairs[0].priceUsd;
-        // fdv = formatNumber(fdv);
+      if (
+        response.data.pairs != null &&
+        response.data.pairs.length > 0 &&
+        response.data.pairs[0].chainId == 'solana'
+      ) {
+        const pair = response.data.pairs[0];
         let tokenInfo: TokenInfo = {
-          address: ca,
-          fdv: parseFloat(fdv),
-          symbol: symbol,
+          address: pair.baseToken.address,
+          fdv: parseFloat(pair.fdv),
+          symbol: pair.baseToken.symbol,
           chain: 'solana',
+          url: pair.url,
+          name: pair.baseToken.name,
+          image_uri: pair.info.imageUrl,
         };
         return tokenInfo;
       } else {
@@ -308,15 +310,15 @@ async function getPumpfunToken(token: string): Promise<TokenInfo | null> {
     .get(`https://frontend-api.pump.fun/coins/${token}`)
     .then((response) => {
       if (response.data != null && response.data.mint) {
-        let ca = response.data.mint;
-        let symbol = response.data.symbol;
-        let fdv = response.data.usd_market_cap;
-        // fdv = formatNumber(fdv);
+        let address = response.data.mint;
         let tokenInfo: TokenInfo = {
-          address: ca,
-          fdv: parseFloat(fdv),
-          symbol: symbol,
+          address: address,
+          fdv: parseFloat(response.data.usd_market_cap),
+          symbol: response.data.symbol,
+          name: response.data.name,
           chain: 'solana',
+          url: `https://pump.fun/${address}`,
+          image_uri: response.data.image_uri,
         };
         return tokenInfo;
       } else {

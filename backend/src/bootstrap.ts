@@ -10,7 +10,8 @@ import {
 } from './services';
 import 'dotenv/config';
 import duration from 'dayjs/plugin/duration';
-import dayjs from 'dayjs'; // ES 2015
+import dayjs from 'dayjs';
+import { TokenService } from '@src/services/TokenService'; // ES 2015
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -50,6 +51,7 @@ export default async function bootstrap() {
     prisma
   );
   const profileService = new ProfileService(prisma);
+  const tokenService = new TokenService(prisma);
 
   return {
     callerService,
@@ -57,6 +59,7 @@ export default async function bootstrap() {
     callingPowerService,
     profileService,
     tournamentService,
+    tokenService,
     prisma,
   };
 }

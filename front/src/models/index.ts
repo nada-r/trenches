@@ -64,19 +64,13 @@ export const ClaimScalarFieldEnumSchema = z.enum(['id','walletPubkey','portfolio
 
 export const PlayerScalarFieldEnumSchema = z.enum(['id','walletPubkey','data','createdAt','updatedAt']);
 
+export const TokenScalarFieldEnumSchema = z.enum(['id','address','name','ticker','url','image_uri','createdAt','updatedAt']);
+
 export const TournamentScalarFieldEnumSchema = z.enum(['id','name','status','startedAt','metadata','createdAt','updatedAt']);
 
 export const TournamentParticipationScalarFieldEnumSchema = z.enum(['id','walletPubkey','callers','createdAt','updatedAt','tournamentId']);
 
 export const TournamenCallerPowerScalarFieldEnumSchema = z.enum(['id','callerId','power','tournamentId','updatedAt']);
-
-export const CardScalarFieldEnumSchema = z.enum(['id','name','price','image','createdAt','updatedAt','powerId']);
-
-export const PowerScalarFieldEnumSchema = z.enum(['id','name','value','createdAt','updatedAt']);
-
-export const UserScalarFieldEnumSchema = z.enum(['id','name','walletString','createdAt','updatedAt']);
-
-export const TestScalarFieldEnumSchema = z.enum(['id','name','createdAt','updatedAt']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -172,6 +166,23 @@ export const PlayerSchema = z.object({
 export type Player = z.infer<typeof PlayerSchema>
 
 /////////////////////////////////////////
+// TOKEN SCHEMA
+/////////////////////////////////////////
+
+export const TokenSchema = z.object({
+  id: z.number().int(),
+  address: z.string(),
+  name: z.string(),
+  ticker: z.string(),
+  url: z.string(),
+  image_uri: z.string(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+})
+
+export type Token = z.infer<typeof TokenSchema>
+
+/////////////////////////////////////////
 // TOURNAMENT SCHEMA
 /////////////////////////////////////////
 
@@ -218,60 +229,3 @@ export const TournamenCallerPowerSchema = z.object({
 })
 
 export type TournamenCallerPower = z.infer<typeof TournamenCallerPowerSchema>
-
-/////////////////////////////////////////
-// CARD SCHEMA
-/////////////////////////////////////////
-
-export const CardSchema = z.object({
-  id: z.number().int(),
-  name: z.string(),
-  price: z.number().int(),
-  image: z.string(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  powerId: z.number().int(),
-})
-
-export type Card = z.infer<typeof CardSchema>
-
-/////////////////////////////////////////
-// POWER SCHEMA
-/////////////////////////////////////////
-
-export const PowerSchema = z.object({
-  id: z.number().int(),
-  name: z.string(),
-  value: z.number().int(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-})
-
-export type Power = z.infer<typeof PowerSchema>
-
-/////////////////////////////////////////
-// USER SCHEMA
-/////////////////////////////////////////
-
-export const UserSchema = z.object({
-  id: z.number().int(),
-  name: z.string(),
-  walletString: z.string(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-})
-
-export type User = z.infer<typeof UserSchema>
-
-/////////////////////////////////////////
-// TEST SCHEMA
-/////////////////////////////////////////
-
-export const TestSchema = z.object({
-  id: z.number().int(),
-  name: z.string(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-})
-
-export type Test = z.infer<typeof TestSchema>
