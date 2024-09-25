@@ -242,7 +242,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       <h1 className="text-xl font-bold mb-4">Rewards Breakdown</h1>
 
       <div className="bg-neutral-700 text-neutral-300 rounded-2xl p-4 mb-4">
-        <img src="https://imgflip.com/i/94n6ko" alt="Coming Soon" />"
+        <img src="https://i.imgflip.com/94n6ko.jpg" alt="Coming Soon" />
         {/*<p>The top 10 winners will receive the following</p>
         <p className="mt-2">
           1st Place: ... SOL + x% of supply burned
