@@ -1,6 +1,7 @@
 import React from 'react';
 import CallerAvatar from '@/components/trenches/CallerAvatar';
 import { Caller } from '@/models';
+import { useRouter } from 'next/navigation';
 
 export function getSimCardType(balance: number): string {
   if (balance >= 3_000_000) {
@@ -15,12 +16,18 @@ export function getSimCardType(balance: number): string {
 }
 
 const CallerCard: React.FC<Caller & { balance: number; marketCap: number }> = ({
+  id,
   name,
   balance,
   image,
   data,
 }) => {
+  const router = useRouter();
   const type = getSimCardType(balance);
+
+  const displayCallerPage = () => {
+    router.push(`/caller/${id}`);
+  };
 
   return (
     <div className="flex flex-col items-center px-4">
@@ -32,7 +39,9 @@ const CallerCard: React.FC<Caller & { balance: number; marketCap: number }> = ({
           </span>
         </div>
       </div>
-      <div className="my-2">{name}</div>
+      <div className="my-2" onClick={() => displayCallerPage()}>
+        {name}
+      </div>
       {/*<Avatar>
         <AvatarImage src={image} alt={`@${name}`} />
         <AvatarFallback>CN</AvatarFallback>

@@ -19,10 +19,12 @@ import CallerAvatar from '@/components/trenches/CallerAvatar';
 import CallingPower from '@/components/trenches/CallingPower';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { useRouter } from 'next/navigation';
 
 const instance = createAxiosInstance();
 
 const Page = ({ params }: { params: { id: string } }) => {
+  const router = useRouter();
   const { profile, walletPubkey } = useProfileContext();
 
   const [caller, setCaller] = useState<
@@ -66,7 +68,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   return (
     <>
-      <Link href="/ranking" className="mr-2">
+      <Link href="#" onClick={() => router.back()} className="mr-2">
         <IoIosArrowBack />
       </Link>
 
