@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { IoIosArrowBack } from 'react-icons/io';
-import { Token } from '@/app/portfolio/page';
 import { Button } from '@/components/ui/button';
 import TournamentSlot from '@/components/trenches/TournamentSlot';
 import CallerTournamentCard from '@/components/trenches/CallerTournamentCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import {
+  Caller,
   Tournament,
   TournamentParticipation,
   TournamentParticipationSchema,
@@ -37,9 +37,11 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   const [participation, setParticipation] = useState<
     TournamentParticipation & { score: number }
   >();
-  const [availableTokens, setAvailableTokens] = useState<Token[]>([]);
-  const [selectedTokens, setSelectedTokens] = useState<
-    Array<Token | undefined>
+  const [myCallers, setMyCallers] = useState<
+    Array<Caller & { balance: number; marketCap: number }>
+  >([]);
+  const [selectedCallers, setSelectedCallers] = useState<
+    Array<(Caller & { balance: number; marketCap: number }) | undefined>
   >([]);
   const [isAllCardsSelected, setIsAllCardsSelected] = useState(false);
   const [isAlreadyParticipate, setIsAlreadyParticipate] = useState(false);
@@ -70,7 +72,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
             `/portfolio/${solanaWallet?.address}`
           );
 
-          setAvailableTokens(
+          setMyCallers(
             response.data.portfolio.map((t: any, i: number) => ({
               ...callerResponse.data.find((c: any) => c.id === t.callerId),
               marketCap: 430000,
@@ -87,7 +89,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   }, [solanaWallet]);
 
   useEffect(() => {
-    if (solanaWallet && availableTokens.length > 0) {
+    if (solanaWallet && myCallers.length > 0) {
       const fetchParticipation = async () => {
         try {
           const address = solanaWallet.address;
@@ -100,9 +102,9 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
 
           setIsAlreadyParticipate(true);
           setParticipation({ ...participation, score: response.data.score });
-          setSelectedTokens(
+          setSelectedCallers(
             participation.callers.map((c) =>
-              availableTokens.find((t) => t.id.toString() === c)
+              myCallers.find((t) => t.id.toString() === c)
             )
           );
         } catch (error) {
@@ -111,17 +113,17 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       };
       fetchParticipation();
     }
-  }, [solanaWallet, availableTokens]);
+  }, [solanaWallet, myCallers]);
 
   useEffect(() => {
     setIsAllCardsSelected(
-      selectedTokens.filter((t) => t !== undefined).length === 3
+      selectedCallers.filter((t) => t !== undefined).length === 3
     );
-  }, [selectedTokens]);
+  }, [selectedCallers]);
 
   useEffect(() => {
     // Initialize selectedTokens with 3 undefined elements
-    setSelectedTokens([undefined, undefined, undefined]);
+    setSelectedCallers([undefined, undefined, undefined]);
 
     async function fetchTournament() {
       try {
@@ -137,21 +139,23 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     fetchTournament();
   }, []);
 
-  const selectToken = (token: Token) => {
-    const index = selectedTokens.findIndex((t) => t === undefined);
+  const selectCaller = (
+    caller: Caller & { balance: number; marketCap: number }
+  ) => {
+    const index = selectedCallers.findIndex((t) => t === undefined);
     if (index !== -1) {
-      const newSelected = [...selectedTokens];
-      newSelected[index] = token;
-      setSelectedTokens(newSelected);
+      const newSelected = [...selectedCallers];
+      newSelected[index] = caller;
+      setSelectedCallers(newSelected);
     }
   };
 
-  const unselectToken = (token: Token) => {
-    const index = selectedTokens.findIndex((t) => t?.id === token.id);
+  const unselectCaller = (caller: Caller) => {
+    const index = selectedCallers.findIndex((t) => t?.id === caller.id);
     if (index !== -1) {
-      const newSelected = [...selectedTokens];
+      const newSelected = [...selectedCallers];
       newSelected[index] = undefined;
-      setSelectedTokens(newSelected);
+      setSelectedCallers(newSelected);
     }
   };
 
@@ -160,16 +164,16 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       const response = await instance.post('/tournament/join', {
         tournamentId: Number(params.id),
         walletPubkey: solanaWallet?.address,
-        callers: selectedTokens.map((t) => t?.id.toString()),
+        callers: selectedCallers.map((t) => t?.id.toString()),
       });
 
       console.log('Joined tournament:', response.data);
       const participation = TournamentParticipationSchema.parse(response.data);
 
       setIsAlreadyParticipate(true);
-      setSelectedTokens(
+      setSelectedCallers(
         participation.callers.map((c) =>
-          availableTokens.find((t) => t.id === Number(c))
+          myCallers.find((t) => t.id === Number(c))
         )
       );
       // You might want to update the UI or refetch tournaments here
@@ -207,25 +211,25 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
 
       <h1 className="text-xl font-bold mb-4">Available Cards</h1>
       <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
-        {availableTokens.map((card, index) => (
+        {myCallers.map((card, index) => (
           <CallerTournamentCard
             key={index}
             {...card}
             participationClosed={isAlreadyParticipate}
-            onSelect={() => selectToken(card)}
-            isSelected={selectedTokens.some((t) => t && t.id === card.id)}
+            onSelect={() => selectCaller(card)}
+            isSelected={selectedCallers.some((t) => t && t.id === card.id)}
           />
         ))}
       </div>
       <h1 className="text-xl font-bold mb-4">Your Tournament Cards</h1>
       <span>Actual score: {participation?.score}</span>
       <div className="grid grid-cols-3 gap-4 py-4">
-        {selectedTokens.map((card, index) => (
+        {selectedCallers.map((card, index) => (
           <TournamentSlot
             key={index}
             token={card}
             participationClosed={isAlreadyParticipate}
-            onUnselect={unselectToken}
+            onUnselect={unselectCaller}
           />
         ))}
       </div>

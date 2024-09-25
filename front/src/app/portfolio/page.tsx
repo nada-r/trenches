@@ -14,20 +14,14 @@ import { Balance } from '@/components/trenches/Balance';
 import CallerCard from '@/components/trenches/CallerCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
-
-export interface Token {
-  id: number;
-  rank: number;
-  name: string;
-  marketCap: number;
-  balance: number;
-  image: string;
-}
+import { Caller } from '@/models';
 
 const instance = createAxiosInstance();
 
 export default function Portfolio() {
-  const [tokens, setTokens] = useState<Token[]>([]);
+  const [myCallers, setMyCallers] = useState<
+    Array<Caller & { balance: number; marketCap: number }>
+  >([]);
 
   const { user } = usePrivy();
   const solanaWallet =
@@ -48,7 +42,7 @@ export default function Portfolio() {
             `/portfolio/${solanaWallet?.address}`
           );
 
-          setTokens(
+          setMyCallers(
             response.data.portfolio.map((t: any, i: number) => ({
               ...callerResponse.data.find((c: any) => c.id === t.callerId),
               marketCap: 430000,
@@ -73,7 +67,7 @@ export default function Portfolio() {
         </a>
       </div>
       <div className="flex overflow-x-auto py-4">
-        {tokens.map((token, index) => (
+        {myCallers.map((token, index) => (
           <CallerCard key={index} {...token} />
         ))}
       </div>
@@ -85,7 +79,7 @@ export default function Portfolio() {
         </a>
       </div>
       <Table className="bg-background text-foreground">
-        {tokens.length > 0 ? (
+        {myCallers.length > 0 ? (
           <>
             <TableHeader className="border-border">
               <TableRow>
@@ -96,19 +90,19 @@ export default function Portfolio() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tokens.map((token) => (
-                <TableRow key={token.id} className="">
+              {myCallers.map((caller) => (
+                <TableRow key={caller.id} className="">
                   <TableCell className="font-medium text-foreground">
-                    #{token.rank}
+                    #{caller.data.rank}
                   </TableCell>
                   <TableCell className="text-foreground">
-                    {token.name}
+                    {caller.name}
                   </TableCell>
                   <TableCell className="text-foreground">
-                    ${token.marketCap.toLocaleString()}
+                    ${caller.marketCap.toLocaleString()}
                   </TableCell>
                   <TableCell className="text-green-500">
-                    <Balance balance={token.balance} />
+                    <Balance balance={caller.balance} />
                   </TableCell>
                 </TableRow>
               ))}

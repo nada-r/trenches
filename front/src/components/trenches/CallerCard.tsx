@@ -1,6 +1,6 @@
 import React from 'react';
-import { Token } from '@/app/portfolio/page';
 import CallerAvatar from '@/components/trenches/CallerAvatar';
+import { Caller } from '@/models';
 
 export function getSimCardType(balance: number): string {
   if (balance >= 3_000_000) {
@@ -14,15 +14,25 @@ export function getSimCardType(balance: number): string {
   }
 }
 
-const CallerCard: React.FC<Token> = ({ name, balance, image }) => {
+const CallerCard: React.FC<Caller & { balance: number; marketCap: number }> = ({
+  name,
+  balance,
+  image,
+  data,
+}) => {
   const type = getSimCardType(balance);
 
   return (
-    <div className="relative flex flex-col items-center px-4">
-      {/*<div className="absolute left-3 -top-3 z-10">
-        <SimCardIcon type={type} size={16} />
-      </div>*/}
-      <CallerAvatar name={name} image={image} />
+    <div className="flex flex-col items-center px-4">
+      <div className="flex flex-row">
+        <CallerAvatar name={name} image={image === null ? undefined : image} />
+        <div>
+          <span className="ml-2 border border-red-500 text-xs text-gray-500 rounded-full px-2">
+            #{data.rank}
+          </span>
+        </div>
+      </div>
+      <div className="my-2">{name}</div>
       {/*<Avatar>
         <AvatarImage src={image} alt={`@${name}`} />
         <AvatarFallback>CN</AvatarFallback>
