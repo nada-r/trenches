@@ -32,6 +32,31 @@ export class TokenService {
     }
   }
 
+  async findMissingTokens(): Promise<string[]> {
+    try {
+      const calls = await this.prisma.call.findMany({
+        select: {
+          tokenAddress: true,
+        },
+        distinct: ['tokenAddress'],
+        where: {
+          tokenAddress: {
+            notIn: await this.prisma.token
+              .findMany({
+                select: { address: true },
+              })
+              .then((tokens) => tokens.map((token) => token.address)),
+          },
+        },
+      });
+
+      return calls.map((call) => call.tokenAddress);
+    } catch (error) {
+      console.error('Error finding missing tokens:', error);
+      throw error;
+    }
+  }
+
   async getTokenList(tokenAddresses: string[]): Promise<Token[]> {
     try {
       const tokens = await this.prisma.token.findMany({

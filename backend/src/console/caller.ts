@@ -29,7 +29,7 @@ export async function displayCallerActions(
       await explainCallerPower(callerService, callService);
       break;
     case 'updateCallerPower':
-      await updateCallerPower(callingPowerService);
+      await updateCallerPower(callerService, callingPowerService);
       break;
     default:
       console.log('Not yet implemented');
@@ -87,11 +87,23 @@ const explainCallerPower = async (
   }
 };
 
-async function updateCallerPower(callingPowerService: CallingPowerService) {
-  const answer = await confirm({
-    message: 'Are you sure you want to update all calling power?',
-  });
-  if (answer) {
-    await callingPowerService.updateAllCallingPower();
+async function updateCallerPower(
+  callerService: CallerService,
+  callingPowerService: CallingPowerService
+) {
+  const callerId = await number({ message: 'Enter caller ID:' });
+
+  if (callerId) {
+    const caller = await callerService.getCallerWithCall(callerId);
+    if (caller) {
+      await callingPowerService.updateCallingPower(caller.telegramId);
+    }
+  } else {
+    const answer = await confirm({
+      message: 'Are you sure you want to update all calling power?',
+    });
+    if (answer) {
+      await callingPowerService.updateAllCallingPower();
+    }
   }
 }

@@ -3,12 +3,19 @@ import bootstrap from './bootstrap';
 import { displayCallerActions } from './console/caller';
 import { displayTournamentActions } from './console/tournament';
 import * as process from 'node:process';
+import { updateTokenCache } from '@src/console/token';
 
 export type EnvType = 'production' | 'development';
 
 async function main() {
-  const { callerService, callService, callingPowerService, tournamentService } =
-    await bootstrap();
+  const {
+    callerService,
+    callService,
+    callingPowerService,
+    tournamentService,
+    tokenService,
+    tokenInfoProvider,
+  } = await bootstrap();
   const env = getEnvFromDotenvKey();
 
   const answer = await select({
@@ -21,6 +28,10 @@ async function main() {
       {
         name: 'Caller',
         value: 'caller',
+      },
+      {
+        name: 'Token',
+        value: 'token',
       },
     ],
   });
@@ -36,6 +47,9 @@ async function main() {
       break;
     case 'tournament':
       await displayTournamentActions(env, tournamentService);
+      break;
+    case 'token':
+      await updateTokenCache(tokenService, tokenInfoProvider);
       break;
     default:
       // Handle default case or leave empty if no default action is needed
