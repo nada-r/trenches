@@ -66,25 +66,45 @@ export class CallerService {
 
     if (!caller) return null;
 
+    const tokenAddresses = [
+      ...new Set(caller.calls.map((call) => call.tokenAddress)),
+    ];
+    const tokens = await this.prisma.token.findMany({
+      where: {
+        address: {
+          in: tokenAddresses,
+        },
+      },
+    });
+
+    const tokenMap = new Map(tokens.map((token) => [token.address, token]));
+
+    const callerWithTokens = {
+      ...caller,
+      calls: caller.calls.map((call) => ({
+        ...call,
+        token: tokenMap.get(call.tokenAddress) || null,
+      })),
+    };
+
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    const openCalls = caller.calls
+    const openCalls = callerWithTokens.calls
       .filter((call: Call) => new Date(call.createdAt) >= twentyFourHoursAgo)
       .sort(
         (a: Call, b: Call) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
-    const closedCalls = caller.calls
+    const closedCalls = callerWithTokens.calls
       .filter((call: Call) => new Date(call.createdAt) < twentyFourHoursAgo)
       .sort(
         (a: Call, b: Call) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
-
     return {
-      ...caller,
+      ...callerWithTokens,
       openCalls,
       closedCalls,
     };
