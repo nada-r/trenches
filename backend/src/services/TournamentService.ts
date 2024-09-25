@@ -72,18 +72,9 @@ export class TournamentService {
   async getAvailable(): Promise<Tournament[]> {
     return this.prisma.tournament.findMany({
       where: {
-        OR: [
-          {
-            status: {
-              equals: 'STARTED',
-            },
-          },
-          {
-            status: {
-              equals: 'COMPLETED',
-            },
-          },
-        ],
+        status: {
+          in: ['UPCOMING', 'STARTED', 'COMPLETED'],
+        },
       },
     });
   }

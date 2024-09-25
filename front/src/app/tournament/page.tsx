@@ -50,7 +50,7 @@ export default function Homepage() {
         >
           <div className="text-lg font-bold mb-2">{tournament.name}</div>
           <div className="mb-2">
-            {tournament.isClosed ? 'Finishing' : 'Starting'} in:
+            {tournament.isClosed ? 'Finished' : 'Starting in'}:
             <RemainingTime
               classname="m-2"
               startedAt={tournament.startedAt!}

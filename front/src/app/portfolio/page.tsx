@@ -16,7 +16,7 @@ import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 
 export interface Token {
-  id: string;
+  id: number;
   rank: number;
   name: string;
   marketCap: number;

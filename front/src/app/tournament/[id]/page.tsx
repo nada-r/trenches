@@ -169,7 +169,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       setIsAlreadyParticipate(true);
       setSelectedTokens(
         participation.callers.map((c) =>
-          availableTokens.find((t) => t.id === c)
+          availableTokens.find((t) => t.id === Number(c))
         )
       );
       // You might want to update the UI or refetch tournaments here
