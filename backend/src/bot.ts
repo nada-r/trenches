@@ -3,7 +3,6 @@ import AWS from 'aws-sdk';
 import axios from 'axios';
 import bootstrap from './bootstrap';
 import dotenv from 'dotenv';
-import { TokenInfo } from '@src/services/TokenService';
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 dotenv.config();
@@ -14,6 +13,7 @@ async function startBot() {
     callService,
     callingPowerService,
     tokenService,
+    tokenInfoProvider,
     prisma,
   } = await bootstrap();
 
@@ -96,7 +96,7 @@ async function startBot() {
     const updatedTokens = [];
 
     for (const token of uniqueTokens) {
-      const tokenInfo = await getSolanaToken(token);
+      const tokenInfo = await tokenInfoProvider.getSolanaToken(token);
       if (tokenInfo) {
         const newFDV = tokenInfo.fdv;
         const result = await callService.updateHighestFdvByToken(token, newFDV);
@@ -108,7 +108,7 @@ async function startBot() {
 
     console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
     if (updatedTokens.length > 0) {
-      await callingPowerService.updateCallingPower(updatedTokens);
+      await callingPowerService.updateCallingPowerFor(updatedTokens);
     }
   }, 60000);
 
@@ -137,7 +137,7 @@ async function startBot() {
 
       for (let i = 0; i < splTokens.length; i++) {
         let token = splTokens[i];
-        let tokenInfo = await getSolanaToken(token);
+        let tokenInfo = await tokenInfoProvider.getSolanaToken(token);
         if (tokenInfo != null) {
           await tokenService.createToken(tokenInfo);
           // record the call if there is not already one for this token and caller
@@ -232,108 +232,6 @@ async function handleUserProfileImage(
   }
 
   return undefined;
-}
-
-async function getSolanaToken(token: string): Promise<TokenInfo | null> {
-  return axios
-    .get(`https://api.dexscreener.com/latest/dex/tokens/${token}`)
-    .then((response) => {
-      if (
-        response.data.pairs != null &&
-        response.data.pairs.length > 0 &&
-        response.data.pairs[0].chainId == 'solana'
-      ) {
-        const pair = response.data.pairs[0];
-        let tokenInfo: TokenInfo = {
-          address: pair.baseToken.address,
-          fdv: parseFloat(pair.fdv),
-          symbol: pair.baseToken.symbol,
-          chain: 'solana',
-          url: pair.url,
-          name: pair.baseToken.name,
-          image_uri: pair.info.imageUrl,
-        };
-        return tokenInfo;
-      } else {
-        // console.log("Token not found in dexscreener, checking pools");
-        return getSolanaPool(token);
-      }
-    })
-    .catch((error) => {
-      if (error.response && error.response.status === 429) {
-        console.log(`429 on ${error.config.url}`);
-      } else {
-        console.error('Error fetching token data:', error);
-      }
-      return null;
-    });
-}
-
-async function getSolanaPool(address: string): Promise<TokenInfo | null> {
-  return axios
-    .get(`https://api.dexscreener.com/latest/dex/pairs/solana/${address}`)
-    .then((response) => {
-      if (
-        response.data.pairs != null &&
-        response.data.pairs.length > 0 &&
-        response.data.pairs[0].chainId == 'solana'
-      ) {
-        const pair = response.data.pairs[0];
-        let tokenInfo: TokenInfo = {
-          address: pair.baseToken.address,
-          fdv: parseFloat(pair.fdv),
-          symbol: pair.baseToken.symbol,
-          chain: 'solana',
-          url: pair.url,
-          name: pair.baseToken.name,
-          image_uri: pair.info.imageUrl,
-        };
-        return tokenInfo;
-      } else {
-        // console.log("Token not found in dexscreener pools");
-        return getPumpfunToken(address);
-        // return null;
-      }
-    })
-    .catch((error) => {
-      if (error.response && error.response.status === 429) {
-        console.log(`429 on ${error.config.url}`);
-      } else {
-        console.error('Error fetching token', error);
-      }
-      return null;
-    });
-}
-
-async function getPumpfunToken(token: string): Promise<TokenInfo | null> {
-  return axios
-    .get(`https://frontend-api.pump.fun/coins/${token}`)
-    .then((response) => {
-      if (response.data != null && response.data.mint) {
-        let address = response.data.mint;
-        let tokenInfo: TokenInfo = {
-          address: address,
-          fdv: parseFloat(response.data.usd_market_cap),
-          symbol: response.data.symbol,
-          name: response.data.name,
-          chain: 'solana',
-          url: `https://pump.fun/${address}`,
-          image_uri: response.data.image_uri,
-        };
-        return tokenInfo;
-      } else {
-        // console.log("Token not found in pumpfun");
-        return null;
-      }
-    })
-    .catch((error) => {
-      if (error.response && error.response.status === 429) {
-        console.log(`429 on ${error.config.url}`);
-      } else {
-        console.error('Error fetching token', error);
-      }
-      return null;
-    });
 }
 
 startBot().catch(console.error);

@@ -11,7 +11,8 @@ import {
 import 'dotenv/config';
 import duration from 'dayjs/plugin/duration';
 import dayjs from 'dayjs';
-import { TokenService } from '@src/services/TokenService'; // ES 2015
+import { TokenService } from '@src/services/TokenService';
+import { TokenInfoProvider } from '@src/services/TokenInfoProvider'; // ES 2015
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -52,6 +53,7 @@ export default async function bootstrap() {
   );
   const profileService = new ProfileService(prisma);
   const tokenService = new TokenService(prisma);
+  const tokenInfoProvider = new TokenInfoProvider();
 
   return {
     callerService,
@@ -60,6 +62,7 @@ export default async function bootstrap() {
     profileService,
     tournamentService,
     tokenService,
+    tokenInfoProvider,
     prisma,
   };
 }

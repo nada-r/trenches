@@ -9,7 +9,7 @@ export class CallingPowerService {
     private powerCalculatorFactory: PowerCalculatorFactory = new PowerCalculatorFactory()
   ) {}
 
-  async updateCallingPower(uniqueTokens: string[]): Promise<void> {
+  async updateCallingPowerFor(uniqueTokens: string[]): Promise<void> {
     const callers =
       await this.callerService.getCallersWithCallsOnTokens(uniqueTokens);
     for (const c of callers) {
@@ -36,5 +36,15 @@ export class CallingPowerService {
     await this.callerService.updateCallerRanks();
 
     console.log(`Calling power updated for ${callers.length} callers.`);
+  }
+
+  async updateCallingPower(telegramId: string): Promise<void> {
+    const calls = await this.callService.getCallsByTelegramId(telegramId);
+    const callerPower = this.powerCalculatorFactory
+      .getCalculator('premium')
+      .computePower(calls);
+    await this.callerService.updateCallingPower(telegramId, callerPower);
+
+    await this.callerService.updateCallerRanks();
   }
 }
