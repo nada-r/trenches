@@ -33,7 +33,7 @@ export const updateTokenCache = async (
     console.log(token);
     const tokenInfo = await tokenInfoProvider.getSolanaToken(token);
     if (tokenInfo) {
-      //await tokenService.createToken(tokenInfo);
+      await tokenService.createToken(tokenInfo);
       count++;
     } else {
       notfounds++;
