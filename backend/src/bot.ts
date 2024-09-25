@@ -68,15 +68,67 @@ async function startBot() {
     }
     const message = msg.text;
     if (!message) return;
+    handleMessage(telegramId, username, message, user.id, true);
+  });
 
+  bot.on('channel_post', async (msg) => {
+    const chat = msg.chat;
+    if (!chat) return;
+    const telegramId = chat.id.toString();
+    const username = chat.title;
+    if (!username) {
+      console.log('No username found for chat', chat);
+      return;
+    }
+    const message = msg.text;
+    if (!message) return;
+    handleMessage(telegramId, username, message, chat.id, false);
+  });
+
+  setInterval(async () => {
+    const activeCalls = await callService.getActiveCalls();
+    const uniqueTokens = [
+      ...new Set(activeCalls.map((call) => call.tokenAddress)),
+    ];
+    console.log(
+      `Total of ${activeCalls.length} active calls to update, ${uniqueTokens.length} unique tokens`
+    );
+
+    const updatedTokens = [];
+
+    for (const token of uniqueTokens) {
+      const tokenInfo = await getSolanaToken(token);
+      if (tokenInfo) {
+        const newFDV = tokenInfo.fdv;
+        const result = await callService.updateHighestFdvByToken(token, newFDV);
+        if (result.count > 0) {
+          updatedTokens.push(token);
+        }
+      }
+    }
+
+    console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
+    if (updatedTokens.length > 0) {
+      await callingPowerService.updateCallingPower(updatedTokens);
+    }
+  }, 60000);
+
+  async function handleMessage(
+    telegramId: string,
+    username: string,
+    message: string,
+    userId: number,
+    isNormalUser: boolean
+  ) {
     let splTokens = message.match(/[1-9A-HJ-NP-Za-z]{32,44}/g);
 
     if (splTokens) {
       const imageUrl = await handleUserProfileImage(
         bot,
-        user.id,
+        userId,
         s3,
-        BOT_TOKEN
+        BOT_TOKEN as string,
+        isNormalUser
       );
       const caller = await callerService.getOrCreateCaller(
         telegramId,
@@ -113,42 +165,15 @@ async function startBot() {
         }
       }
     }
-  });
-
-  setInterval(async () => {
-    const activeCalls = await callService.getActiveCalls();
-    const uniqueTokens = [
-      ...new Set(activeCalls.map((call) => call.tokenAddress)),
-    ];
-    console.log(
-      `Total of ${activeCalls.length} active calls to update, ${uniqueTokens.length} unique tokens`
-    );
-
-    const updatedTokens = [];
-
-    for (const token of uniqueTokens) {
-      const tokenInfo = await getSolanaToken(token);
-      if (tokenInfo) {
-        const newFDV = tokenInfo.fdv;
-        const result = await callService.updateHighestFdvByToken(token, newFDV);
-        if (result.count > 0) {
-          updatedTokens.push(token);
-        }
-      }
-    }
-
-    console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
-    if (updatedTokens.length > 0) {
-      await callingPowerService.updateCallingPower(updatedTokens);
-    }
-  }, 60000);
+  }
 }
 
 async function handleUserProfileImage(
   bot: TelegramBot,
   userId: number,
   s3: AWS.S3,
-  botToken: string
+  botToken: string,
+  isNormalUser: boolean
 ): Promise<string | undefined> {
   const s3Key = `profile_pictures/${userId}.jpg`;
 
@@ -170,9 +195,15 @@ async function handleUserProfileImage(
       console.log('Image does not exist, proceeding with upload...');
     }
 
-    const photos = await bot.getUserProfilePhotos(userId);
-    if (photos.total_count > 0) {
-      const fileId = photos.photos[0][0].file_id;
+    let fileId;
+    if (isNormalUser) {
+      const photos = await bot.getUserProfilePhotos(userId);
+      if (photos.total_count > 0) fileId = photos.photos[0][0].file_id;
+    } else {
+      const chat = await bot.getChat(userId);
+      if (chat.photo) fileId = chat.photo.big_file_id;
+    }
+    if (fileId) {
       const file = await bot.getFile(fileId);
 
       const fileUrl = `https://api.telegram.org/file/bot${botToken}/${file.file_path}`;
