@@ -211,6 +211,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           <CallerTournamentCard
             key={index}
             {...card}
+            participationClosed={isAlreadyParticipate}
             onSelect={() => selectToken(card)}
             isSelected={selectedTokens.some((t) => t && t.id === card.id)}
           />
@@ -220,7 +221,12 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       <span>Actual score: {participation?.score}</span>
       <div className="grid grid-cols-3 gap-4 py-4">
         {selectedTokens.map((card, index) => (
-          <TournamentSlot key={index} token={card} onUnselect={unselectToken} />
+          <TournamentSlot
+            key={index}
+            token={card}
+            participationClosed={isAlreadyParticipate}
+            onUnselect={unselectToken}
+          />
         ))}
       </div>
       <Button

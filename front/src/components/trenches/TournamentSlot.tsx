@@ -4,11 +4,13 @@ import CallerCard from '@/components/trenches/CallerCard';
 import { FaTimes } from 'react-icons/fa';
 
 interface CallerTournamentCardProps {
+  participationClosed: boolean;
   token: Token | undefined;
   onUnselect: (token: Token) => void;
 }
 
 const TournamentSlot: React.FC<CallerTournamentCardProps> = ({
+  participationClosed,
   token,
   onUnselect,
 }) => {
@@ -18,10 +20,12 @@ const TournamentSlot: React.FC<CallerTournamentCardProps> = ({
         {token ? (
           <div className="flex flex-col items-center justify-center w-full h-full">
             <CallerCard {...token} />
-            <FaTimes
-              onClick={() => onUnselect(token)}
-              className="mt-1 cursor-pointer"
-            />
+            {!participationClosed && (
+              <FaTimes
+                onClick={() => onUnselect(token)}
+                className="mt-1 cursor-pointer"
+              />
+            )}
           </div>
         ) : (
           <span>Slot</span>
