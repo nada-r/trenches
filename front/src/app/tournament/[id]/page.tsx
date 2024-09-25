@@ -240,8 +240,12 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
         {tournament?.participationCount} players have entered the tournament
       </p>
       <h1 className="text-xl font-bold mb-4">Rewards Breakdown</h1>
+
       <div className="bg-neutral-700 text-neutral-300 rounded-2xl p-4 mb-4">
-        <p>The top 10 winners will receive the following</p>
+        <p className="text-center text-neutral-500 italic">
+          Not implemented yet
+        </p>
+        {/*<p>The top 10 winners will receive the following</p>
         <p className="mt-2">
           1st Place: ... SOL + x% of supply burned
           <br />
@@ -262,7 +266,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           9th Place: ... SOL + x% of supply burned
           <br />
           10th Place: ... SOL + x% of supply burned
-        </p>
+        </p>*/}
       </div>
     </>
   );
