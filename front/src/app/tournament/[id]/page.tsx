@@ -211,23 +211,23 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
 
       <h1 className="text-xl font-bold mb-4">Available Cards</h1>
       <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
-        {myCallers.map((card, index) => (
+        {myCallers.map((caller, index) => (
           <CallerTournamentCard
             key={index}
-            {...card}
+            {...caller}
             participationClosed={isAlreadyParticipate}
-            onSelect={() => selectCaller(card)}
-            isSelected={selectedCallers.some((t) => t && t.id === card.id)}
+            onSelect={() => selectCaller(caller)}
+            isSelected={selectedCallers.some((t) => t && t.id === caller.id)}
           />
         ))}
       </div>
       <h1 className="text-xl font-bold mb-4">Your Tournament Cards</h1>
       <span>Actual score: {participation?.score}</span>
       <div className="grid grid-cols-3 gap-4 py-4">
-        {selectedCallers.map((card, index) => (
+        {selectedCallers.map((caller, index) => (
           <TournamentSlot
             key={index}
-            token={card}
+            caller={caller}
             participationClosed={isAlreadyParticipate}
             onUnselect={unselectCaller}
           />
