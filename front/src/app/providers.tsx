@@ -12,6 +12,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         appearance: {
           theme: 'light',
           accentColor: '#676FFF',
+          walletList: [],
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {
