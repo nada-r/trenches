@@ -19,7 +19,7 @@ export class TokenService {
     try {
       const token = await this.prisma.token.upsert({
         where: {
-          address: 'tokenInfo.address',
+          address: tokenInfo.address,
         },
         update: {
           url: tokenInfo.url,
