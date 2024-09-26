@@ -31,13 +31,13 @@ export class PumpfunProvider {
       .catch((error) => {
         if (error.response && error.response.status === 429) {
           console.log(`429 on ${error.config.url}`);
-        } else {
+        } /*else {
           console.error(
             `Error ${error.response.status} fetching token:`,
             tokenAddress
           );
           console.error(`On url: ${error.config.url}`);
-        }
+        }*/
         return null;
       });
   }

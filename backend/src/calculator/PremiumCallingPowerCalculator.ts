@@ -7,9 +7,7 @@ export class PremiumCallingPowerCalculator implements ICallingPowerCalculator {
     let globalPerformance = 0;
     let totalWeight = 0;
     const currentDate = dayjs();
-
-    console.log('Starting calculation for calls:');
-
+    
     for (const call of calls) {
       // Calculate the performance
       const performance =
