@@ -87,6 +87,7 @@ async function startBot() {
     handleMessage(telegramId, username, message, chat.id, false);
   });
 
+  // doc
   async function handleMessage(
     telegramId: string,
     username: string,
