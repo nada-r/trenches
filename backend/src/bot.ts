@@ -208,7 +208,7 @@ async function startBot() {
         await callingPowerService.updateCallingPowerFor(updatedTokens);
       }
     },
-    1 * 30 * 1000
+    5 * 60 * 1000
   );
 }
 
