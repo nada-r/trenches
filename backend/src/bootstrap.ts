@@ -15,6 +15,8 @@ import { TokenService } from '@src/services/TokenService';
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider'; // ES 2015
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -37,6 +39,11 @@ export default async function bootstrap() {
     '!Prisma connection status:',
     isConnected ? 'Connected' : 'Not Connected'
   );
+
+  axiosRetry(axios, {
+    retryDelay: axiosRetry.exponentialDelay,
+    retryCondition: (error) => error.response?.status === 429,
+  });
 
   const callerService = new CallerService(prisma);
   const callService = new CallService(prisma);
