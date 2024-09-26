@@ -7,7 +7,11 @@ import { pinata } from '../util/pinataconfig'
 
 const umi = createUmi('https://divine-necessary-scion.solana-devnet.quiknode.pro/c6f57b9e59ed38a658fa9516d87df8a8f4351ec9');
 
-const secretKey = bs58.decode(secret.skey);
+const secretKey = process.env.DEV_WALLET_SKEY ? bs58.decode(process.env.DEV_WALLET_SKEY) : null;
+
+if (!secretKey) {
+    throw new Error("DEV_WALLET_SKEY environment variable is not set");
+}
 
 const userWallet = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(secretKey));
 

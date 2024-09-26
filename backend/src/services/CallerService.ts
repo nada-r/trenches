@@ -125,6 +125,7 @@ export class CallerService {
         data: {},
       });
     }
+    console.log("callerImageURL:", image)
     await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
     return caller;
   }
