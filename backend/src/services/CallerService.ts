@@ -1,5 +1,6 @@
 import { Call, Caller, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
+import { mintToken } from './mint';
 
 export class CallerService {
   constructor(private prisma: PrismaClient) {}
@@ -124,7 +125,7 @@ export class CallerService {
         data: {},
       });
     }
-    //TODO create SPL here
+    await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
     return caller;
   }
 

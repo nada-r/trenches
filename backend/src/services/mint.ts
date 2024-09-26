@@ -15,23 +15,23 @@ const userWalletSigner = createSignerFromKeypair(umi, userWallet);
 
 const mint = generateSigner(umi);
 umi.use(signerIdentity(userWalletSigner));
-umi.use(mplTokenMetadata())
+umi.use(mplTokenMetadata());
 
-async function setupMetadata() {
-    const upload = await pinata.upload.url("https://trenches.fra1.cdn.digitaloceanspaces.com/profile_pictures/6255998913.jpg");
+async function setupMetadata(image: string, callerName: string) {
+    const upload = await pinata.upload.url(image);
 
     const metadata = {
-        name: "luigiscalls",
-        symbol: "luigiscalls".slice(0, 3).toUpperCase(),//metadata.name.slice(0, 3).toUpperCase(),
+        name: callerName,
+        symbol: callerName.slice(0, 3).toUpperCase(),
         uri: `https://turquoise-quickest-wasp-930.mypinata.cloud/ipfs/${upload.IpfsHash}`,
     };
 
     return metadata;
 }
 
-async function mintToken() {
+export async function mintToken(image: string, callerName: string) {
     try {
-        const metadata = await setupMetadata();
+        const metadata = await setupMetadata(image, callerName);//"https://trenches.fra1.cdn.digitaloceanspaces.com/profile_pictures/6255998913.jpg", "luigiscall");
 
         await createAndMint(umi, {
             mint,
@@ -50,5 +50,3 @@ async function mintToken() {
         console.error("Error minting tokens:", err);
     }
 }
-
-mintToken();
