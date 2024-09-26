@@ -80,7 +80,7 @@ export default function HomePage() {
 
           <Button className="mt-6" onClick={login} variant="outline">
             {disableLogin && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            connect wallet
+            Start
           </Button>
           {solanaWalletError && (
             <p className="text-red-500">
