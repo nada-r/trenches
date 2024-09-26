@@ -3,19 +3,43 @@ import axios from 'axios';
 export class GeckoTerminalProvider {
   constructor() {}
 
+  private solPriceCache: { price: number | null; timestamp: number } | null =
+    null;
+  private readonly CACHE_DURATION = 60000; // 1 minute in milliseconds
+
   async getSolPrice(): Promise<number | null> {
-    {
-      try {
-        const response = await axios.get(
-          `https://api.geckoterminal.com/api/v2/simple/networks/solana/token_price/So11111111111111111111111111111111111111112`
-        );
-        return response.data.data.attributes.token_prices[
+    const currentTime = Date.now();
+
+    // Check if cache exists and is still valid
+    if (
+      this.solPriceCache &&
+      currentTime - this.solPriceCache.timestamp < this.CACHE_DURATION
+    ) {
+      return this.solPriceCache.price;
+    }
+    try {
+      const response = await axios.get(
+        `https://api.geckoterminal.com/api/v2/simple/networks/solana/token_price/So11111111111111111111111111111111111111112`
+      );
+      const price =
+        response.data.data.attributes.token_prices[
           'So11111111111111111111111111111111111111112'
         ];
-      } catch (error) {
+
+      // Update cache
+      this.solPriceCache = {
+        price,
+        timestamp: currentTime,
+      };
+
+      return price;
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.log(`429 on ${error.config.url}`);
+      } else {
         console.error('Error fetching SOL price:', error);
-        return null;
       }
+      return null;
     }
   }
 
