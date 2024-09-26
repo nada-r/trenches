@@ -13,7 +13,6 @@ async function startBot() {
     callService,
     callingPowerService,
     tokenService,
-    tokenInfoProvider,
     pumpfunProvider,
     geckoTerminalProvider,
     dexScreenerProvider,

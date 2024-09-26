@@ -14,7 +14,6 @@ async function main() {
     callingPowerService,
     tournamentService,
     tokenService,
-    tokenInfoProvider,
   } = await bootstrap();
   const env = getEnvFromDotenvKey();
 
@@ -49,7 +48,7 @@ async function main() {
       await displayTournamentActions(env, tournamentService);
       break;
     case 'token':
-      await updateTokenCache(tokenService, tokenInfoProvider);
+      await updateTokenCache(tokenService);
       break;
     default:
       // Handle default case or leave empty if no default action is needed
