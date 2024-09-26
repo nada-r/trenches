@@ -64,7 +64,7 @@ export const ClaimScalarFieldEnumSchema = z.enum(['id','walletPubkey','portfolio
 
 export const PlayerScalarFieldEnumSchema = z.enum(['id','walletPubkey','data','createdAt','updatedAt']);
 
-export const TokenScalarFieldEnumSchema = z.enum(['id','address','name','ticker','url','image_uri','createdAt','updatedAt']);
+export const TokenScalarFieldEnumSchema = z.enum(['id','address','name','ticker','url','image_uri','createdAt','updatedAt','data']);
 
 export const TournamentScalarFieldEnumSchema = z.enum(['id','name','status','startedAt','metadata','createdAt','updatedAt']);
 
@@ -126,6 +126,9 @@ export const CallSchema = z.object({
   callerId: z.number().int(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  /**
+   * [CallData | null]]
+   */
   data: JsonValueSchema.nullable(),
 })
 
@@ -178,6 +181,10 @@ export const TokenSchema = z.object({
   image_uri: z.string(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
+  /**
+   * [TokenData]
+   */
+  data: JsonValueSchema,
 })
 
 export type Token = z.infer<typeof TokenSchema>

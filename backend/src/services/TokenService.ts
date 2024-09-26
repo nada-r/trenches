@@ -8,6 +8,8 @@ export interface TokenInfo {
   name: string;
   url: string;
   image_uri: string;
+  type: 'pumpfun' | 'raydium';
+  poolAddress?: string;
 }
 
 export class TokenService {
@@ -15,13 +17,28 @@ export class TokenService {
 
   async createToken(tokenInfo: TokenInfo): Promise<void> {
     try {
-      const token = await this.prisma.token.create({
-        data: {
+      const token = await this.prisma.token.upsert({
+        where: {
+          address: 'tokenInfo.address',
+        },
+        update: {
+          url: tokenInfo.url,
+          image_uri: tokenInfo.image_uri,
+          data: {
+            type: tokenInfo.type,
+            poolAddress: tokenInfo.poolAddress,
+          },
+        },
+        create: {
           address: tokenInfo.address,
           name: tokenInfo.name,
           ticker: tokenInfo.symbol,
           url: tokenInfo.url,
           image_uri: tokenInfo.image_uri,
+          data: {
+            type: tokenInfo.type,
+            poolAddress: tokenInfo.poolAddress,
+          },
         },
       });
     } catch (error) {

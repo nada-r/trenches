@@ -12,7 +12,9 @@ import 'dotenv/config';
 import duration from 'dayjs/plugin/duration';
 import dayjs from 'dayjs';
 import { TokenService } from '@src/services/TokenService';
-import { TokenInfoProvider } from '@src/services/TokenInfoProvider'; // ES 2015
+import { PumpfunProvider } from '@src/services/PumpfunProvider';
+import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
+import { DexScreenerProvider } from '@src/services/DexScreenerProvider'; // ES 2015
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -53,7 +55,9 @@ export default async function bootstrap() {
   );
   const profileService = new ProfileService(prisma);
   const tokenService = new TokenService(prisma);
-  const tokenInfoProvider = new TokenInfoProvider();
+  const geckoTerminalProvider = new GeckoTerminalProvider();
+  const dexScreenerProvider = new DexScreenerProvider();
+  const pumpfunProvider = new PumpfunProvider(geckoTerminalProvider);
 
   return {
     callerService,
@@ -62,7 +66,9 @@ export default async function bootstrap() {
     profileService,
     tournamentService,
     tokenService,
-    tokenInfoProvider,
+    pumpfunProvider,
+    geckoTerminalProvider,
+    dexScreenerProvider,
     prisma,
   };
 }

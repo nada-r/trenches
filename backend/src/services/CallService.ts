@@ -1,4 +1,4 @@
-import { Call, Prisma, PrismaClient } from '@prisma/client';
+import { Call, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
 
 export class CallService {
@@ -6,11 +6,7 @@ export class CallService {
 
   async createCall(data: OmitPrisma<Call>): Promise<Call> {
     return this.prisma.call.create({
-      data: {
-        ...data,
-        // Assurez-vous que le champ `data` respecte le type `InputJsonValue`
-        data: data.data as Prisma.InputJsonValue,
-      },
+      data,
     });
   }
 

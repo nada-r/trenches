@@ -62,6 +62,7 @@ model Call {
   callerId     Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  /// [CallData | null]]
   data         Json?
 }
 
@@ -92,6 +93,8 @@ model Token {
   image_uri String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  /// [TokenData]
+  data      Json     @default("{}")
 }
 
 enum TournamentStatus {

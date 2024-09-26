@@ -14,6 +14,9 @@ async function startBot() {
     callingPowerService,
     tokenService,
     tokenInfoProvider,
+    pumpfunProvider,
+    geckoTerminalProvider,
+    dexScreenerProvider,
     prisma,
   } = await bootstrap();
   const telegramProvider = new TelegramProvider();
@@ -85,34 +88,6 @@ async function startBot() {
     handleMessage(telegramId, username, message, chat.id, false);
   });
 
-  setInterval(async () => {
-    const activeCalls = await callService.getActiveCalls();
-    const uniqueTokens = [
-      ...new Set(activeCalls.map((call) => call.tokenAddress)),
-    ];
-    console.log(
-      `Total of ${activeCalls.length} active calls to update, ${uniqueTokens.length} unique tokens`
-    );
-
-    const updatedTokens = [];
-
-    for (const token of uniqueTokens) {
-      const tokenInfo = await tokenInfoProvider.getSolanaToken(token);
-      if (tokenInfo) {
-        const newFDV = tokenInfo.fdv;
-        const result = await callService.updateHighestFdvByToken(token, newFDV);
-        if (result.count > 0) {
-          updatedTokens.push(token);
-        }
-      }
-    }
-
-    console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
-    if (updatedTokens.length > 0) {
-      await callingPowerService.updateCallingPowerFor(updatedTokens);
-    }
-  }, 60000);
-
   async function handleMessage(
     telegramId: string,
     username: string,
@@ -121,52 +96,120 @@ async function startBot() {
     isNormalUser: boolean
   ) {
     let splTokens = message.match(/[1-9A-HJ-NP-Za-z]{32,44}/g);
+    if (!splTokens) {
+      return;
+    }
 
-    if (splTokens) {
-      const imageUrl = await telegramProvider.handleUserProfileImage(
-        bot,
-        userId,
-        s3,
-        BOT_TOKEN as string,
-        isNormalUser
-      );
-      const caller = await callerService.getOrCreateCaller(
-        telegramId,
-        username,
-        imageUrl
-      );
+    const imageUrl = await telegramProvider.handleUserProfileImage(
+      bot,
+      userId,
+      s3,
+      BOT_TOKEN as string,
+      isNormalUser
+    );
+    const caller = await callerService.getOrCreateCaller(
+      telegramId,
+      username,
+      imageUrl
+    );
 
-      for (let i = 0; i < splTokens.length; i++) {
-        let token = splTokens[i];
-        let tokenInfo = await tokenInfoProvider.getSolanaToken(token);
-        if (tokenInfo != null) {
-          await tokenService.createToken(tokenInfo);
-          // record the call if there is not already one for this token and caller
-          const existingCall = await callService.getCallByTelegramIdAndToken(
-            telegramId,
-            tokenInfo.address
-          );
+    for (let i = 0; i < splTokens.length; i++) {
+      let tokenAddress = splTokens[i];
 
-          if (!existingCall) {
-            await callService.createCall({
-              tokenAddress: tokenInfo.address,
-              startFDV: tokenInfo.fdv,
-              highestFDV: tokenInfo.fdv,
-              callerId: caller.id,
-              data: null,
-            });
-            console.log(
-              `Created call for token ${token} and caller ${caller.name}`
-            );
-          } else {
-            console.log(
-              `Call already exists for token ${token} and caller ${caller.name}`
-            );
+      // Check if the token exists in the Pumpfun
+      let tokenInfo = await pumpfunProvider.getTokenInfo(tokenAddress);
+      if (!tokenInfo) {
+        tokenInfo = await dexScreenerProvider.getTokenInfo(tokenAddress);
+        if (!tokenInfo) {
+          tokenInfo = await dexScreenerProvider.getPoolInfo(tokenAddress);
+          if (!tokenInfo) {
+            continue;
           }
         }
       }
+
+      // Store token info in the database
+      await tokenService.createToken(tokenInfo);
+
+      // record the call if there is not already one for this token and caller
+      const existingCall = await callService.getCallByTelegramIdAndToken(
+        telegramId,
+        tokenInfo.address
+      );
+
+      if (!existingCall) {
+        await callService.createCall({
+          tokenAddress: tokenInfo.address,
+          startFDV: tokenInfo.fdv,
+          highestFDV: tokenInfo.fdv,
+          callerId: caller.id,
+          data: {
+            poolAddress: tokenInfo.poolAddress,
+          },
+        });
+        console.log(
+          `Created call for token ${tokenAddress} and caller ${caller.name}`
+        );
+      } else {
+        console.log(
+          `Call already exists for token ${tokenAddress} and caller ${caller.name}`
+        );
+      }
     }
   }
+
+  setInterval(
+    async () => {
+      const activeCalls = await callService.getActiveCalls();
+      const uniqueTokens = [
+        ...new Set(
+          activeCalls.map((call) => call.data?.poolAddress || call.tokenAddress)
+        ),
+      ];
+
+      const poolToToken = new Map<string, string>();
+      for (const token of uniqueTokens) {
+        const tokenInfo = await pumpfunProvider.getTokenInfo(token);
+        if (tokenInfo && tokenInfo.poolAddress) {
+          // Store token info in the database
+          await tokenService.createToken(tokenInfo);
+          poolToToken.set(tokenInfo.poolAddress, token);
+        }
+      }
+
+      const tokensToUpdate = [
+        ...new Set([...uniqueTokens, ...poolToToken.keys()]),
+      ];
+
+      const updatedTokens = [];
+      for (const token of tokensToUpdate) {
+        let newFDV = await geckoTerminalProvider.getHighestMCap(token);
+        if (!newFDV) {
+          newFDV = await pumpfunProvider.getHighestMCap(token);
+          if (!newFDV) {
+            continue;
+          }
+        }
+        let result = (await callService.updateHighestFdvByToken(token, newFDV))
+          .count;
+        const pumpToken = poolToToken.get(token);
+        if (pumpToken) {
+          result += (
+            await callService.updateHighestFdvByToken(pumpToken, newFDV)
+          ).count;
+        }
+        if (result > 0) {
+          updatedTokens.push(token);
+        }
+      }
+
+      console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
+      if (updatedTokens.length > 0) {
+        await callingPowerService.updateCallingPowerFor(updatedTokens);
+      }
+    },
+    1 * 30 * 1000
+  );
 }
 
 startBot().catch(console.error);
