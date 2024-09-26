@@ -32,7 +32,11 @@ export class PumpfunProvider {
         if (error.response && error.response.status === 429) {
           console.log(`429 on ${error.config.url}`);
         } else {
-          console.error('Error fetching token', error);
+          console.error(
+            `Error ${error.response.status} fetching token:`,
+            tokenAddress
+          );
+          console.error(`On url: ${error.config.url}`);
         }
         return null;
       });
