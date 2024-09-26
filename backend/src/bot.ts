@@ -157,79 +157,69 @@ async function startBot() {
     }
   }
 
-  setInterval(
-    async () => {
-      const startTime = Date.now();
-      console.log('Starting FDV update process...');
+  setInterval(async () => {
+    const startTime = Date.now();
+    console.log('Starting FDV update process...');
 
-      const activeCalls = await callService.getActiveCalls();
-      const uniqueTokens = [
-        ...new Set(
-          activeCalls.map((call) => call.data?.poolAddress || call.tokenAddress)
-        ),
-      ];
+    const activeCalls = await callService.getActiveCalls();
+    const uniqueTokens = [
+      ...new Set(
+        activeCalls.map((call) => call.data?.poolAddress || call.tokenAddress)
+      ),
+    ];
 
-      console.log(`Found ${uniqueTokens.length} unique tokens to process`);
+    console.log(`Found ${uniqueTokens.length} unique tokens to process`);
 
-      const poolToToken = new Map<string, string>();
-      for (const token of uniqueTokens) {
-        const tokenInfo = await pumpfunProvider.getTokenInfo(token);
-        if (tokenInfo && tokenInfo.poolAddress) {
-          // Store token info in the database
-          await tokenService.createToken(tokenInfo);
-          poolToToken.set(tokenInfo.poolAddress, token);
-        }
+    const poolToToken = new Map<string, string>();
+    for (const token of uniqueTokens) {
+      const tokenInfo = await pumpfunProvider.getTokenInfo(token);
+      if (tokenInfo && tokenInfo.poolAddress) {
+        // Store token info in the database
+        await tokenService.createToken(tokenInfo);
+        poolToToken.set(tokenInfo.poolAddress, token);
       }
+    }
+    const tokensToUpdate = [
+      ...new Set([...uniqueTokens, ...poolToToken.keys()]),
+    ];
 
-      console.log(`Processed ${poolToToken.size} pool-to-token mappings`);
+    console.log(`Preparing to update ${tokensToUpdate.length} tokens`);
 
-      const tokensToUpdate = [
-        ...new Set([...uniqueTokens, ...poolToToken.keys()]),
-      ];
-
-      console.log(`Preparing to update ${tokensToUpdate.length} tokens`);
-
-      const updatedTokens = [];
-      for (const token of tokensToUpdate) {
-        const tokenStartTime = Date.now();
-        let newFDV = await geckoTerminalProvider.getHighestMCap(token);
+    const updatedTokens = [];
+    for (const token of tokensToUpdate) {
+      const tokenStartTime = Date.now();
+      let newFDV = await geckoTerminalProvider.getHighestMCap(token);
+      if (!newFDV) {
+        newFDV = await pumpfunProvider.getHighestMCap(token);
         if (!newFDV) {
-          newFDV = await pumpfunProvider.getHighestMCap(token);
-          if (!newFDV) {
-            console.log(`Could not get FDV for token ${token}`);
-            continue;
-          }
+          console.log(`Could not get FDV for token ${token}`);
+          continue;
         }
-        let result = (await callService.updateHighestFdvByToken(token, newFDV))
+      }
+      let result = (await callService.updateHighestFdvByToken(token, newFDV))
+        .count;
+      const pumpToken = poolToToken.get(token);
+      if (pumpToken) {
+        result += (await callService.updateHighestFdvByToken(pumpToken, newFDV))
           .count;
-        const pumpToken = poolToToken.get(token);
-        if (pumpToken) {
-          result += (
-            await callService.updateHighestFdvByToken(pumpToken, newFDV)
-          ).count;
-        }
-        if (result > 0) {
-          updatedTokens.push(token);
-        }
-        console.log(
-          `Updated token ${token} in ${Date.now() - tokenStartTime}ms`
-        );
       }
-
-      console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
-      if (updatedTokens.length > 0) {
-        const callingPowerStartTime = Date.now();
-        await callingPowerService.updateCallingPowerFor(updatedTokens);
-        console.log(
-          `Updated calling power in ${Date.now() - callingPowerStartTime}ms`
-        );
+      if (result > 0) {
+        updatedTokens.push(token);
       }
+    }
 
-      const totalTime = Date.now() - startTime;
-      console.log(`Total FDV update process took ${totalTime}ms`);
-    },
-    10 * 60 * 1000
-  );
+    console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
+    if (updatedTokens.length > 0) {
+      const callingPowerStartTime = Date.now();
+      await callingPowerService.updateCallingPowerFor(updatedTokens);
+      console.log(
+        `Updated calling power in ${Date.now() - callingPowerStartTime}ms`
+      );
+    }
+
+    const totalTime = Date.now() - startTime;
+    console.log(`Total FDV update process took ${totalTime}ms`);
+  }, 30 * 1000);
 }
 
 startBot().catch(console.error);
