@@ -159,12 +159,17 @@ async function startBot() {
 
   setInterval(
     async () => {
+      const startTime = Date.now();
+      console.log('Starting FDV update process...');
+
       const activeCalls = await callService.getActiveCalls();
       const uniqueTokens = [
         ...new Set(
           activeCalls.map((call) => call.data?.poolAddress || call.tokenAddress)
         ),
       ];
+
+      console.log(`Found ${uniqueTokens.length} unique tokens to process`);
 
       const poolToToken = new Map<string, string>();
       for (const token of uniqueTokens) {
@@ -176,16 +181,22 @@ async function startBot() {
         }
       }
 
+      console.log(`Processed ${poolToToken.size} pool-to-token mappings`);
+
       const tokensToUpdate = [
         ...new Set([...uniqueTokens, ...poolToToken.keys()]),
       ];
 
+      console.log(`Preparing to update ${tokensToUpdate.length} tokens`);
+
       const updatedTokens = [];
       for (const token of tokensToUpdate) {
+        const tokenStartTime = Date.now();
         let newFDV = await geckoTerminalProvider.getHighestMCap(token);
         if (!newFDV) {
           newFDV = await pumpfunProvider.getHighestMCap(token);
           if (!newFDV) {
+            console.log(`Could not get FDV for token ${token}`);
             continue;
           }
         }
@@ -200,14 +211,24 @@ async function startBot() {
         if (result > 0) {
           updatedTokens.push(token);
         }
+        console.log(
+          `Updated token ${token} in ${Date.now() - tokenStartTime}ms`
+        );
       }
 
       console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
       if (updatedTokens.length > 0) {
+        const callingPowerStartTime = Date.now();
         await callingPowerService.updateCallingPowerFor(updatedTokens);
+        console.log(
+          `Updated calling power in ${Date.now() - callingPowerStartTime}ms`
+        );
       }
+
+      const totalTime = Date.now() - startTime;
+      console.log(`Total FDV update process took ${totalTime}ms`);
     },
-    5 * 60 * 1000
+    10 * 60 * 1000
   );
 }
 
