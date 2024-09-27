@@ -13,7 +13,14 @@ const instance = createAxiosInstance();
 
 export default function Homepage() {
   const [tournaments, setTournaments] = useState<
-    Array<Tournament & { isClosed: boolean }>
+    Array<
+      Tournament & {
+        isClosed: boolean;
+        isOpen: boolean;
+        isUpcoming: boolean;
+        isFinish: boolean;
+      }
+    >
   >([]);
 
   useEffect(() => {
@@ -23,14 +30,22 @@ export default function Homepage() {
         setTournaments(
           response.data.map((t: unknown) => {
             const parsedTournament = TournamentSchema.parse(t);
+            const startedAt = dayjs(parsedTournament.startedAt);
             const now = dayjs();
-            const endTime = dayjs(parsedTournament.startedAt).add(
+            const closeTime = startedAt.add(
+              parsedTournament.metadata.openDuration,
+              'second'
+            );
+            const endTime = startedAt.add(
               parsedTournament.metadata.endDuration,
               'second'
             );
             return {
               ...parsedTournament,
-              isClosed: endTime.isBefore(now),
+              isUpcoming: now.isBefore(startedAt),
+              isOpen: startedAt.isBefore(now) && now.isBefore(closeTime),
+              isClosed: closeTime.isBefore(now) && now.isBefore(endTime),
+              isFinish: endTime.isBefore(now),
             };
           })
         );
@@ -44,35 +59,48 @@ export default function Homepage() {
   return (
     <>
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-8">Tournaments</h1>
+        <h1 className="text-3xl font-bold mt-4 mb-8">Tournaments</h1>
       </div>
       {tournaments.map((tournament) => (
         <div
           key={tournament.id}
-          className="bg-neutral-800 border border-gray-500 rounded-2xl p-4 mb-4"
+          className="flex flex-col rounded-lg bg-neutral-900 p-3 mb-4"
         >
           <div className="text-lg font-bold mb-2">{tournament.name}</div>
-          <div className="mb-2">
-            {tournament.isClosed ? 'Finished' : 'Starting in'}:
-            <RemainingTime
-              classname="m-2"
-              startedAt={tournament.startedAt!}
-              durationInSeconds={
-                tournament.isClosed
-                  ? tournament.metadata.endDuration
-                  : tournament.metadata.openDuration
-              }
-            />
-          </div>
-          <div className="mb-2">Prize: {tournament.metadata.prize} SOL</div>
-          <div className="mb-4">
+          <div className="flex flex-row">
+            <div className="basis-2/3 flex flex-col">
+              <div>
+                {tournament.isUpcoming && 'Upcoming'}
+                {tournament.isOpen && 'Starting in'}
+                {tournament.isClosed && 'Finishing in'}
+                {tournament.isFinish && 'Finished'}
+                {(tournament.isOpen || tournament.isClosed) && (
+                  <RemainingTime
+                    classname="m-2"
+                    startedAt={tournament.startedAt!}
+                    durationInSeconds={
+                      tournament.isClosed
+                        ? tournament.metadata.endDuration
+                        : tournament.metadata.openDuration
+                    }
+                  />
+                )}
+              </div>
+              <div>
+                Prize: <span className="text-gray-600 italic">coming soon</span>
+              </div>
+              {/*<div className="mb-4">
             Supply burn: {tournament.metadata.supplyBurn}%
+          </div>*/}
+            </div>
+            <div className=" basis-1/3">
+              <Button asChild className="w-full rounded-full text-lg font-bold">
+                <Link href={`/tournament/${tournament.id}`} className="w-full">
+                  Play
+                </Link>
+              </Button>
+            </div>
           </div>
-          <Button asChild className="w-full">
-            <Link href={`/tournament/${tournament.id}`} className="w-full">
-              Play
-            </Link>
-          </Button>
         </div>
       ))}
     </>
