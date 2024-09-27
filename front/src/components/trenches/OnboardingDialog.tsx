@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Dialog, DialogClose,
+  Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -45,7 +45,6 @@ const OnboardingDialog = () => {
           <Button onClick={() => handleOnboardingClose()}>OK</Button>
         </DialogFooter>
       </DialogContent>
-      <DialogClose
     </Dialog>
   );
 };
