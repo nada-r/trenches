@@ -2,7 +2,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useState } from 'react';
 import OnboardingDialog from '@/components/trenches/OnboardingDialog';
-import Logo from '~/svg/Logo.svg';
 import { FaCircleUser } from 'react-icons/fa6';
 
 export default function Header() {
@@ -25,7 +24,7 @@ export default function Header() {
   return (
     <>
       <header className="flex flex-row items-center gap-3 text-white my-1 mr-4 ml-2 ">
-        <Logo className="w-8" />
+        <img src="images/logo.png" className="w-10 h-10" alt="Logo" />
         {/*<div className="text-center">
           <h1 className="text-xl font-bold">{title}</h1>
         </div>*/}

@@ -4,8 +4,6 @@ import Head from 'next/head';
 import * as React from 'react';
 import { useState } from 'react';
 import '@/lib/env';
-
-import Logo from '~/svg/Logo.svg';
 import {
   useLogin,
   usePrivy,
@@ -70,8 +68,8 @@ export default function HomePage() {
         <title>Hi</title>
       </Head>
       <section>
-        <div className="layout relative flex min-h-screen flex-col items-center justify-center py-12 text-center">
-          <Logo className="w-16" />
+        <div className="layout relative flex min-h-[calc(100dvh)] flex-col items-center justify-center py-12 text-center">
+          <img src="images/logo.png" className="w-16 h-16" alt="Logo" />
           <h1 className="mt-4">Welcome to trenches.top</h1>
 
           <p className="mt-2 text-sm">
