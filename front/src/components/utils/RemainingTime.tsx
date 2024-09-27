@@ -23,7 +23,7 @@ const RemainingTime: React.FC<RemainingTimeProps> = ({
       const timeDiff = endTime.getTime() - now.getTime();
 
       if (timeDiff <= 0) {
-        setRemainingTime('Ended');
+        setRemainingTime('0m 0s');
         setBgColor('bg-red-500');
         return false; // Return false to stop the interval
       } else {
