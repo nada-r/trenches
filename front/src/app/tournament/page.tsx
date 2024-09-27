@@ -43,6 +43,9 @@ export default function Homepage() {
 
   return (
     <>
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-8">Tournaments</h1>
+      </div>
       {tournaments.map((tournament) => (
         <div
           key={tournament.id}
@@ -61,13 +64,13 @@ export default function Homepage() {
               }
             />
           </div>
-          {/*<div className="mb-2">Prize: {tournament.metadata.prize} SOL</div>
+          <div className="mb-2">Prize: {tournament.metadata.prize} SOL</div>
           <div className="mb-4">
             Supply burn: {tournament.metadata.supplyBurn}%
-          </div>*/}
+          </div>
           <Button asChild className="w-full">
             <Link href={`/tournament/${tournament.id}`} className="w-full">
-              View
+              Play
             </Link>
           </Button>
         </div>
