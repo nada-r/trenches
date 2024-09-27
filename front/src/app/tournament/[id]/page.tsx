@@ -209,7 +209,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
         </div>
       </div>
 
-      <h1 className="text-xl font-bold mb-4">Available Cards</h1>
+      <h1 className="text-xl font-bold mb-4">Held Callers</h1>
       <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
         {myCallers.map((caller, index) => (
           <CallerTournamentCard
