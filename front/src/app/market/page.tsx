@@ -52,8 +52,8 @@ export default function MarketPage() {
         </div>
 
         {/* Overlay to prevent user interaction */}
-        <div className="absolute inset-0 bg-black bg-opacity-50 z-20"></div>
-        <div className="absolute top-44 inset-0 flex items-center justify-center z-30">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-20"></div>
+        <div className="fixed inset-0 flex items-center justify-center z-30">
           <div className="transform rotate-[-30deg] bg-yellow-500 text-black text-6xl font-bold py-4 px-8 rounded-lg">
             COMING SOON !!
           </div>
