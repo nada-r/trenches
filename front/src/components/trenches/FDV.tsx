@@ -8,6 +8,7 @@ const FDV: React.FC<FDVProps> = ({ value }) => {
   const formattedValue = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
+    currencyDisplay: 'symbol',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);

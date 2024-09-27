@@ -13,13 +13,13 @@ import {
 } from '@/components/ui/table';
 import Link from 'next/link';
 import { IoIosArrowBack } from 'react-icons/io';
-import SlicedAddress from '@/components/utils/SlicedAddress';
 import FDV from '@/components/trenches/FDV';
 import CallerAvatar from '@/components/trenches/CallerAvatar';
 import CallingPower from '@/components/trenches/CallingPower';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useRouter } from 'next/navigation';
+import TokenAddress from '@/components/trenches/TokenAddress';
 
 const instance = createAxiosInstance();
 
@@ -119,7 +119,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         <TableHeader>
           <TableRow className="border-b-gray-600">
             <TableHead className="font-bold text-lg text-white">
-              Opened Calls
+              Open Calls
             </TableHead>
             <TableHead>Start</TableHead>
             <TableHead>Highest</TableHead>
@@ -127,9 +127,9 @@ const Page = ({ params }: { params: { id: string } }) => {
         </TableHeader>
         <TableBody>
           {caller?.openCalls.map((call, index) => (
-            <TableRow key={index}>
+            <TableRow key={index} className="bg-neutral-900">
               <TableCell className="font-medium">
-                <SlicedAddress address={call.tokenAddress} showEnd={false} />
+                <TokenAddress address={call.tokenAddress} />
               </TableCell>
               <TableCell>
                 <FDV value={call.startFDV} />
@@ -157,9 +157,9 @@ const Page = ({ params }: { params: { id: string } }) => {
         </TableHeader>
         <TableBody>
           {caller?.closedCalls.map((call, index) => (
-            <TableRow key={index}>
+            <TableRow key={index} className="bg-neutral-900">
               <TableCell className="font-medium">
-                <SlicedAddress address={call.tokenAddress} showEnd={false} />
+                <TokenAddress address={call.tokenAddress} />
               </TableCell>
               {/*<TableCell>
                 {(() => {

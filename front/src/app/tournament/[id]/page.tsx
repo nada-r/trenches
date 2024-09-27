@@ -210,7 +210,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       </div>
 
       <h1 className="text-xl font-bold mb-4">Held Callers</h1>
-      <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
+      <div className="grid grid-cols-3 gap-4 py-4">
         {myCallers.map((caller, index) => (
           <CallerTournamentCard
             key={index}
@@ -222,7 +222,6 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
         ))}
       </div>
       <h1 className="text-xl font-bold mb-4">Your Tournament Cards</h1>
-      <span>Actual score: {participation?.score}</span>
       <div className="grid grid-cols-3 gap-4 py-4">
         {selectedCallers.map((caller, index) => (
           <TournamentSlot
@@ -233,6 +232,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           />
         ))}
       </div>
+      <span>Actual score: {participation?.score}</span>
       <Button
         disabled={
           isTournamentClosed || !isAllCardsSelected || isAlreadyParticipate

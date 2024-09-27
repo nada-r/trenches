@@ -1,25 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
-const OnboardingDialog = () => {
-  const [showOnboarding, setShowOnboarding] = useState(
-    !localStorage.getItem('ONBOARDING_SHOWN')
-  );
-
-  const handleOnboardingClose = () => {
-    localStorage.setItem('ONBOARDING_SHOWN', 'true');
-    setShowOnboarding(false);
-  };
-
+const OnboardingDialog = ({
+  showOnboarding,
+  handleOnboardingClose,
+  children,
+}: {
+  showOnboarding: boolean;
+  handleOnboardingClose: () => void;
+  children: React.ReactNode;
+}) => {
   return (
-    <Dialog open={showOnboarding}>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>HOW IT WORKS</DialogTitle>
@@ -42,7 +44,9 @@ const OnboardingDialog = () => {
           trade and compete for rewards.
         </p>
         <DialogFooter>
-          <Button onClick={() => handleOnboardingClose()}>OK</Button>
+          <DialogClose asChild>
+            <Button>OK</Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

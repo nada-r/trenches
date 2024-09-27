@@ -26,11 +26,6 @@ export default function ProfilePage() {
     router.push(previousPage);
   };
 
-  const handleDisplayOnboarding = () => {
-    localStorage.removeItem('ONBOARDING_SHOWN');
-    location.reload();
-  };
-
   return (
     <div className="relative">
       <div className="absolute top-0 right-4">
@@ -46,14 +41,6 @@ export default function ProfilePage() {
           </div>
           <Button variant="link" className="mt-4" onClick={logout}>
             Logout
-          </Button>
-          {/* Add the new button here */}
-          <Button
-            variant="link"
-            className="mt-4"
-            onClick={handleDisplayOnboarding}
-          >
-            Show Onboarding
           </Button>
         </>
       )}

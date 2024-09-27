@@ -66,7 +66,7 @@ export default function Portfolio() {
           See all
         </a>*/}
       </div>
-      <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
+      <div className="grid grid-cols-3 gap-4 py-4">
         {myCallers.map((token, index) => (
           <CallerCard key={index} {...token} />
         ))}
