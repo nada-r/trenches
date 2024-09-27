@@ -5,6 +5,16 @@ import CallerCard from '@/components/trenches/CallerCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 import { Caller } from '@/models';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Balance } from '@/components/trenches/Balance';
 
 const instance = createAxiosInstance();
 
@@ -62,11 +72,11 @@ export default function Portfolio() {
         ))}
       </div>
 
-      {/*<div className="flex items-baseline mb-4">
+      <div className="flex items-baseline mb-4 ">
         <h1 className="text-2xl font-bold mr-4">Tokens</h1>
-        <a href="#" className="text-xs text-gray-500 underline">
+        {/*<a href="#" className="text-xs text-gray-500 underline">
           See all
-        </a>
+        </a>*/}
       </div>
       <Table className="bg-background text-foreground">
         {myCallers.length > 0 ? (
@@ -103,7 +113,7 @@ export default function Portfolio() {
             Your Token Portfolio
           </TableCaption>
         )}
-      </Table>*/}
+      </Table>
     </>
   );
 }

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node -r dotenv/config ./node_modules/.bin/next",
+    "dev": "node -r dotenv/config ./node_modules/.bin/next  --experimental-https",
     "build": "node -r dotenv/config ./node_modules/.bin/next build",
     "start": "node -r dotenv/config ./node_modules/.bin/next start",
     "lint": "next lint",
@@ -14,7 +14,9 @@
     "test": "jest",
     "format": "prettier -w .",
     "format:check": "prettier -c .",
-    "postbuild": "next-sitemap --config next-sitemap.config.js"
+    "postbuild": "next-sitemap --config next-sitemap.config.js",
+    "dotenv:pull": "npx dotenv-vault@latest pull",
+    "dotenv:push": "npx dotenv-vault@latest push"
   },
   "dependencies": {
     "@prisma/client": "^5.18.0",

@@ -104,16 +104,16 @@ export default function Ranking() {
         </ToggleGroupItem>
       </ToggleGroup>
 
-      <Table className="bg-background text-foreground border-border">
+      <Table className="bg-background text-foreground border-border mt-2">
         <TableCaption className="text-muted-foreground"></TableCaption>
         <TableHeader className="border-border">
           <TableRow>
-            <TableHead className="w-[100px] text-muted-foreground border-border">
+            <TableHead className="w-[50px] text-muted-foreground border-border">
               Rank
             </TableHead>
             <TableHead className="text-muted-foreground border-border"></TableHead>
-            <TableHead className="text-muted-foreground border-border">
-              Name
+            <TableHead className="text-muted-foreground border-border px-0">
+              Alpha Caller
             </TableHead>
             <TableHead className="text-muted-foreground border-border">
               Calling power
@@ -130,13 +130,14 @@ export default function Ranking() {
               <TableCell className="font-medium text-foreground border-border">
                 #{caller.data.rank}
               </TableCell>
-              <TableCell className="border-border">
+              <TableCell className="border-border pr-2">
                 <CallerAvatar
                   name={caller.name}
                   image={caller.image === null ? undefined : caller.image}
+                  className="w-8 h-8"
                 />
               </TableCell>
-              <TableCell className="text-foreground border-border">
+              <TableCell className="text-foreground border-border pl-2">
                 {caller.name}
               </TableCell>
               <TableCell className="text-foreground border-border">
