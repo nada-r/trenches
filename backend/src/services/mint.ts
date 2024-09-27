@@ -1,7 +1,6 @@
 import { percentAmount, generateSigner, signerIdentity, createSignerFromKeypair } from '@metaplex-foundation/umi'
 import { TokenStandard, createAndMint, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-const secret = require('../backend/dev-wallet.json');
 import bs58 from "bs58";
 import { pinata } from '../util/pinataconfig'
 
