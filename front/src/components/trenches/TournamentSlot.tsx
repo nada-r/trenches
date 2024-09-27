@@ -16,7 +16,7 @@ const TournamentSlot: React.FC<CallerTournamentCardProps> = ({
 }) => {
   return (
     <>
-      <div className="text-neutral-500 bg-neutral-800 border border-neutral-500 rounded-2xl text-center min-h-36 flex items-center justify-center">
+      <div className="text-neutral-500 bg-neutral-800 rounded-2xl text-center py-3 flex items-center justify-center">
         {caller ? (
           <div className="flex flex-col items-center justify-center w-full h-full">
             <CallerCard {...caller} marketCap={0} balance={0} />

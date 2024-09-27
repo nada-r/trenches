@@ -4,10 +4,10 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import RemainingTime from '@/components/utils/RemainingTime';
 import { Tournament, TournamentSchema } from '@/models';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import dayjs from 'dayjs';
+import TournamentCounterDate from '@/components/trenches/TournamentCounterDate';
 
 const instance = createAxiosInstance();
 
@@ -59,7 +59,7 @@ export default function Homepage() {
   return (
     <>
       <div className="text-center">
-        <h1 className="text-3xl font-bold mt-4 mb-8">Tournaments</h1>
+        <h1 className="text-3xl font-bold mb-4">Tournaments</h1>
       </div>
       {tournaments.map((tournament) => (
         <div
@@ -69,23 +69,7 @@ export default function Homepage() {
           <div className="text-lg font-bold mb-2">{tournament.name}</div>
           <div className="flex flex-row">
             <div className="basis-2/3 flex flex-col">
-              <div>
-                {tournament.isUpcoming && 'Upcoming'}
-                {tournament.isOpen && 'Starting in'}
-                {tournament.isClosed && 'Finishing in'}
-                {tournament.isFinish && 'Finished'}
-                {(tournament.isOpen || tournament.isClosed) && (
-                  <RemainingTime
-                    classname="m-2"
-                    startedAt={tournament.startedAt!}
-                    durationInSeconds={
-                      tournament.isClosed
-                        ? tournament.metadata.endDuration
-                        : tournament.metadata.openDuration
-                    }
-                  />
-                )}
-              </div>
+              <TournamentCounterDate tournament={tournament} />
               <div>
                 Prize: <span className="text-gray-600 italic">coming soon</span>
               </div>

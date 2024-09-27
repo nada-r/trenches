@@ -76,7 +76,7 @@ const RemainingTime: React.FC<RemainingTimeProps> = ({
 
   return (
     <Badge
-      className={`text-black ${bgColor} rounded-sm px-1 ${classname ?? ''}`}
+      className={`text-black ${bgColor} rounded-sm px-1 pb-0 ${classname ?? ''}`}
     >
       {remainingTime}
     </Badge>

@@ -20,7 +20,7 @@ const CallerTournamentCard: React.FC<CallerTournamentCardProps> = ({
 
   return (
     <div className="flex justify-center items-center gap-4">
-      <div>
+      <div className={isSelected ? 'opacity-50' : 'opacity-1'}>
         <CallerCard {...caller} balance={0} marketCap={0} />
         {!participationClosed && (
           <Button variant="link" disabled={isSelected} onClick={handleSelect}>

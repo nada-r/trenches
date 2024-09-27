@@ -14,8 +14,10 @@ import {
   TournamentParticipationSchema,
   TournamentSchema,
 } from '@/models';
-import RemainingTime from '@/components/utils/RemainingTime';
 import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
+import dayjs from 'dayjs';
+import TournamentCounterDate from '@/components/trenches/TournamentCounterDate';
+import CallingPower from '@/components/trenches/CallingPower';
 
 const instance = createAxiosInstance();
 
@@ -32,7 +34,13 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     );
 
   const [tournament, setTournament] = useState<
-    Tournament & { participationCount: number }
+    Tournament & {
+      participationCount: number;
+      isClosed: boolean;
+      isOpen: boolean;
+      isUpcoming: boolean;
+      isFinish: boolean;
+    }
   >();
   const [participation, setParticipation] = useState<
     TournamentParticipation & { score: number }
@@ -43,17 +51,34 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   const [selectedCallers, setSelectedCallers] = useState<
     Array<(Caller & { balance: number; marketCap: number }) | undefined>
   >([]);
+
+  const [score, setScore] = useState(0);
   const [isAllCardsSelected, setIsAllCardsSelected] = useState(false);
   const [isAlreadyParticipate, setIsAlreadyParticipate] = useState(false);
-  const [isTournamentClosed, setIsTournamentClosed] = useState(false);
+
+  const [isUpcoming, setIsUpcoming] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isClosed, setIsClosed] = useState(false);
+  const [isFinish, setIsFinish] = useState(false);
 
   useEffect(() => {
     if (tournament && tournament.startedAt) {
       const checkTournamentStatus = () => {
-        const startTime = tournament.startedAt!.getTime();
-        const currentTime = new Date().getTime();
-        const endTime = startTime + tournament.metadata.openDuration * 1000;
-        setIsTournamentClosed(currentTime >= endTime);
+        const startedAt = dayjs(tournament.startedAt);
+        const now = dayjs();
+        const closeTime = startedAt.add(
+          tournament.metadata.openDuration,
+          'second'
+        );
+        const endTime = startedAt.add(
+          tournament.metadata.endDuration,
+          'second'
+        );
+
+        setIsUpcoming(now.isBefore(startedAt));
+        setIsOpen(startedAt.isBefore(now) && now.isBefore(closeTime));
+        setIsClosed(closeTime.isBefore(now) && now.isBefore(endTime));
+        setIsFinish(endTime.isBefore(now));
       };
 
       checkTournamentStatus();
@@ -119,6 +144,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     setIsAllCardsSelected(
       selectedCallers.filter((t) => t !== undefined).length === 3
     );
+    setScore(selectedCallers.reduce((acc, c) => acc + (c?.data.power || 0), 0));
   }, [selectedCallers]);
 
   useEffect(() => {
@@ -128,9 +154,25 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     async function fetchTournament() {
       try {
         const response = await instance.get('/tournament/' + params.id);
+        const parsedTournament = TournamentSchema.parse(response.data);
+
+        const startedAt = dayjs(parsedTournament.startedAt);
+        const now = dayjs();
+        const closeTime = startedAt.add(
+          parsedTournament.metadata.openDuration,
+          'second'
+        );
+        const endTime = startedAt.add(
+          parsedTournament.metadata.endDuration,
+          'second'
+        );
         setTournament({
-          ...TournamentSchema.parse(response.data),
+          ...parsedTournament,
           participationCount: response.data.participationCount,
+          isUpcoming: now.isBefore(startedAt),
+          isOpen: startedAt.isBefore(now) && now.isBefore(closeTime),
+          isClosed: closeTime.isBefore(now) && now.isBefore(endTime),
+          isFinish: endTime.isBefore(now),
         });
       } catch (error) {
         console.error('Error fetching tournament:', error);
@@ -192,20 +234,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           <h1 className="text-2xl font-bold text-center">
             {tournament?.name || 'Tournament'}
           </h1>
-          {tournament && (
-            <span>
-              {isTournamentClosed ? 'Finishing' : 'Starting'} in
-              <RemainingTime
-                classname="m-2"
-                startedAt={tournament.startedAt!}
-                durationInSeconds={
-                  isTournamentClosed
-                    ? tournament.metadata.endDuration
-                    : tournament.metadata.openDuration
-                }
-              />
-            </span>
-          )}
+          {tournament && <TournamentCounterDate tournament={tournament} />}
         </div>
       </div>
 
@@ -232,15 +261,16 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
           />
         ))}
       </div>
-      <span>Actual score: {participation?.score}</span>
+      <div className="mb-2">
+        Your actual score:{' '}
+        {(isClosed || isFinish) && <CallingPower value={score} />}
+      </div>
       <Button
-        disabled={
-          isTournamentClosed || !isAllCardsSelected || isAlreadyParticipate
-        }
-        className="w-full"
+        disabled={isClosed || !isAllCardsSelected || isAlreadyParticipate}
+        className="w-full rounded-full"
         onClick={() => handleJoinTournament()}
       >
-        {isTournamentClosed
+        {isClosed
           ? 'Participation closed'
           : isAlreadyParticipate
             ? 'Already participate'
