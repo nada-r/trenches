@@ -1,16 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Balance } from '@/components/trenches/Balance';
 import CallerCard from '@/components/trenches/CallerCard';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
@@ -61,18 +51,18 @@ export default function Portfolio() {
   return (
     <>
       <div className="flex items-baseline mb-4">
-        <h1 className="text-2xl font-bold mr-4">Cards</h1>
-        <a href="#" className="text-xs text-gray-500 underline">
+        <h1 className="text-2xl font-bold mr-4">My Callers</h1>
+        {/*<a href="#" className="text-xs text-gray-500 underline">
           See all
-        </a>
+        </a>*/}
       </div>
-      <div className="flex overflow-x-auto py-4">
+      <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
         {myCallers.map((token, index) => (
           <CallerCard key={index} {...token} />
         ))}
       </div>
 
-      <div className="flex items-baseline mb-4">
+      {/*<div className="flex items-baseline mb-4">
         <h1 className="text-2xl font-bold mr-4">Tokens</h1>
         <a href="#" className="text-xs text-gray-500 underline">
           See all
@@ -113,7 +103,7 @@ export default function Portfolio() {
             Your Token Portfolio
           </TableCaption>
         )}
-      </Table>
+      </Table>*/}
     </>
   );
 }
