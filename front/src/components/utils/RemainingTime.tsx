@@ -14,22 +14,20 @@ const RemainingTime: React.FC<RemainingTimeProps> = ({
   classname,
 }) => {
   const [remainingTime, setRemainingTime] = useState('');
+  const [bgColor, setBgColor] = useState('bg-lime-500');
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    const updateRemainingTime = () => {
       const now = new Date();
       const endTime = new Date(startedAt.getTime() + durationInSeconds * 1000);
       const timeDiff = endTime.getTime() - now.getTime();
 
       if (timeDiff <= 0) {
         setRemainingTime('Ended');
-        clearInterval(intervalId);
+        setBgColor('bg-red-500');
+        return false; // Return false to stop the interval
       } else {
-        const days = Math.max(Math.floor(timeDiff / (1000 * 60 * 60 * 24)), 0);
-        const hours = Math.max(
-          Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          0
-        );
+        const hours = Math.max(Math.floor(timeDiff / (1000 * 60 * 60)), 0);
         const minutes = Math.max(
           Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60)),
           0
@@ -42,25 +40,43 @@ const RemainingTime: React.FC<RemainingTimeProps> = ({
         const pad = (num: number) => num.toString().padStart(2, '0');
 
         let timeString = '';
-        if (days > 0) {
-          timeString = `${days}d ${pad(hours)}h ${pad(minutes)}m`;
-        } else if (hours > 0) {
+        if (hours >= 24) {
+          const days = Math.floor(hours / 24);
+          timeString = `${days}d ${pad(hours % 24)}h ${pad(minutes)}m`;
+          setBgColor('bg-lime-500');
+        } else if (hours >= 4) {
           timeString = `${pad(hours)}h ${pad(minutes)}m`;
+          setBgColor('bg-lime-500');
+        } else if (hours >= 1) {
+          timeString = `${pad(hours)}h ${pad(minutes)}m`;
+          setBgColor('bg-orange-400');
         } else {
           timeString = `${pad(minutes)}m ${pad(seconds)}s`;
+          setBgColor('bg-red-500');
         }
         setRemainingTime(timeString);
       }
-    }, 1000);
+      return true; // Return true to continue the interval
+    };
 
-    return () => clearInterval(intervalId);
+    // Execute immediately
+    const shouldContinue = updateRemainingTime();
+
+    // Set up interval only if it should continue
+    const intervalId = shouldContinue
+      ? setInterval(updateRemainingTime, 1000)
+      : undefined;
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [startedAt, durationInSeconds]);
 
   if (!remainingTime) return '';
 
   return (
     <Badge
-      className={`text-black bg-lime-500 rounded-sm px-1 ${classname ?? ''}`}
+      className={`text-black ${bgColor} rounded-sm px-1 ${classname ?? ''}`}
     >
       {remainingTime}
     </Badge>
