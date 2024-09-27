@@ -30,21 +30,34 @@ export default function MarketPage() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <a href="#" className="text-gray-400 hover:underline flex items-center">
-          <RiFilter3Fill className="mr-1" size={24} />{' '}
-          <span className="text-sm">Filters</span>
-        </a>
-        <select className="text-gray-400 bg-neutral-800 border border-neutral-500 rounded-full px-3 py-1">
-          <option value="rank">Price high to low</option>
-          <option value="name">Price low to high</option>
-        </select>
-      </div>
+      <div className="relative">
+        <div className="flex justify-between items-center mb-4">
+          <a
+            href="#"
+            className="text-gray-400 hover:underline flex items-center"
+          >
+            <RiFilter3Fill className="mr-1" size={24} />{' '}
+            <span className="text-sm">Filters</span>
+          </a>
+          <select className="text-gray-400 bg-neutral-800 border border-neutral-500 rounded-full px-3 py-1">
+            <option value="rank">Price high to low</option>
+            <option value="name">Price low to high</option>
+          </select>
+        </div>
 
-      <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
-        {marketCard.map((token, index) => (
-          <MarketCard key={index} {...token} />
-        ))}
+        <div className="grid grid-cols-3 gap-4 overflow-y-auto py-4">
+          {marketCard.map((token, index) => (
+            <MarketCard key={index} {...token} />
+          ))}
+        </div>
+
+        {/* Overlay to prevent user interaction */}
+        <div className="absolute inset-0 bg-black bg-opacity-50 z-20"></div>
+        <div className="absolute top-44 inset-0 flex items-center justify-center z-30">
+          <div className="transform rotate-[-30deg] bg-yellow-500 text-black text-6xl font-bold py-4 px-8 rounded-lg">
+            COMING SOON !!
+          </div>
+        </div>
       </div>
     </>
   );
