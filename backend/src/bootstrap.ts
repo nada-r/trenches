@@ -20,14 +20,16 @@ import axiosRetry from 'axios-retry';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
-function validateEnv() {
-  cleanEnv(process.env, {
-    DATABASE_URL: str(),
-  });
+function validateEnv(envkeys: Record<string, any>): void {
+  cleanEnv(process.env, envkeys);
 }
 
 export default async function bootstrap() {
-  validateEnv();
+  validateEnv({
+    DATABASE_URL: str(),
+    PINATA_JWT: str(),
+    GATEWAY_URL: str(),
+  });
   dayjs.extend(duration);
   const prisma = new PrismaClient();
   // Show connection status
@@ -77,5 +79,6 @@ export default async function bootstrap() {
     geckoTerminalProvider,
     dexScreenerProvider,
     prisma,
+    validateEnv,
   };
 }

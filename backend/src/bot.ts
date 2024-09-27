@@ -1,11 +1,10 @@
 import TelegramBot from 'node-telegram-bot-api';
 import AWS from 'aws-sdk';
 import bootstrap from './bootstrap';
-import dotenv from 'dotenv';
 import { TelegramProvider } from '@src/services/TelegramProvider';
+import { str } from 'envalid';
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
-dotenv.config();
 
 async function startBot() {
   const {
@@ -17,6 +16,7 @@ async function startBot() {
     geckoTerminalProvider,
     dexScreenerProvider,
     prisma,
+    validateEnv,
   } = await bootstrap();
   const telegramProvider = new TelegramProvider();
 
@@ -32,21 +32,13 @@ async function startBot() {
     process.exit(0);
   });
 
-  const BOT_TOKEN = process.env.BOT_TOKEN;
-  if (!BOT_TOKEN) {
-    console.error('BOT_TOKEN is not set');
-    process.exit(1);
-  }
-
-  if (
-    !process.env.CDN_ENDPOINT ||
-    !process.env.CDN_KEY ||
-    !process.env.CDN_SECRET ||
-    !process.env.CDN_SPACE_NAME
-  ) {
-    console.error('CDN environment variables are not set');
-    process.exit(1);
-  }
+  validateEnv({
+    BOT_TOKEN: str(),
+    CDN_ENDPOINT: str(),
+    CDN_KEY: str(),
+    CDN_SECRET: str(),
+    CDN_SPACE_NAME: str(),
+  });
 
   const s3 = new AWS.S3({
     endpoint: process.env.CDN_ENDPOINT,
@@ -54,7 +46,8 @@ async function startBot() {
     secretAccessKey: process.env.CDN_SECRET,
   });
 
-  const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+  const BOT_TOKEN = process.env.BOT_TOKEN;
+  const bot = new TelegramBot(BOT_TOKEN!, { polling: true });
 
   bot.on('polling_error', (error) => console.log(error));
 
