@@ -2,25 +2,22 @@
 
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { Tournament, TournamentSchema } from '@/models';
+import { TournamentSchema } from '@/models';
 import { createAxiosInstance } from '@/utils/createAxiosInstance';
 import dayjs from 'dayjs';
-import TournamentCounterDate from '@/components/trenches/TournamentCounterDate';
+import TournamentCard, {
+  TournamentExtended,
+} from '@/components/trenches/TournamentCard';
 
 const instance = createAxiosInstance();
 
 export default function Homepage() {
-  const [tournaments, setTournaments] = useState<
-    Array<
-      Tournament & {
-        isClosed: boolean;
-        isOpen: boolean;
-        isUpcoming: boolean;
-        isFinish: boolean;
-      }
-    >
+  const [tournaments, setTournaments] = useState<Array<TournamentExtended>>([]);
+  const [upcomingTournaments, setUpcomingTournaments] = useState<
+    Array<TournamentExtended>
+  >([]);
+  const [closedTournaments, setClosedTournaments] = useState<
+    Array<TournamentExtended>
   >([]);
 
   useEffect(() => {
@@ -53,6 +50,7 @@ export default function Homepage() {
         console.error('Error fetching tournaments:', error);
       }
     }
+
     fetchTournaments();
   }, []);
 
@@ -62,31 +60,34 @@ export default function Homepage() {
         <h1 className="text-3xl font-bold mb-4">Tournaments</h1>
       </div>
       {tournaments.map((tournament) => (
-        <div
-          key={tournament.id}
-          className="flex flex-col rounded-lg bg-neutral-900 p-3 mb-4"
-        >
-          <div className="text-lg font-bold mb-2">{tournament.name}</div>
-          <div className="flex flex-row">
-            <div className="basis-2/3 flex flex-col">
-              <TournamentCounterDate tournament={tournament} />
-              <div>
-                Prize: <span className="text-gray-600 italic">coming soon</span>
-              </div>
-              {/*<div className="mb-4">
-            Supply burn: {tournament.metadata.supplyBurn}%
-          </div>*/}
-            </div>
-            <div className=" basis-1/3">
-              <Button asChild className="w-full rounded-full text-lg font-bold">
-                <Link href={`/tournament/${tournament.id}`} className="w-full">
-                  Play
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+        <TournamentCard key={tournament.id} tournament={tournament} />
       ))}
+
+      {upcomingTournaments.length > 0 && (
+        <>
+          <div className="text-center">
+            <h1 className="text-lg italic text-gray-500 mb-4">
+              ~~ Upcoming ~~
+            </h1>
+          </div>
+          {upcomingTournaments.map((tournament) => (
+            <TournamentCard key={tournament.id} tournament={tournament} />
+          ))}
+        </>
+      )}
+      {closedTournaments.length > 0 && (
+        <>
+          <div className="text-center">
+            <h1 className="text-lg italic text-gray-500 mb-4">
+              ~~ Previous ~~
+            </h1>
+          </div>
+
+          {closedTournaments.map((tournament) => (
+            <TournamentCard key={tournament.id} tournament={tournament} />
+          ))}
+        </>
+      )}
     </>
   );
 }

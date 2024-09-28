@@ -14,34 +14,20 @@ import {
   TournamentParticipationSchema,
   TournamentSchema,
 } from '@/models';
-import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 import dayjs from 'dayjs';
 import TournamentCounterDate from '@/components/trenches/TournamentCounterDate';
 import CallingPower from '@/components/trenches/CallingPower';
+import { TournamentExtended } from '@/components/trenches/TournamentCard';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 const instance = createAxiosInstance();
 
 const TournamentPage = ({ params }: { params: { id: string } }) => {
   const tournamentId = Number(params.id);
-  const { user } = usePrivy();
-  const solanaWallet =
-    user &&
-    user.linkedAccounts.find(
-      (account): account is WalletWithMetadata =>
-        account.type === 'wallet' &&
-        account.walletClientType === 'privy' &&
-        account.chainType === 'solana'
-    );
 
-  const [tournament, setTournament] = useState<
-    Tournament & {
-      participationCount: number;
-      isClosed: boolean;
-      isOpen: boolean;
-      isUpcoming: boolean;
-      isFinish: boolean;
-    }
-  >();
+  const { walletPubkey } = useProfileContext();
+
+  const [tournament, setTournament] = useState<TournamentExtended>();
   const [participation, setParticipation] = useState<
     TournamentParticipation & { score: number }
   >();
@@ -89,13 +75,11 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
   }, [tournament]);
 
   useEffect(() => {
-    if (solanaWallet) {
+    if (walletPubkey) {
       const fetchTokens = async () => {
         try {
           const callerResponse = await instance.get('/callers');
-          const response = await instance.get(
-            `/portfolio/${solanaWallet?.address}`
-          );
+          const response = await instance.get(`/portfolio/${walletPubkey}`);
 
           setMyCallers(
             response.data.portfolio.map((t: any, i: number) => ({
@@ -111,15 +95,14 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
 
       fetchTokens();
     }
-  }, [solanaWallet]);
+  }, [walletPubkey]);
 
   useEffect(() => {
-    if (solanaWallet && myCallers.length > 0) {
+    if (walletPubkey && myCallers.length > 0) {
       const fetchParticipation = async () => {
         try {
-          const address = solanaWallet.address;
           const response = await instance.get(
-            `/tournament/${tournamentId}/${address}`
+            `/tournament/${tournamentId}/${walletPubkey}`
           );
           const participation = TournamentParticipationSchema.parse(
             response.data
@@ -138,7 +121,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       };
       fetchParticipation();
     }
-  }, [solanaWallet, myCallers]);
+  }, [walletPubkey, myCallers]);
 
   useEffect(() => {
     setIsAllCardsSelected(
@@ -205,7 +188,7 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
     try {
       const response = await instance.post('/tournament/join', {
         tournamentId: Number(params.id),
-        walletPubkey: solanaWallet?.address,
+        walletPubkey: walletPubkey,
         callers: selectedCallers.map((t) => t?.id.toString()),
       });
 
