@@ -52,6 +52,7 @@ export { initializeUmi };
 
 async function setupMetadata(image: string, callerName: string) {
   const upload = await pinata.upload.url(image);
+  console.log("🚀 ~ setupMetadata ~ pinata:", pinata.config)
 
   return {
     name: callerName,
@@ -65,6 +66,7 @@ export async function mintToken(image: string, callerName: string) {
     initializeUmi();
 
     const metadata = await setupMetadata(image, callerName); //"https://trenches.fra1.cdn.digitaloceanspaces.com/profile_pictures/6255998913.jpg", "luigiscall");
+    console.log("🚀 ~ mintToken ~ metadata:", metadata)
 
     await createAndMint(umi, {
       mint,
