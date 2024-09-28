@@ -238,19 +238,11 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
         </div>
       </div>
 
-      <h1 className="text-xl font-bold mb-4">Held Callers</h1>
-      <div className="grid grid-cols-3 gap-4 py-4">
-        {myCallers.map((caller, index) => (
-          <CallerTournamentCard
-            key={index}
-            {...caller}
-            participationClosed={isAlreadyParticipate}
-            onSelect={() => selectCaller(caller)}
-            isSelected={selectedCallers.some((t) => t && t.id === caller.id)}
-          />
-        ))}
+      <h1 className="text-xl font-bold mb-4">Callers in game</h1>
+      <div className="">
+        Your actual score:{' '}
+        {(isClosed || isFinish) && <CallingPower value={score} />}
       </div>
-      <h1 className="text-xl font-bold mb-4">Your Tournament Cards</h1>
       <div className="grid grid-cols-3 gap-4 py-4">
         {selectedCallers.map((caller, index) => (
           <TournamentSlot
@@ -260,10 +252,6 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
             onUnselect={unselectCaller}
           />
         ))}
-      </div>
-      <div className="mb-2">
-        Your actual score:{' '}
-        {(isClosed || isFinish) && <CallingPower value={score} />}
       </div>
       <Button
         disabled={isClosed || !isAllCardsSelected || isAlreadyParticipate}
@@ -279,8 +267,27 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       <p className="mb-16 w-full text-sm text-neutral-500 text-center mt-3">
         {tournament?.participationCount} players have entered the tournament
       </p>
-      <h1 className="text-xl font-bold mb-4">Rewards Breakdown</h1>
 
+      {isOpen && (
+        <>
+          <h1 className="text-xl font-bold mb-4">Inventory</h1>
+          <div className="grid grid-cols-3 gap-4 py-4">
+            {myCallers.map((caller, index) => (
+              <CallerTournamentCard
+                key={index}
+                {...caller}
+                participationClosed={isAlreadyParticipate}
+                onSelect={() => selectCaller(caller)}
+                isSelected={selectedCallers.some(
+                  (t) => t && t.id === caller.id
+                )}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      <h1 className="text-xl font-bold mb-4">Rewards Breakdown</h1>
       <div className="bg-neutral-700 text-neutral-300 rounded-2xl p-4 mb-4">
         <img src="https://i.imgflip.com/94q580.jpg" />
         {/*<p>The top 10 winners will receive the following</p>
