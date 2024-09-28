@@ -24,7 +24,7 @@ export default function Header() {
   return (
     <>
       <header className="flex flex-row items-center gap-3 text-white my-1 mr-4 ml-2 ">
-        <img src="images/logo.png" className="w-10 h-10" alt="Logo" />
+        <img src="/images/logo.png" className="w-10 h-10" alt="Logo" />
         {/*<div className="text-center">
           <h1 className="text-xl font-bold">{title}</h1>
         </div>*/}
