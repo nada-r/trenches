@@ -178,7 +178,7 @@ const Page = ({ params }: { params: { id: string } }) => {
               <TableCell>
                 <FDV value={call.highestFDV} />
                 <span className="ml-2 text-sm text-gray-500">
-                  [{(call.highestFDV / call.startFDV - 1).toFixed(1)}X]
+                  [{(call.highestFDV / call.startFDV).toFixed(1)}X]
                 </span>
               </TableCell>
             </TableRow>
