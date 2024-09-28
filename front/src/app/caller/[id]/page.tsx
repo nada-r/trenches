@@ -1,8 +1,8 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { FaTelegramPlane } from 'react-icons/fa';
-import { Call, Caller } from '@/models';
-import { createAxiosInstance } from '@/utils/createAxiosInstance';
+"use client";
+import React, { useEffect, useState } from "react";
+import { FaTelegramPlane } from "react-icons/fa";
+import { Call, Caller } from "@/models";
+import { createAxiosInstance } from "@/utils/createAxiosInstance";
 import {
   Table,
   TableBody,
@@ -10,16 +10,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import Link from 'next/link';
-import { IoIosArrowBack } from 'react-icons/io';
-import FDV from '@/components/trenches/FDV';
-import CallerAvatar from '@/components/trenches/CallerAvatar';
-import CallingPower from '@/components/trenches/CallingPower';
-import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
-import { useProfileContext } from '@/contexts/ProfileContext';
-import { useRouter } from 'next/navigation';
-import TokenAddress from '@/components/trenches/TokenAddress';
+} from "@/components/ui/table";
+import Link from "next/link";
+import { IoIosArrowBack } from "react-icons/io";
+import FDV from "@/components/trenches/FDV";
+import CallerAvatar from "@/components/trenches/CallerAvatar";
+import CallingPower from "@/components/trenches/CallingPower";
+import { AiFillStar, AiOutlineStar } from "react-icons/ai";
+import { useProfileContext } from "@/contexts/ProfileContext";
+import { useRouter } from "next/navigation";
+import TokenAddress from "@/components/trenches/TokenAddress";
 
 const instance = createAxiosInstance();
 
@@ -41,7 +41,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         const response = await instance.get(`/caller/${params.id}`);
         setCaller(response.data);
       } catch (error) {
-        console.error('Error fetching callers:', error);
+        console.error("Error fetching callers:", error);
       }
     }
 
@@ -56,13 +56,13 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   const handleFollowToggle = async () => {
     try {
-      const endpoint = isFollowing ? 'unfollow' : 'follow';
+      const endpoint = isFollowing ? "unfollow" : "follow";
       await instance.post(`/caller/${params.id}/${endpoint}`, {
         walletPubkey,
       });
       setIsFollowing(!isFollowing);
     } catch (error) {
-      console.error('Error toggling follow status:', error);
+      console.error("Error toggling follow status:", error);
     }
   };
 
@@ -75,7 +75,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       <div className="flex flex-col">
         <div className="flex flex-row items-center">
           <CallerAvatar
-            name={caller?.name || ''}
+            name={caller?.name || ""}
             image={caller?.image === null ? undefined : caller?.image}
             className="w-10 h-10 mr-4"
           />
@@ -137,7 +137,7 @@ const Page = ({ params }: { params: { id: string } }) => {
               <TableCell>
                 <FDV value={call.highestFDV} />
                 <span className="ml-2 text-sm text-gray-500">
-                  [{(call.highestFDV / call.startFDV - 1).toFixed(1)}X]
+                  [{(call.highestFDV / call.startFDV).toFixed(1)}X]
                 </span>
               </TableCell>
             </TableRow>
