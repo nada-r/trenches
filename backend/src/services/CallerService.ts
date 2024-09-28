@@ -48,7 +48,7 @@ export class CallerService {
   async getCallerByTelegramId(telegramId: string): Promise<Caller | null> {
     return this.prisma.caller.findUnique({
       where: {
-        telegramId: telegramId,
+          telegramId,
       },
     });
   }
@@ -124,9 +124,9 @@ export class CallerService {
         image: image || null,
         data: {},
       });
+      await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
     }
     console.log("callerImageURL:", image)
-    await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
     return caller;
   }
 
