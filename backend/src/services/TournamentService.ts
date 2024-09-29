@@ -1,6 +1,5 @@
 import { PrismaClient, Tournament, TournamentParticipation } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
-import TournamentScoreService from '@src/services/TournamentScoreService';
 
 /**
  * TournamentService is a class that provides CRUD operations for tournaments.
@@ -8,7 +7,6 @@ import TournamentScoreService from '@src/services/TournamentScoreService';
  */
 export class TournamentService {
   constructor(
-    private tournamentScoreService: TournamentScoreService,
     private prisma: PrismaClient
   ) {}
 
@@ -80,6 +78,21 @@ export class TournamentService {
   }
 
   /**
+   * Retrieves all available tournaments.
+   * A tournament is considered available if its status is either 'STARTED' or 'COMPLETED'.
+   * @returns A Promise that resolves to an array of Tournament objects.
+   */
+  async getStarted(): Promise<Tournament[]> {
+    return this.prisma.tournament.findMany({
+      where: {
+        status: {
+          in: ['STARTED'],
+        },
+      },
+    });
+  }
+
+  /**
    * Starts a tournament by updating its status and setting the start time.
    * @param tournamentId The ID of the tournament to start.
    * @returns A Promise that resolves to the updated Tournament object.
@@ -110,6 +123,17 @@ export class TournamentService {
     });
   }
 
+  async endTournament(tournamentId: number) {
+    return this.prisma.tournament.update({
+      where: {
+        id: tournamentId,
+      },
+      data: {
+        status: 'COMPLETED', // Set the tournament status to 'STARTED'
+      },
+    });
+  }
+
   async getMyTournamentParticipation(
     tournamentId: number,
     walletPubkey: string
@@ -132,12 +156,20 @@ export class TournamentService {
       return null;
     }
 
-    const score = await this.tournamentScoreService.getPlayerScore(participation.tournament, participation);
-
     return {
+
       ...participation,
-      score,
+      score: 0,
     };
+  }
+
+  async getAllParticipations(tournamentId: number) {
+
+    return this.prisma.tournamentParticipation.findMany({
+      where: {
+        tournamentId: tournamentId,
+      },
+    });
   }
 }
 

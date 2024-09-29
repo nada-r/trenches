@@ -5,7 +5,6 @@ import {
   CallingPowerService,
   CallService,
   ProfileService,
-  TournamentScoreService,
   TournamentService,
 } from './services';
 import 'dotenv/config';
@@ -17,6 +16,7 @@ import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider'; // ES 2015
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -53,15 +53,9 @@ export default async function bootstrap() {
     callerService,
     callService
   );
-  const tournamentScoreService = new TournamentScoreService(
-    callerService,
-    callService,
-    prisma
-  );
-  const tournamentService = new TournamentService(
-    tournamentScoreService,
-    prisma
-  );
+  const tournamentService = new TournamentService(prisma);
+  const tournamentResultProcessor: TournamentResultProcessor =
+    new TournamentResultProcessor(callerService, tournamentService, prisma);
   const profileService = new ProfileService(prisma);
   const tokenService = new TokenService(prisma);
   const geckoTerminalProvider = new GeckoTerminalProvider();
@@ -74,6 +68,7 @@ export default async function bootstrap() {
     callingPowerService,
     profileService,
     tournamentService,
+    tournamentResultProcessor,
     tokenService,
     pumpfunProvider,
     geckoTerminalProvider,

@@ -68,7 +68,7 @@ export const TokenScalarFieldEnumSchema = z.enum(['id','address','name','ticker'
 
 export const TournamentScalarFieldEnumSchema = z.enum(['id','name','status','startedAt','metadata','createdAt','updatedAt']);
 
-export const TournamentParticipationScalarFieldEnumSchema = z.enum(['id','walletPubkey','callers','createdAt','updatedAt','tournamentId']);
+export const TournamentParticipationScalarFieldEnumSchema = z.enum(['id','walletPubkey','callers','createdAt','updatedAt','tournamentId','data']);
 
 export const TournamenCallerPowerScalarFieldEnumSchema = z.enum(['id','callerId','power','tournamentId','updatedAt']);
 
@@ -219,6 +219,10 @@ export const TournamentParticipationSchema = z.object({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   tournamentId: z.number().int(),
+  /**
+   * [TournamentParticipationData]
+   */
+  data: z.object({ score: z.number(), rank: z.number() }),
 })
 
 export type TournamentParticipation = z.infer<typeof TournamentParticipationSchema>

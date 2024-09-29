@@ -126,6 +126,8 @@ model TournamentParticipation {
   updatedAt    DateTime   @updatedAt
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
   tournamentId Int
+  /// [TournamentParticipationData]
+  data         Json       @default("{}") /// @zod.custom.use(z.object({ score: z.number(), rank: z.number() }))
 
   @@unique(name: "unique_participation", [walletPubkey, tournamentId])
 }

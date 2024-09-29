@@ -94,6 +94,7 @@ app.post('/tournament/join', async (req: Request, res: Response) => {
       tournamentId,
       walletPubkey,
       callers,
+      data: {}
     });
     res.json(result);
   } catch (error) {

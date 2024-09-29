@@ -12,6 +12,7 @@ async function main() {
     callerService,
     callService,
     callingPowerService,
+    tournamentResultProcessor,
     tournamentService,
     tokenService,
   } = await bootstrap();
@@ -45,7 +46,11 @@ async function main() {
       );
       break;
     case 'tournament':
-      await displayTournamentActions(env, tournamentService);
+      await displayTournamentActions(
+        env,
+        tournamentService,
+        tournamentResultProcessor
+      );
       break;
     case 'token':
       await updateTokenCache(tokenService);

@@ -3,6 +3,7 @@ import AWS from 'aws-sdk';
 import bootstrap from './bootstrap';
 import { TelegramProvider } from '@src/services/TelegramProvider';
 import { str } from 'envalid';
+import dayjs from 'dayjs';
 
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
@@ -15,6 +16,8 @@ async function startBot() {
     pumpfunProvider,
     geckoTerminalProvider,
     dexScreenerProvider,
+    tournamentService,
+    tournamentResultProcessor,
     prisma,
     validateEnv,
   } = await bootstrap();
@@ -218,6 +221,21 @@ async function startBot() {
     },
     10 * 60 * 1000
   );
+
+  setInterval(async () => {
+    const startedTournaments = await tournamentService.getStarted();
+    for (const tournament of startedTournaments) {
+      const startedAt = dayjs(tournament.startedAt);
+      const endTime = startedAt.add(tournament.metadata.endDuration, 'second');
+      const now = dayjs();
+      if (now.isAfter(endTime)) {
+        console.log(
+          `Complete tournament: ${tournament.name} [${tournament.id}]`
+        );
+        await tournamentResultProcessor.processResults(tournament.id);
+      }
+    }
+  }, 60 * 1000);
 }
 
 startBot().catch(console.error);

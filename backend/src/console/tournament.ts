@@ -2,16 +2,19 @@ import { input, number, select } from '@inquirer/prompts';
 import { TournamentService } from '@src/services';
 import { TournamentStatus } from '@prisma/client';
 import { EnvType } from '@src/console';
+import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
 
 export async function displayTournamentActions(
   env: EnvType,
-  tournamentService: TournamentService
+  tournamentService: TournamentService,
+  tournamentResultProcessor: TournamentResultProcessor
 ) {
   const action = await select({
     message: 'Select an action:',
     choices: [
       { name: 'Create tournament', value: 'create' },
       { name: 'Start tournament', value: 'start' },
+      { name: 'Result tournament', value: 'end' },
     ],
   });
 
@@ -21,6 +24,9 @@ export async function displayTournamentActions(
       break;
     case 'start':
       await startTournament(tournamentService);
+      break;
+    case 'end':
+      await endTournament(tournamentService, tournamentResultProcessor);
       break;
     default:
       console.log('Invalid action');
@@ -66,5 +72,31 @@ async function startTournament(tournamentService: TournamentService) {
     console.log(`Tournament ${tournamentId} has been started successfully.`);
   } catch (error) {
     console.error(`Failed to start tournament: ${error.message}`);
+  }
+}
+
+async function endTournament(
+  tournamentService: TournamentService,
+  tournamentResultProcessor: TournamentResultProcessor
+) {
+  try {
+    const tournamentId = await select({
+      message: 'Enter tournament ID:',
+      choices: (await tournamentService.getAll())
+        .filter((t) => t.status === 'STARTED')
+        .map((t) => ({
+          name: t.name,
+          value: t.id,
+        })),
+    });
+
+    if (!tournamentId) {
+      console.log('Please provide valid id;');
+      return;
+    }
+
+    await tournamentResultProcessor.processResults(tournamentId);
+  } catch (error) {
+    console.error(`Failed to end tournament: ${error.message}`);
   }
 }

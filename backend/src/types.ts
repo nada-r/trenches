@@ -10,6 +10,7 @@ declare global {
       prize: number;
       supplyBurn: number;
     };
+    type TournamentParticipationData = { score?: number; rank?: number };
     type ClaimMetadata = Array<{ callerId: number; balance: number }>;
   }
 }
