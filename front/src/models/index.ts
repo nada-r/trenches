@@ -222,7 +222,7 @@ export const TournamentParticipationSchema = z.object({
   /**
    * [TournamentParticipationData]
    */
-  data: z.object({ score: z.number(), rank: z.number() }),
+  data: z.object({ score: z.number().optional(), rank: z.number().optional() }),
 })
 
 export type TournamentParticipation = z.infer<typeof TournamentParticipationSchema>
