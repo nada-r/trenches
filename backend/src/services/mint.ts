@@ -51,8 +51,9 @@ function initializeUmi() {
 export { initializeUmi };
 
 async function setupMetadata(image: string, callerName: string) {
-  const upload = await pinata.upload.url(image);
   console.log("🚀 ~ setupMetadata ~ pinata:", pinata.config)
+  const upload = await pinata.upload.url(image);
+
 
   return {
     name: callerName,
