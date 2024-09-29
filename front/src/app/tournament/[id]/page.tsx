@@ -224,13 +224,11 @@ const TournamentPage = ({ params }: { params: { id: string } }) => {
       <h1 className="text-xl font-bold mb-4">Callers in game</h1>
       <div className="">
         Your actual score: {isClosed && <CallingPower value={score} />}
-        {isFinish && (
-          <>
-            <CallingPower value={participation?.data.score || 0} />
-            <span> Your final rank: #{participation?.data.rank}</span>
-          </>
-        )}
+        {isFinish && <CallingPower value={participation?.data.score || 0} />}
       </div>
+      {isFinish && (
+        <div className="">Your final rank: #{participation?.data.rank}</div>
+      )}
       <div className="grid grid-cols-3 gap-4 py-4">
         {selectedCallers.map((caller, index) => (
           <TournamentSlot
