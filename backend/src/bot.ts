@@ -154,76 +154,99 @@ async function startBot() {
     }
   }
 
-  setInterval(
-    async () => {
-      const startTime = Date.now();
-      console.log('Starting FDV update process...');
+  const updateFDV = async () => {
+    const startTime = Date.now();
+    console.log('Starting FDV update process...');
 
-      const activeCalls = await callService.getActiveCalls();
-      const uniqueTokens = [
-        ...new Set(
-          activeCalls.map((call) => call.data?.poolAddress || call.tokenAddress)
-        ),
-      ];
+    const activeCalls = await callService.getActiveCalls();
+    const tokensToUpdate = [
+      ...new Set(
+        activeCalls.map((call) => ({
+          tokenAddress: call.tokenAddress,
+          poolAddress: call.data?.poolAddress,
+        }))
+      ),
+    ];
+    let stepTime = Date.now();
+    console.log(
+      `Found ${tokensToUpdate.length} unique tokens to process (${stepTime - startTime}ms)`
+    );
 
-      console.log(`Found ${uniqueTokens.length} unique tokens to process`);
-
-      const poolToToken = new Map<string, string>();
-      for (const token of uniqueTokens) {
-        const tokenInfo = await pumpfunProvider.getTokenInfo(token);
-        if (tokenInfo && tokenInfo.poolAddress) {
-          // Store token info in the database
-          await tokenService.createToken(tokenInfo);
-          poolToToken.set(tokenInfo.poolAddress, token);
-        }
-      }
-      const tokensToUpdate = [
-        ...new Set([...uniqueTokens, ...poolToToken.keys()]),
-      ];
-
-      console.log(`Preparing to update ${tokensToUpdate.length} tokens`);
-
-      const updatedTokens = [];
-      for (const token of tokensToUpdate) {
-        const tokenStartTime = Date.now();
-        let newFDV = undefined;
-        if (!token.endsWith('pump')) {
-          newFDV = await geckoTerminalProvider.getHighestMCap(token);
-        }
-        if (!newFDV) {
-          newFDV = await pumpfunProvider.getHighestMCap(token);
-          if (!newFDV) {
-            console.log(`Could not get FDV for token ${token}`);
-            continue;
-          }
-        }
-        let result = (await callService.updateHighestFdvByToken(token, newFDV))
-          .count;
-        const pumpToken = poolToToken.get(token);
-        if (pumpToken) {
-          result += (
-            await callService.updateHighestFdvByToken(pumpToken, newFDV)
-          ).count;
-        }
-        if (result > 0) {
-          updatedTokens.push(token);
-        }
+    let newPoolsDetected = 0;
+    for (const token of tokensToUpdate) {
+      if (token.poolAddress) {
+        continue;
       }
 
-      console.log(` => Updated FDV for ${updatedTokens.length} tokens`);
-      if (updatedTokens.length > 0) {
-        const callingPowerStartTime = Date.now();
-        await callingPowerService.updateCallingPowerFor(updatedTokens);
-        console.log(
-          `Updated calling power in ${Date.now() - callingPowerStartTime}ms`
-        );
+      const tokenInfo = await pumpfunProvider.getTokenInfo(token.tokenAddress);
+      if (tokenInfo && tokenInfo.poolAddress) {
+        await tokenService.createToken(tokenInfo);
+
+        // update current state
+        token.poolAddress = tokenInfo.poolAddress;
+        newPoolsDetected++;
       }
 
-      const totalTime = Date.now() - startTime;
-      console.log(`Total FDV update process took ${totalTime}ms`);
-    },
-    10 * 60 * 1000
-  );
+      //TODO update calls too
+    }
+    console.log(
+      `${newPoolsDetected} new pools detected (${Date.now() - stepTime}ms)`
+    );
+    stepTime = Date.now();
+
+    const updatedTokens = [];
+    for (const token of tokensToUpdate) {
+      let newFDV = undefined;
+      if (token.poolAddress) {
+        newFDV = await geckoTerminalProvider.getHighestMCap(token.poolAddress);
+      }
+      if (!newFDV && !token.tokenAddress.endsWith('pump')) {
+        newFDV = await geckoTerminalProvider.getHighestMCap(token.tokenAddress);
+      }
+      if (!newFDV) {
+        newFDV = await pumpfunProvider.getHighestMCap(token.tokenAddress);
+      }
+      if (!newFDV) {
+        console.log(`Could not get FDV for token ${token.tokenAddress}`);
+        continue;
+      }
+
+      let result = (
+        await callService.updateHighestFdvByToken(token.tokenAddress, newFDV)
+      ).count;
+      if (token.poolAddress) {
+        result += (
+          await callService.updateHighestFdvByToken(token.poolAddress, newFDV)
+        ).count;
+      }
+      if (result > 0) {
+        updatedTokens.push(token.tokenAddress);
+        if (token.poolAddress) {
+          updatedTokens.push(token.poolAddress);
+        }
+      }
+    }
+    console.log(
+      ` => Updated FDV for ${updatedTokens.length} tokens (${Date.now() - stepTime}ms)`
+    );
+
+    if (updatedTokens.length > 0) {
+      const callingPowerStartTime = Date.now();
+      await callingPowerService.updateCallingPowerFor(updatedTokens);
+      console.log(
+        `Updated calling power in ${Date.now() - callingPowerStartTime}ms`
+      );
+    }
+
+    const totalTime = Date.now() - startTime;
+    console.log(`Total FDV update process took ${totalTime}ms`);
+  };
+
+  // Run immediately
+  await updateFDV();
+
+  // Then set interval to run every 30 minutes
+  setInterval(updateFDV, 30 * 60 * 1000);
 
   setInterval(async () => {
     const startedTournaments = await tournamentService.getStarted();

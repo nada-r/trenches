@@ -3,7 +3,7 @@ import bootstrap from './bootstrap';
 import { displayCallerActions } from './console/caller';
 import { displayTournamentActions } from './console/tournament';
 import * as process from 'node:process';
-import { updateTokenCache } from '@src/console/token';
+import { displayTokenActions } from '@src/console/token';
 
 export type EnvType = 'production' | 'development';
 
@@ -15,6 +15,10 @@ async function main() {
     tournamentResultProcessor,
     tournamentService,
     tokenService,
+    geckoTerminalProvider,
+    pumpfunProvider,
+    dexScreenerProvider,
+    fdvUpdaterService,
   } = await bootstrap();
   const env = getEnvFromDotenvKey();
 
@@ -53,7 +57,13 @@ async function main() {
       );
       break;
     case 'token':
-      await updateTokenCache(tokenService);
+      await displayTokenActions(
+        tokenService,
+        geckoTerminalProvider,
+        pumpfunProvider,
+        dexScreenerProvider,
+        fdvUpdaterService
+      );
       break;
     default:
       // Handle default case or leave empty if no default action is needed

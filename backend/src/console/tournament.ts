@@ -9,27 +9,35 @@ export async function displayTournamentActions(
   tournamentService: TournamentService,
   tournamentResultProcessor: TournamentResultProcessor
 ) {
-  const action = await select({
-    message: 'Select an action:',
-    choices: [
-      { name: 'Create tournament', value: 'create' },
-      { name: 'Start tournament', value: 'start' },
-      { name: 'Result tournament', value: 'end' },
-    ],
-  });
+  while (true) {
+    const action = await select({
+      message: 'Select an action:',
+      choices: [
+        { name: 'Create tournament', value: 'create' },
+        { name: 'Start tournament', value: 'start' },
+        { name: 'Result tournament', value: 'end' },
+        { name: 'Back to parent menu', value: 'back' },
+      ],
+    });
 
-  switch (action) {
-    case 'create':
-      await createTournament(tournamentService);
-      break;
-    case 'start':
-      await startTournament(tournamentService);
-      break;
-    case 'end':
-      await endTournament(tournamentService, tournamentResultProcessor);
-      break;
-    default:
-      console.log('Invalid action');
+    switch (action) {
+      case 'create':
+        await createTournament(tournamentService);
+        break;
+      case 'start':
+        await startTournament(tournamentService);
+        break;
+      case 'end':
+        await endTournament(tournamentService, tournamentResultProcessor);
+        break;
+      case 'back':
+        return; // Exit the function to go back to the parent menu
+      default:
+        console.log('Invalid action');
+    }
+
+    // Add a newline for better readability in the console
+    console.log('\n');
   }
 }
 async function createTournament(tournamentService: TournamentService) {

@@ -15,8 +15,9 @@ import { PumpfunProvider } from '@src/services/PumpfunProvider';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider'; // ES 2015
 import axios from 'axios';
-import axiosRetry from 'axios-retry';
+import axiosRetry, { retryAfter } from 'axios-retry';
 import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
+import { FdvUpdaterService } from '@src/services/FdvUpdaterService';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -43,7 +44,13 @@ export default async function bootstrap() {
   );
 
   axiosRetry(axios, {
-    retryDelay: axiosRetry.exponentialDelay,
+    retries: 3,
+    retryDelay: (retryNumber = 0, error) => {
+      const calculatedDelay = 2 ** retryNumber * 1000;
+      const delay = Math.max(calculatedDelay, retryAfter(error));
+      const randomSum = delay * 0.2 * Math.random(); // 0-20% of the delay
+      return delay + randomSum;
+    },
     retryCondition: (error) => error.response?.status === 429,
   });
 
@@ -61,6 +68,10 @@ export default async function bootstrap() {
   const geckoTerminalProvider = new GeckoTerminalProvider();
   const dexScreenerProvider = new DexScreenerProvider();
   const pumpfunProvider = new PumpfunProvider(geckoTerminalProvider);
+  const fdvUpdaterService: FdvUpdaterService = new FdvUpdaterService(
+    geckoTerminalProvider,
+    pumpfunProvider
+  );
 
   return {
     callerService,
@@ -73,6 +84,7 @@ export default async function bootstrap() {
     pumpfunProvider,
     geckoTerminalProvider,
     dexScreenerProvider,
+    fdvUpdaterService,
     prisma,
     validateEnv,
   };
