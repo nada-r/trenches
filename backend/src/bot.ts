@@ -186,7 +186,10 @@ async function startBot() {
       const updatedTokens = [];
       for (const token of tokensToUpdate) {
         const tokenStartTime = Date.now();
-        let newFDV = await geckoTerminalProvider.getHighestMCap(token);
+        let newFDV = undefined;
+        if (!token.endsWith('pump')) {
+          newFDV = await geckoTerminalProvider.getHighestMCap(token);
+        }
         if (!newFDV) {
           newFDV = await pumpfunProvider.getHighestMCap(token);
           if (!newFDV) {
