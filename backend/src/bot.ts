@@ -185,9 +185,12 @@ async function startBot() {
         // update current state
         token.poolAddress = tokenInfo.poolAddress;
         newPoolsDetected++;
-      }
 
-      //TODO update calls too
+        await callService.updateCallTokenPoolAddress(
+          token.tokenAddress,
+          tokenInfo.poolAddress
+        );
+      }
     }
     console.log(
       `${newPoolsDetected} new pools detected (${Date.now() - stepTime}ms)`
