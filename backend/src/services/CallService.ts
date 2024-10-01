@@ -2,7 +2,21 @@ import { Call, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
 
 export class CallService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma;
+  constructor(prisma: PrismaClient) {
+    this.prisma = prisma.$extends({
+      result: {
+        call: {
+          multiple: {
+            needs: { startFDV: true, highestFDV: true },
+            compute(call) {
+              return call.highestFDV / call.startFDV;
+            },
+          },
+        },
+      },
+    });
+  }
 
   async createCall(data: OmitPrisma<Call>): Promise<Call> {
     return this.prisma.call.create({
@@ -47,6 +61,49 @@ export class CallService {
       where: {
         createdAt: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        },
+      },
+    });
+  }
+
+  async getOpenCalls(): Promise<Call[]> {
+    const openCalls = await this.prisma.call.findMany({
+      where: {
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        },
+      },
+      include: {
+        token: true,
+        caller: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+    return openCalls.sort((c1, c2) => c2.multiple - c1.multiple);
+  }
+
+  async getClosedCalls(): Promise<Call[]> {
+    return this.prisma.call.findMany({
+      where: {
+        createdAt: {
+          lte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10,
+      include: {
+        token: true,
+        caller: {
+          select: {
+            name: true,
+            image: true,
+          },
         },
       },
     });

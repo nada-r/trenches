@@ -14,7 +14,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1 p-2">{children}</main>
 
-      <Toaster />
+      <Toaster position="top-right" richColors />
 
       {/*{authenticated && <OnboardingDialog />}*/}
 

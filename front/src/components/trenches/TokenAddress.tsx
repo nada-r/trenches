@@ -1,15 +1,20 @@
-import React, { useState } from "react";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import { FaCopy } from "react-icons/fa";
+import React from 'react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { FaCopy } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 interface TruncatedAddressProps {
   address: string | undefined;
+  iconOnly?: boolean;
 }
 
-const TruncatedAddress: React.FC<TruncatedAddressProps> = ({ address }) => {
+const TruncatedAddress: React.FC<TruncatedAddressProps> = ({
+  address,
+  iconOnly = false,
+}) => {
   const truncateAddress = (addr: string | undefined): string => {
     if (!addr) {
-      return "";
+      return '';
     }
     if (addr.length <= 8) {
       return addr;
@@ -18,22 +23,18 @@ const TruncatedAddress: React.FC<TruncatedAddressProps> = ({ address }) => {
     return `${start}`;
   };
 
-  const [copied, setCopied] = useState(false);
-
   const handleCopy = () => {
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1000);
+    toast.success('Copied to clipboard!');
   };
 
   return (
-    <div className="flex flex-row gap-1">
-      <span>{truncateAddress(address)}</span>
-      <CopyToClipboard text={address || ""} onCopy={handleCopy}>
+    <div>
+      {!iconOnly && <span>{truncateAddress(address)}</span>}
+      <CopyToClipboard text={address || ''} onCopy={handleCopy}>
         <button title="Copy address">
-          <FaCopy />
+          <FaCopy size={12} />
         </button>
       </CopyToClipboard>
-      {copied && <span className="text-green-200">Copied</span>}
     </div>
   );
 };

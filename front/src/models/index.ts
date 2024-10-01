@@ -184,7 +184,7 @@ export const TokenSchema = z.object({
   /**
    * [TokenData]
    */
-  data: JsonValueSchema,
+  data: z.object({ type: z.string(), poolAddress: z.string().optional()}),
 })
 
 export type Token = z.infer<typeof TokenSchema>
