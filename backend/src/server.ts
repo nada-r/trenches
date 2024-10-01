@@ -60,6 +60,14 @@ app.post('/caller/:id/unfollow', async (req: Request, res: Response) => {
   res.status(200).json({ message: 'Follow successful' });
 });
 
+app.get('/calls/tops', async (req: Request, res: Response) => {
+  const topOpenCalls = await services.call?.getOpenCalls();
+  const closedCalls = await services.call?.getClosedCalls();
+  res.json({
+    topOpenCalls,
+     closedCalls
+  });
+});
 
 app.get('/tournament/all', async (req: Request, res: Response) => {
   const tournaments = await services.tournament?.getAvailable();

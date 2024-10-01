@@ -56,6 +56,7 @@ model Caller {
 model Call {
   id           Int      @id @default(autoincrement())
   tokenAddress String
+  token        Token    @relation(fields: [tokenAddress], references: [address])
   startFDV     Float
   highestFDV   Float
   caller       Caller   @relation(fields: [callerId], references: [id])
@@ -93,8 +94,9 @@ model Token {
   image_uri String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Call      Call[]
   /// [TokenData]
-  data      Json     @default("{}")
+  data      Json     @default("{}") /// @zod.custom.use(z.object({ type: z.string(), poolAddress: z.string().optional()}))
 }
 
 enum TournamentStatus {

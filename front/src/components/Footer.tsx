@@ -4,6 +4,7 @@ import RankIcon from './icons/RankIcon';
 import PortfolioIcon from './icons/PortfolioIcon';
 import MarketIcon from './icons/MarketIcon';
 import TournamentIcon from './icons/TournamentIcon';
+import CallIcon from '@/components/icons/CallIcon';
 
 const menulist = [
   {
@@ -15,6 +16,11 @@ const menulist = [
     icon: <PortfolioIcon />,
     name: 'Portfolio',
     href: '/portfolio',
+  },
+  {
+    icon: <CallIcon />,
+    name: 'Calls',
+    href: '/call',
   },
   {
     icon: <MarketIcon />,
