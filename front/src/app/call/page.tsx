@@ -19,6 +19,7 @@ import TokenLinks from '@/components/trenches/TokenLinks';
 import FDV from '@/components/trenches/FDV';
 import TokenTicker from '@/components/trenches/TokenTicker';
 import CallMultiple from '@/components/trenches/CallMultiple';
+import Link from 'next/link';
 
 const instance = createAxiosInstance();
 
@@ -143,19 +144,23 @@ export default function CallPage() {
                 </TableCell>
                 <TableCell className="border-border pr-2 text-right">
                   <div className="flex justify-end">
-                    <CallerAvatar
-                      name={call.caller?.name || ''}
-                      image={
-                        call.caller?.image === null
-                          ? undefined
-                          : call.caller?.image
-                      }
-                      className="w-7 h-7"
-                    />
+                    <Link href={`/caller/${call.callerId}`}>
+                      <CallerAvatar
+                        name={call.caller?.name || ''}
+                        image={
+                          call.caller?.image === null
+                            ? undefined
+                            : call.caller?.image
+                        }
+                        className="w-7 h-7"
+                      />
+                    </Link>
                   </div>
                 </TableCell>
                 <TableCell className="text-foreground border-border">
-                  {call.caller.name}
+                  <Link href={`/caller/${call.callerId}`}>
+                    {call.caller.name}
+                  </Link>
                 </TableCell>
                 <TableCell
                   className={`text-foreground border-border text-right ${callColor}`}
