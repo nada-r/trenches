@@ -14,12 +14,14 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import bs58 from 'bs58';
-import { pinata } from '../util/pinataconfig';
+import { setupPinata } from '../util/pinataconfig';
+import { PinataSDK } from 'pinata-web3';
 
 let umi: Umi;
 let userWallet: Keypair;
 let userWalletSigner: Signer;
 let mint: Signer;
+let pinata: PinataSDK;
 
 function initializeUmi() {
   if (umi) {
@@ -45,12 +47,15 @@ function initializeUmi() {
   umi.use(signerIdentity(userWalletSigner));
   umi.use(mplTokenMetadata());
 
+  pinata = setupPinata();
+
   return { umi, userWallet, userWalletSigner, mint };
 }
 
 export { initializeUmi };
 
 async function setupMetadata(image: string, callerName: string) {
+
   console.log("🚀 ~ setupMetadata ~ pinata:", pinata.config)
   const upload = await pinata.upload.url(image);
 
