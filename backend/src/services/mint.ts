@@ -20,12 +20,12 @@ import { PinataSDK } from 'pinata-web3';
 let umi: Umi;
 let userWallet: Keypair;
 let userWalletSigner: Signer;
-let mint: Signer;
+//let mint: Signer;
 let pinata: PinataSDK;
 
 function initializeUmi() {
   if (umi) {
-    return { umi, userWallet, userWalletSigner, mint };
+    return { umi, userWallet, userWalletSigner};
   }
   umi = createUmi(
     'https://divine-necessary-scion.solana-devnet.quiknode.pro/c6f57b9e59ed38a658fa9516d87df8a8f4351ec9'
@@ -43,13 +43,13 @@ function initializeUmi() {
 
   userWalletSigner = createSignerFromKeypair(umi, userWallet);
 
-  mint = generateSigner(umi);
+
   umi.use(signerIdentity(userWalletSigner));
   umi.use(mplTokenMetadata());
 
   pinata = setupPinata();
 
-  return { umi, userWallet, userWalletSigner, mint };
+  return { umi, userWallet, userWalletSigner};
 }
 
 export { initializeUmi };
@@ -77,6 +77,8 @@ export async function mintToken(image: string, callerName: string) {
 
     const metadata = await setupMetadata(image, callerName); //"https://trenches.fra1.cdn.digitaloceanspaces.com/profile_pictures/6255998913.jpg", "luigiscall");
     console.log("🚀 ~ mintToken ~ metadata:", metadata)
+
+    const mint = generateSigner(umi);
 
     await createAndMint(umi, {
       mint,
