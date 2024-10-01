@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { FaCopy } from 'react-icons/fa';
+import React, { useState } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { FaCopy } from "react-icons/fa";
 
 interface TruncatedAddressProps {
   address: string | undefined;
@@ -9,7 +9,7 @@ interface TruncatedAddressProps {
 const TruncatedAddress: React.FC<TruncatedAddressProps> = ({ address }) => {
   const truncateAddress = (addr: string | undefined): string => {
     if (!addr) {
-      return '';
+      return "";
     }
     if (addr.length <= 8) {
       return addr;
@@ -28,12 +28,12 @@ const TruncatedAddress: React.FC<TruncatedAddressProps> = ({ address }) => {
   return (
     <div className="flex flex-row gap-1">
       <span>{truncateAddress(address)}</span>
-      <CopyToClipboard text={address || ''} onCopy={handleCopy}>
+      <CopyToClipboard text={address || ""} onCopy={handleCopy}>
         <button title="Copy address">
           <FaCopy />
         </button>
       </CopyToClipboard>
-      {copied && <span className="text-green-200">Copied!</span>}
+      {copied && <span className="text-green-200">Copied</span>}
     </div>
   );
 };
