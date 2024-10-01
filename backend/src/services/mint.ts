@@ -56,14 +56,18 @@ export { initializeUmi };
 
 async function setupMetadata(image: string, callerName: string) {
 
-  console.log("🚀 ~ setupMetadata ~ pinata:", pinata.config)
-  const upload = await pinata.upload.url(image);
+  const uploadImage = await pinata.upload.url(image);
 
+  const uploadMetadata = await pinata.upload.json({
+    name: callerName,
+    symbol: callerName.slice(0, 3).toUpperCase(),
+    image: `https://turquoise-quickest-wasp-930.mypinata.cloud/ipfs/${uploadImage.IpfsHash}`,
+  })
 
   return {
     name: callerName,
     symbol: callerName.slice(0, 3).toUpperCase(),
-    uri: `https://turquoise-quickest-wasp-930.mypinata.cloud/ipfs/${upload.IpfsHash}`,
+    uri: `https://turquoise-quickest-wasp-930.mypinata.cloud/ipfs/${uploadMetadata.IpfsHash}`,
   };
 }
 
