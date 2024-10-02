@@ -54,6 +54,44 @@ async function startBot() {
 
   bot.on('polling_error', (error) => console.log(error));
 
+  bot.onText(/\/login/, async (msg) => {
+    const chatId = msg.chat.id;
+    const user = msg.from;
+    if (!user) return;
+
+    const telegramId = user.id.toString();
+    const username = user.username;
+
+    if (!username) {
+      bot.sendMessage(
+        chatId,
+        'Sorry, you need to set a username in Telegram to use this bot.'
+      );
+      return;
+    }
+
+    try {
+      await bot.sendMessage(chatId, `Login to Trenches.top`, {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Login',
+                login_url: { url: 'https://trenches.top/login' },
+              },
+            ],
+          ],
+        },
+      });
+    } catch (error) {
+      console.error('Error during login:', error);
+      bot.sendMessage(
+        chatId,
+        'An error occurred during login. Please try again later.'
+      );
+    }
+  });
+
   bot.on('message', async (msg) => {
     const user = msg.from;
     if (!user) return;
