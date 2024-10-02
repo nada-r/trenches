@@ -1,11 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-const Login = () => {
+function LoginInfo() {
   const searchParams = useSearchParams();
-
   return (
     <div>
       <h2>Query Parameters:</h2>
@@ -21,6 +20,14 @@ const Login = () => {
         <p>No query parameters found.</p>
       )}
     </div>
+  );
+}
+
+const Login = () => {
+  return (
+    <Suspense>
+      <LoginInfo />
+    </Suspense>
   );
 };
 
