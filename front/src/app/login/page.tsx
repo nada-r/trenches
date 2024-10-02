@@ -6,6 +6,12 @@ import { useSearchParams } from 'next/navigation';
 function LoginInfo() {
   const searchParams = useSearchParams();
 
+  // Log searchParams entries
+  console.log('Search Parameters:');
+  searchParams.forEach((value, key) => {
+    console.log(`${key}: ${value}`);
+  });
+
   return (
     <div>
       <h2>Query Parameters:</h2>
