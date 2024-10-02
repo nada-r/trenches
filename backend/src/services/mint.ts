@@ -75,7 +75,7 @@ export async function mintToken(image: string, callerName: string) {
   try {
     initializeUmi();
 
-    const metadata = await setupMetadata(image, callerName); //"https://trenches.fra1.cdn.digitaloceanspaces.com/profile_pictures/6255998913.jpg", "luigiscall");
+    const metadata = await setupMetadata(image, callerName);
     console.log("🚀 ~ mintToken ~ metadata:", metadata)
 
     const mint = generateSigner(umi);
@@ -93,6 +93,7 @@ export async function mintToken(image: string, callerName: string) {
       tokenStandard: TokenStandard.Fungible,
     }).sendAndConfirm(umi);
     console.log('Successfully minted 1 billion tokens (', mint.publicKey, ')');
+
   } catch (err) {
     console.error('Error minting tokens:', err);
   }

@@ -143,6 +143,19 @@ export class CallerService {
     });
   }
 
+  async addCallerTokenAdress(telegramId: string, tokenAddress: string): Promise<Caller> {
+    return this.prisma.caller.update({
+      where: {
+        telegramId,
+      },
+      data: {
+        data: {
+          tokenAddress,
+        },
+      },
+    });
+  }
+
   async updateCallerRanks(): Promise<void> {
     const callers = await this.prisma.caller.findMany({});
 
