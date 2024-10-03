@@ -17,7 +17,7 @@ const callCard = ({ call }: { call: CallExtended }) => {
   };
 
   return (
-    <div className="flex items-center bg-gray-900 border border-gray-600 rounded p-3">
+    <div className="flex items-center bg-neutral-900 rounded p-3">
       <div className="">
         <img
           src={call.token.image_uri}
@@ -26,7 +26,7 @@ const callCard = ({ call }: { call: CallExtended }) => {
         />
       </div>
       <div className="flex flex-col ml-3 flex-1 overflow-hidden">
-        <div className="flex items-center justify-between border-b pb-2 border-gray-600">
+        <div className="flex items-center justify-between border-b pb-2 border-gray-700">
           <div className="flex flex-col gap-y-2 overflow-hidden">
             <div className="flex">
               <div className="!p-0 !m-0 !h-auto relative flex gap-x-1 overflow-hidden">

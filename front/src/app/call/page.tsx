@@ -96,7 +96,6 @@ export default function CallPage() {
             <CallCard key={index} call={call} />
           ))}
         </div>
-        <div className={`flex flex-col gap-3 mt-4`}></div>
       </div>
     </>
   );
