@@ -1,25 +1,17 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { FaTelegramPlane } from "react-icons/fa";
-import { Call, Caller } from "@/models";
-import { createAxiosInstance } from "@/utils/createAxiosInstance";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import Link from "next/link";
-import { IoIosArrowBack } from "react-icons/io";
-import FDV from "@/components/trenches/FDV";
-import CallerAvatar from "@/components/trenches/CallerAvatar";
-import CallingPower from "@/components/trenches/CallingPower";
-import { AiFillStar, AiOutlineStar } from "react-icons/ai";
-import { useProfileContext } from "@/contexts/ProfileContext";
-import { useRouter } from "next/navigation";
-import TokenAddress from "@/components/trenches/TokenAddress";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { FaTelegramPlane } from 'react-icons/fa';
+import { Call, Caller, Token } from '@/models';
+import { createAxiosInstance } from '@/utils/createAxiosInstance';
+import Link from 'next/link';
+import { IoIosArrowBack } from 'react-icons/io';
+import CallerAvatar from '@/components/trenches/CallerAvatar';
+import CallingPower from '@/components/trenches/CallingPower';
+import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
+import { useProfileContext } from '@/contexts/ProfileContext';
+import { useRouter } from 'next/navigation';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import CallCard from '@/components/trenches/CallCard';
 
 const instance = createAxiosInstance();
 
@@ -29,10 +21,15 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   const [caller, setCaller] = useState<
     Caller & {
-      openCalls: Call[];
-      closedCalls: Call[];
+      openCalls: Array<Call & { token: Token; multiple: number }>;
+      closedCalls: Array<Call & { token: Token; multiple: number }>;
     }
   >();
+
+  const [selectedView, setSelectedView] = useState<'open' | 'closed'>('open');
+  const [calls, setCalls] = useState<
+    Array<Call & { token: Token; multiple: number }>
+  >([]);
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
@@ -41,7 +38,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         const response = await instance.get(`/caller/${params.id}`);
         setCaller(response.data);
       } catch (error) {
-        console.error("Error fetching callers:", error);
+        console.error('Error fetching callers:', error);
       }
     }
 
@@ -56,14 +53,22 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   const handleFollowToggle = async () => {
     try {
-      const endpoint = isFollowing ? "unfollow" : "follow";
+      const endpoint = isFollowing ? 'unfollow' : 'follow';
       await instance.post(`/caller/${params.id}/${endpoint}`, {
         walletPubkey,
       });
       setIsFollowing(!isFollowing);
     } catch (error) {
-      console.error("Error toggling follow status:", error);
+      console.error('Error toggling follow status:', error);
     }
+  };
+
+  const viewOpen = () => {
+    setCalls(caller?.openCalls || []);
+  };
+
+  const viewClosed = () => {
+    setCalls(caller?.closedCalls || []);
   };
 
   return (
@@ -75,7 +80,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       <div className="flex flex-col">
         <div className="flex flex-row items-center">
           <CallerAvatar
-            name={caller?.name || ""}
+            name={caller?.name || ''}
             image={caller?.image === null ? undefined : caller?.image}
             className="w-10 h-10 mr-4"
           />
@@ -114,77 +119,56 @@ const Page = ({ params }: { params: { id: string } }) => {
           </div>
         </div>
       </div>
+      <div className="lg:hidden mt-4">
+        <ToggleGroup
+          type="single"
+          value={selectedView}
+          className="justify-start"
+          onValueChange={(value) => {
+            if (value === 'open') {
+              viewOpen();
+            } else if (value === 'closed') {
+              viewClosed();
+            }
+            setSelectedView(value as 'open' | 'closed');
+          }}
+        >
+          <ToggleGroupItem
+            className="h-6 rounded-full"
+            onClick={() => viewOpen()}
+            value="open"
+          >
+            Top open calls
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            className="h-6 rounded-full"
+            onClick={() => viewClosed()}
+            value="closed"
+          >
+            Closed calls
+          </ToggleGroupItem>
+        </ToggleGroup>
 
-      <Table className="mt-4">
-        <TableHeader>
-          <TableRow className="border-b-gray-600">
-            <TableHead className="font-bold text-lg text-white">
-              Open Calls
-            </TableHead>
-            <TableHead>Start</TableHead>
-            <TableHead>Highest</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+        <div className={`grid grid-cols-1 gap-3 mt-4`}>
+          {calls.map((call, index) => (
+            <CallCard key={index} call={call} showCaller={false} />
+          ))}
+        </div>
+      </div>
+      <div className="hidden lg:grid grid-cols-2 gap-4">
+        <div className={`flex flex-col gap-3 mt-4`}>
+          <h1>Open Calls</h1>
           {caller?.openCalls.map((call, index) => (
-            <TableRow key={index} className="bg-neutral-900">
-              <TableCell className="font-medium">
-                <TokenAddress address={call.tokenAddress} />
-              </TableCell>
-              <TableCell>
-                <FDV value={call.startFDV} />
-              </TableCell>
-              <TableCell>
-                <FDV value={call.highestFDV} />
-                <span className="ml-2 text-sm text-gray-500">
-                  [{(call.highestFDV / call.startFDV).toFixed(1)}X]
-                </span>
-              </TableCell>
-            </TableRow>
+            <CallCard key={index} call={call} showCaller={false} />
           ))}
-        </TableBody>
-      </Table>
-      <Table className="mt-4">
-        <TableHeader>
-          <TableRow className="border-b-gray-600">
-            <TableHead className="font-bold text-lg text-white">
-              Closed Calls
-            </TableHead>
-            {/*<TableHead>Since</TableHead>*/}
-            <TableHead>Start</TableHead>
-            <TableHead>Highest</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+        </div>
+        <div className={`flex flex-col gap-3 mt-4`}>
+          <h1>Closed Calls</h1>
           {caller?.closedCalls.map((call, index) => (
-            <TableRow key={index} className="bg-neutral-900">
-              <TableCell className="font-medium">
-                <TokenAddress address={call.tokenAddress} />
-              </TableCell>
-              {/*<TableCell>
-                {(() => {
-                  const createdAt = new Date(call.createdAt);
-                  const now = new Date();
-                  const diffTime = Math.abs(
-                    now.getTime() - createdAt.getTime()
-                  );
-                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                  return `${diffDays}d`;
-                })()}
-              </TableCell>*/}
-              <TableCell>
-                <FDV value={call.startFDV} />
-              </TableCell>
-              <TableCell>
-                <FDV value={call.highestFDV} />
-                <span className="ml-2 text-sm text-gray-500">
-                  [{(call.highestFDV / call.startFDV).toFixed(1)}X]
-                </span>
-              </TableCell>
-            </TableRow>
+            <CallCard key={index} call={call} showCaller={false} />
           ))}
-        </TableBody>
-      </Table>
+        </div>
+      </div>
     </>
   );
 };

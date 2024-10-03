@@ -17,28 +17,39 @@ type CallerLight = {
 export type CallExtended = Call & {
   multiple: number;
   token: Token;
-  caller: CallerLight;
+  caller?: CallerLight;
 };
 
 export default function CallPage() {
   const [calls, setCalls] = useState<Array<CallExtended>>([]);
-  const [selectedView, setSelectedView] = useState<'open' | 'closed'>('open');
+  const [selectedView, setSelectedView] = useState<'tops' | 'open' | 'closed'>(
+    'tops'
+  );
   const [topOpenCalls, setTopOpenCalls] = useState<Array<CallExtended>>([]);
+  const [openCalls, setOpenCalls] = useState<Array<CallExtended>>([]);
   const [closedCalls, setClosedCalls] = useState<Array<CallExtended>>([]);
 
   useEffect(() => {
     const fetchCalls = async () => {
       const response = await instance.get('/calls/tops');
 
-      setTopOpenCalls(response.data.topOpenCalls);
-      setCalls(response.data.topOpenCalls);
+      const topOpenCalls = [...response.data.topOpenCalls].sort(
+        (a: CallExtended, b: CallExtended) => b.multiple - a.multiple
+      );
+      setCalls(topOpenCalls);
+      setTopOpenCalls(topOpenCalls);
+      setOpenCalls(response.data.topOpenCalls);
       setClosedCalls(response.data.closedCalls);
     };
     fetchCalls();
   }, []);
 
-  const viewOpen = () => {
+  const viewTops = () => {
     setCalls(topOpenCalls);
+  };
+
+  const viewOpen = () => {
+    setCalls(openCalls);
   };
 
   const viewClosed = () => {
@@ -47,26 +58,35 @@ export default function CallPage() {
 
   return (
     <>
-      <div className="sm:hidden">
+      <div className="lg:hidden">
         <ToggleGroup
           type="single"
           value={selectedView}
           className="justify-start"
           onValueChange={(value) => {
-            if (value === 'open') {
+            if (value === 'tops') {
+              viewTops();
+            } else if (value === 'open') {
               viewOpen();
             } else if (value === 'closed') {
               viewClosed();
             }
-            setSelectedView(value as 'open' | 'closed');
+            setSelectedView(value as 'tops' | 'open' | 'closed');
           }}
         >
+          <ToggleGroupItem
+            className="h-6 rounded-full"
+            onClick={() => viewTops()}
+            value="tops"
+          >
+            Top open calls
+          </ToggleGroupItem>
           <ToggleGroupItem
             className="h-6 rounded-full"
             onClick={() => viewOpen()}
             value="open"
           >
-            Top open calls
+            Last open calls
           </ToggleGroupItem>
           <ToggleGroupItem
             className="h-6 rounded-full"
@@ -83,15 +103,21 @@ export default function CallPage() {
           ))}
         </div>
       </div>
-      <div className="sm:grid grid-cols-3 gap-4">
+      <div className="hidden lg:grid grid-cols-3 gap-4">
         <div className={`flex flex-col gap-3 mt-4`}>
-          <h1>Open Calls</h1>
+          <h1>Top Open Calls</h1>
           {topOpenCalls.map((call, index) => (
             <CallCard key={index} call={call} />
           ))}
         </div>
         <div className={`flex flex-col gap-3 mt-4`}>
-          <h1>Closed Calls</h1>
+          <h1>Last Open Calls</h1>
+          {openCalls.map((call, index) => (
+            <CallCard key={index} call={call} />
+          ))}
+        </div>
+        <div className={`flex flex-col gap-3 mt-4`}>
+          <h1>Last Closed Calls</h1>
           {closedCalls.map((call, index) => (
             <CallCard key={index} call={call} />
           ))}

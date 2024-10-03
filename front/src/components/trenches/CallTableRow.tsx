@@ -74,7 +74,7 @@ const CallTableRow = ({ call }: { call: CallExtended }) => {
         </div>
       </TableCell>
       <TableCell className="text-foreground border-border">
-        <Link href={`/caller/${call.callerId}`}>{call.caller.name}</Link>
+        <Link href={`/caller/${call.callerId}`}>{call.caller?.name}</Link>
       </TableCell>
       <TableCell
         className={`text-foreground border-border text-right ${callColor}`}
