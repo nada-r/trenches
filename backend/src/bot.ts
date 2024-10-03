@@ -163,7 +163,7 @@ async function startBot() {
       }
 
       // Store token info in the database
-      await tokenService.createToken(tokenInfo);
+      await tokenService.createOrUpdateToken(tokenInfo);
 
       // record the call if there is not already one for this token and caller
       const existingCall = await callService.getCallByTelegramIdAndToken(
@@ -218,7 +218,7 @@ async function startBot() {
 
       const tokenInfo = await pumpfunProvider.getTokenInfo(token.tokenAddress);
       if (tokenInfo && tokenInfo.poolAddress) {
-        await tokenService.createToken(tokenInfo);
+        await tokenService.createOrUpdateToken(tokenInfo);
 
         // update current state
         token.poolAddress = tokenInfo.poolAddress;
@@ -237,29 +237,56 @@ async function startBot() {
 
     const updatedTokens = [];
     for (const token of tokensToUpdate) {
-      let newFDV = undefined;
+      let mcapHistory = undefined;
       if (token.poolAddress) {
-        newFDV = await geckoTerminalProvider.getHighestMCap(token.poolAddress);
+        mcapHistory = await geckoTerminalProvider.getTokenMCapHistory(
+          token.poolAddress
+        );
       }
-      if (!newFDV && !token.tokenAddress.endsWith('pump')) {
-        newFDV = await geckoTerminalProvider.getHighestMCap(token.tokenAddress);
+      if (!mcapHistory && !token.tokenAddress.endsWith('pump')) {
+        mcapHistory = await geckoTerminalProvider.getTokenMCapHistory(
+          token.tokenAddress
+        );
       }
-      if (!newFDV) {
-        newFDV = await pumpfunProvider.getHighestMCap(token.tokenAddress);
+      if (!mcapHistory) {
+        mcapHistory = await pumpfunProvider.getTokenMCapHistory(
+          token.tokenAddress
+        );
       }
-      if (!newFDV) {
+      if (!mcapHistory) {
         console.log(`Could not get FDV for token ${token.tokenAddress}`);
         continue;
       }
 
-      let result = (
-        await callService.updateHighestFdvByToken(token.tokenAddress, newFDV)
-      ).count;
-      if (token.poolAddress) {
-        result += (
-          await callService.updateHighestFdvByToken(token.poolAddress, newFDV)
-        ).count;
+      const callToUpdate = activeCalls.filter(
+        (call) =>
+          call.tokenAddress === token.tokenAddress ||
+          call.tokenAddress === token.poolAddress
+      );
+
+      let result = 0;
+      for (const call of callToUpdate) {
+        let highestMcap = 0;
+        for (const entry of mcapHistory) {
+          if (
+            entry.timestamp > call.createdAt.getTime() / 1000 &&
+            entry.highest > highestMcap
+          ) {
+            highestMcap = entry.highest;
+          }
+        }
+
+        if (call.highestFDV < highestMcap) {
+          await callService.updateCallHighestMcap(call.id, highestMcap);
+          result++;
+        }
       }
+
+      await tokenService.updateMcap(
+        token.tokenAddress,
+        mcapHistory[mcapHistory.length - 1].close
+      );
+
       if (result > 0) {
         updatedTokens.push(token.tokenAddress);
         if (token.poolAddress) {

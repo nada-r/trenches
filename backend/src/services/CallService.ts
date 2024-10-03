@@ -125,6 +125,19 @@ export class CallService {
     });
   }
 
+  async updateCallHighestMcap(callId: number, newMcap: number): Promise<any> {
+    return this.prisma.call.updateMany({
+      where: {
+        id: callId,
+        highestFDV: { lt: newMcap },
+      },
+      data: {
+        highestFDV: newMcap,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
   async updateCallTokenPoolAddress(
     tokenAddress: string,
     poolAddress: string

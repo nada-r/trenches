@@ -1,17 +1,16 @@
-import { PumpfunProvider } from '@src/services/PumpfunProvider';
-import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
-
 export class FdvUpdaterService {
-  constructor(
-    private geckoTerminalProvider: GeckoTerminalProvider,
-    private pumpfunProvider: PumpfunProvider
-  ) {}
+  constructor() {}
 
-  async getHighestFDV(token: string): Promise<number | null> {
-    if (!token.endsWith('pump')) {
-      const geckoFDV = await this.geckoTerminalProvider.getHighestMCap(token);
-      if (geckoFDV) return geckoFDV;
+  async getHighestMcap(
+    history: { timestamp: number; highest: number }[],
+    after: number
+  ): Promise<number> {
+    let highestMcap = 0;
+    for (const entry of history) {
+      if (entry.timestamp > after && entry.highest > highestMcap) {
+        highestMcap = entry.highest;
+      }
     }
-    return await this.pumpfunProvider.getHighestMCap(token);
+    return highestMcap;
   }
 }

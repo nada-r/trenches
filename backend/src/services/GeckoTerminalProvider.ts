@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TokenMcap } from '@src/services/TokenService';
 
 export class GeckoTerminalProvider {
   constructor() {}
@@ -43,13 +44,13 @@ export class GeckoTerminalProvider {
     }
   }
 
-  async getHighestMCap(tokenAddress: string): Promise<any | null> {
+  async getTokenMCap(tokenAddress: string): Promise<TokenMcap | null> {
     try {
       const response = await axios.get(
-        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd`
+        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd&limit=1000`
       );
 
-      if (response.data != null) {
+      if (response.data) {
         const highestPrice = response.data.data.attributes.ohlcv_list.reduce(
           (acc: number, curr: number[]) => {
             const H = curr[2];
@@ -59,7 +60,14 @@ export class GeckoTerminalProvider {
           },
           0
         );
-        return highestPrice * 1_000_000_000;
+        const lastPrice =
+          response.data.data.attributes.ohlcv_list[
+            response.data.data.attributes.ohlcv_list.length - 1
+          ][4];
+        return {
+          mcap: lastPrice * 1_000_000_000,
+          highest: highestPrice * 1_000_000_000,
+        };
       } else {
         console.log('Token not found in geckoterminal:', tokenAddress);
         return null;
@@ -71,6 +79,45 @@ export class GeckoTerminalProvider {
         console.log(`429 on ${error.config.url}`);
       } else {
         console.error('Error fetching highest price on geckoterminal:', error);
+      }
+      return null;
+    }
+  }
+
+  async getTokenMCapHistory(tokenAddress: string): Promise<Array<{
+    timestamp: number;
+    highest: number;
+    close: number;
+  }> | null> {
+    try {
+      const response = await axios.get(
+        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd`
+      );
+
+      if (response.data) {
+        return response.data.data.attributes.ohlcv_list
+          .map((data: number[]) => {
+            const H = data[2];
+            const C = data[4];
+            const correctedH = C / H > 0.5 ? C : H; // if highest is 50% higher than close, use close
+            return {
+              timestamp: data[0],
+              highest: correctedH * 1_000_000_000,
+              close: C * 1_000_000_000,
+            };
+          })
+          .reverse();
+      } else {
+        console.log('Token history not found in geckoterminal:', tokenAddress);
+        return null;
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return null;
+      } else if (error.response && error.response.status === 429) {
+        console.log(`429 on ${error.config.url}`);
+      } else {
+        console.error('Error fetching token history on geckoterminal:', error);
       }
       return null;
     }

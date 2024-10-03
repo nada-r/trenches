@@ -1,4 +1,4 @@
-import { TokenInfo } from '@src/services/TokenService';
+import { TokenInfo, TokenMcap } from '@src/services/TokenService';
 import axios from 'axios';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 
@@ -42,7 +42,7 @@ export class PumpfunProvider {
       });
   }
 
-  async getHighestMCap(tokenAddress: string): Promise<number | null> {
+  async getTokenMCap(tokenAddress: string): Promise<TokenMcap | null> {
     try {
       const response = await axios.get(
         `https://frontend-api.pump.fun/candlesticks/${tokenAddress}?offset=0&limit=1000&timeframe=5`
@@ -52,12 +52,16 @@ export class PumpfunProvider {
           (acc, curr) => Math.max(acc, curr.high),
           0.0
         );
+        const lastPrice = response.data[response.data.length - 1].close;
         const sol_to_dollar = await this.geckoTerminalProvider.getSolPrice();
         if (!sol_to_dollar) {
           return null;
         }
 
-        return highestPrice * 1_000_000_000.0 * sol_to_dollar;
+        return {
+          mcap: lastPrice * 1_000_000_000.0 * sol_to_dollar,
+          highest: highestPrice * 1_000_000_000.0 * sol_to_dollar,
+        };
       } else {
         console.log('Token not found on pumpfun:', tokenAddress);
         return null;
@@ -67,6 +71,42 @@ export class PumpfunProvider {
         console.log(`429 on ${error.config.url}`);
       } else {
         console.error('Error fetching token highest price', error);
+      }
+      return null;
+    }
+  }
+
+  async getTokenMCapHistory(
+    tokenAddress: string
+  ): Promise<Array<{
+    timestamp: number;
+    highest: number;
+    close: number;
+  }> | null> {
+    try {
+      const response = await axios.get(
+        `https://frontend-api.pump.fun/candlesticks/${tokenAddress}?offset=0&limit=1000&timeframe=5`
+      );
+      if (response.data != null && Array.isArray(response.data)) {
+        const sol_to_dollar = await this.geckoTerminalProvider.getSolPrice();
+        if (!sol_to_dollar) {
+          return null;
+        }
+
+        return response.data.map((candle) => ({
+          timestamp: candle.timestamp,
+          highest: candle.high * 1_000_000_000.0 * sol_to_dollar,
+          close: candle.close * 1_000_000_000.0 * sol_to_dollar,
+        }));
+      } else {
+        console.log('Token not found on pumpfun:', tokenAddress);
+        return null;
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 429) {
+        console.log(`429 on ${error.config.url}`);
+      } else {
+        console.error('Error fetching token mcap history', error);
       }
       return null;
     }

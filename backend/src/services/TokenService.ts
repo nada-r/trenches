@@ -12,10 +12,15 @@ export interface TokenInfo {
   poolAddress?: string;
 }
 
+export type TokenMcap = {
+  mcap: number;
+  highest: number;
+};
+
 export class TokenService {
   constructor(private prisma: PrismaClient) {}
 
-  async createToken(tokenInfo: TokenInfo): Promise<void> {
+  async createOrUpdateToken(tokenInfo: TokenInfo): Promise<void> {
     try {
       const token = await this.prisma.token.upsert({
         where: {
@@ -27,6 +32,7 @@ export class TokenService {
           data: {
             type: tokenInfo.type,
             poolAddress: tokenInfo.poolAddress,
+            mcap: tokenInfo.fdv,
           },
         },
         create: {
@@ -38,6 +44,7 @@ export class TokenService {
           data: {
             type: tokenInfo.type,
             poolAddress: tokenInfo.poolAddress,
+            mcap: tokenInfo.fdv,
           },
         },
       });
@@ -87,6 +94,35 @@ export class TokenService {
     } catch (error) {
       console.error('Error fetching token list:', error);
       throw error;
+    }
+  }
+
+  async updateMcap(tokenAddress: string, mcap: number) {
+    try {
+      const token = await this.prisma.token.findUnique({
+        where: {
+          address: tokenAddress,
+        },
+      });
+
+      if (!token) {
+        throw new Error(`Token with address ${tokenAddress} not found`);
+      }
+
+      await this.prisma.token.update({
+        where: {
+          address: tokenAddress,
+        },
+        data: {
+          data: {
+            ...token.data,
+            mcap: mcap,
+          },
+        },
+      });
+    } catch (error) {
+      console.error(`Error updating mcap for token ${tokenAddress}:`, error);
+      throw error; // Re-throw the error for the caller to handle if needed
     }
   }
 }

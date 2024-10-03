@@ -56,7 +56,7 @@ export const updateTokenCache = async (tokenService: TokenService) => {
     console.log(token);
     const tokenInfo = null; //await tokenInfoProvider.getSolanaToken(token);
     if (tokenInfo) {
-      await tokenService.createToken(tokenInfo);
+      await tokenService.createOrUpdateToken(tokenInfo);
       count++;
     } else {
       notfounds++;
@@ -86,12 +86,12 @@ export const tokenInfo = async (
 
     console.log('Current FDV:', tokenInfo.fdv);
 
-    const highestMCap = await pumpfunProvider.getHighestMCap(tokenAddress);
+    const highestMCap = await pumpfunProvider.getTokenMCap(tokenAddress);
     console.log('Highest FDV (pump):', highestMCap);
   }
 
   if (poolAddress) {
-    const highestMCap = await geckoTerminalProvider.getHighestMCap(poolAddress);
+    const highestMCap = await geckoTerminalProvider.getTokenMCap(poolAddress);
     console.log('Highest FDV (gecko):', highestMCap);
   }
 };
@@ -105,15 +105,15 @@ export const highestFdv = async (
     required: true,
   });
 
-  const highestFDV = await fdvUpdaterService.getHighestFDV(tokenAddress);
-  console.log('Highest FDV:', highestFDV);
-
-  const tokenInfo = await pumpfunProvider.getTokenInfo(tokenAddress);
-  if (tokenInfo?.poolAddress) {
-    console.log('Find pool address:', tokenInfo.poolAddress);
-    const highestPoolFDV = await fdvUpdaterService.getHighestFDV(
-      tokenInfo.poolAddress
-    );
-    console.log('Highest FDV (pool):', highestPoolFDV);
-  }
+  // const highestFDV = await fdvUpdaterService.getHighestMcap(tokenAddress);
+  // console.log('Highest FDV:', highestFDV);
+  //
+  // const tokenInfo = await pumpfunProvider.getTokenInfo(tokenAddress);
+  // if (tokenInfo?.poolAddress) {
+  //   console.log('Find pool address:', tokenInfo.poolAddress);
+  //   const highestPoolFDV = await fdvUpdaterService.getHighestMcap(
+  //     tokenInfo.poolAddress
+  //   );
+  //   console.log('Highest FDV (pool):', highestPoolFDV);
+  // }
 };

@@ -17,7 +17,6 @@ import { DexScreenerProvider } from '@src/services/DexScreenerProvider'; // ES 2
 import axios from 'axios';
 import axiosRetry, { retryAfter } from 'axios-retry';
 import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
-import { FdvUpdaterService } from '@src/services/FdvUpdaterService';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -68,10 +67,6 @@ export default async function bootstrap() {
   const geckoTerminalProvider = new GeckoTerminalProvider();
   const dexScreenerProvider = new DexScreenerProvider();
   const pumpfunProvider = new PumpfunProvider(geckoTerminalProvider);
-  const fdvUpdaterService: FdvUpdaterService = new FdvUpdaterService(
-    geckoTerminalProvider,
-    pumpfunProvider
-  );
 
   return {
     callerService,
@@ -84,7 +79,6 @@ export default async function bootstrap() {
     pumpfunProvider,
     geckoTerminalProvider,
     dexScreenerProvider,
-    fdvUpdaterService,
     prisma,
     validateEnv,
   };
