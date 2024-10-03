@@ -9,7 +9,13 @@ import CallerAvatar from '@/components/trenches/CallerAvatar';
 import TokenLinks from '@/components/trenches/TokenLinks';
 import Link from 'next/link';
 
-const callCard = ({ call }: { call: CallExtended }) => {
+const callCard = ({
+  call,
+  showCaller = true,
+}: {
+  call: CallExtended;
+  showCaller?: boolean;
+}) => {
   const callColor = call.multiple >= 2 ? 'text-green-500' : 'text-yellow-500';
 
   const handleCopy = () => {
@@ -49,24 +55,28 @@ const callCard = ({ call }: { call: CallExtended }) => {
               </div>
             </div>
             <div className="flex items-center z-10">
-              <span className="inline-flex items-center break-keep md:ml-0 text-xs leading-none border-gray-500 pr-1">
-                <span className="text-gray-400 font-medium">Called by</span>
-                <Link
-                  href={`/caller/${call.caller.id}`}
-                  className="flex flex-row items-center"
-                >
-                  <CallerAvatar
-                    name={call.caller.name}
-                    image={
-                      call.caller.image === null ? undefined : call.caller.image
-                    }
-                    className="w-4 h-4 ml-2"
-                  />
-                  <span className="inline-flex text-gray-200 font-medium ml-1">
-                    {call.caller.name}
-                  </span>
-                </Link>
-              </span>
+              {showCaller && (
+                <span className="inline-flex items-center break-keep md:ml-0 text-xs leading-none border-gray-500 pr-1">
+                  <span className="text-gray-400 font-medium">Called by</span>
+                  <Link
+                    href={`/caller/${call.caller.id}`}
+                    className="flex flex-row items-center"
+                  >
+                    <CallerAvatar
+                      name={call.caller.name}
+                      image={
+                        call.caller.image === null
+                          ? undefined
+                          : call.caller.image
+                      }
+                      className="w-4 h-4 ml-2"
+                    />
+                    <span className="inline-flex text-gray-200 font-medium ml-1">
+                      {call.caller.name}
+                    </span>
+                  </Link>
+                </span>
+              )}
             </div>
           </div>
           <div className="flex items-center justify-end min-w-[90px] flex-1"></div>

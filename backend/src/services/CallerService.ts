@@ -3,7 +3,21 @@ import { OmitPrisma } from '@src/types';
 import { mintToken } from './mint';
 
 export class CallerService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma;
+  constructor(prisma: PrismaClient) {
+    this.prisma = prisma.$extends({
+      result: {
+        call: {
+          multiple: {
+            needs: { startFDV: true, highestFDV: true },
+            compute(call) {
+              return call.highestFDV / call.startFDV;
+            },
+          },
+        },
+      },
+    });
+  }
 
   async createCaller(data: OmitPrisma<Caller>): Promise<Caller> {
     return this.prisma.caller.create({
@@ -48,7 +62,7 @@ export class CallerService {
   async getCallerByTelegramId(telegramId: string): Promise<Caller | null> {
     return this.prisma.caller.findUnique({
       where: {
-          telegramId,
+        telegramId,
       },
     });
   }
@@ -124,13 +138,16 @@ export class CallerService {
         image: image || null,
         data: {},
       });
-      const tokenAddress = await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
-      
+      const tokenAddress = await mintToken(
+        image || 'https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg',
+        username
+      );
+
       if (tokenAddress) {
         await this.addCallerTokenAddress(telegramId, tokenAddress);
       }
     }
-    console.log("callerImageURL:", image)
+    console.log('callerImageURL:', image);
     return caller;
   }
 
@@ -147,27 +164,30 @@ export class CallerService {
     });
   }
 
-  async addCallerTokenAddress(telegramId: string, tokenAddress: string): Promise<void> {
+  async addCallerTokenAddress(
+    telegramId: string,
+    tokenAddress: string
+  ): Promise<void> {
     const caller = await this.prisma.caller.findUnique({
       where: {
-        telegramId: telegramId
-      }
+        telegramId: telegramId,
+      },
     });
 
     if (!caller) {
       console.log('Caller not found, telegram id', telegramId);
-      return
+      return;
     }
     await this.prisma.caller.update({
       where: {
-        telegramId: telegramId
+        telegramId: telegramId,
       },
       data: {
         data: {
           ...caller.data,
-          tokenAddress: tokenAddress
-        }
-      }
+          tokenAddress: tokenAddress,
+        },
+      },
     });
   }
 
