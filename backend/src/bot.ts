@@ -209,7 +209,7 @@ async function startBot() {
     console.log(
       `Found ${tokensToUpdate.length} unique tokens to process (${stepTime - startTime}ms)`
     );
-
+    //check if the pump token is out of bounding curve 
     let newPoolsDetected = 0;
     for (const token of tokensToUpdate) {
       if (token.poolAddress) {
@@ -236,28 +236,33 @@ async function startBot() {
     stepTime = Date.now();
 
     const updatedTokens = [];
+    //for each call, get marketcap
     for (const token of tokensToUpdate) {
       let mcapHistory = undefined;
+      //if poolAddress already in DB (pump adress that is out of the bonding curve)
       if (token.poolAddress) {
         mcapHistory = await geckoTerminalProvider.getTokenMCapHistory(
           token.poolAddress
         );
       }
+      //if it is an address is not a pump one (example BONK)
       if (!mcapHistory && !token.tokenAddress.endsWith('pump')) {
         mcapHistory = await geckoTerminalProvider.getTokenMCapHistory(
           token.tokenAddress
         );
       }
+      //if not on gecko terminal, alsmot sure it is a pump token, but does not end up in 'pump', look on pump
       if (!mcapHistory) {
         mcapHistory = await pumpfunProvider.getTokenMCapHistory(
           token.tokenAddress
         );
       }
+      //token not found (ex, $wSOL address or random)
       if (!mcapHistory) {
         console.log(`Could not get FDV for token ${token.tokenAddress}`);
         continue;
       }
-
+      // check whick call should be updated for this token, get a table of calls to update (often 1 or 2 calls)
       const callToUpdate = activeCalls.filter(
         (call) =>
           call.tokenAddress === token.tokenAddress ||
@@ -267,15 +272,15 @@ async function startBot() {
       let result = 0;
       for (const call of callToUpdate) {
         let highestMcap = 0;
-        for (const entry of mcapHistory) {
+        for (const entry of mcapHistory) { //mcapHistory is a table of the hostrical values
           if (
             entry.timestamp > call.createdAt.getTime() / 1000 &&
-            entry.highest > highestMcap
+            entry.highest > highestMcap //check if timestamp is AFTER call creation AND .... reduce
           ) {
             highestMcap = entry.highest;
           }
         }
-
+        // if highest detected is indeed higher thatn the on in DB, update the highest value
         if (call.highestFDV < highestMcap) {
           await callService.updateCallHighestMcap(call.id, highestMcap);
           result++;
