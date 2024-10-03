@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import MarketCard, { MarketCardProps } from '@/components/trenches/MarketCard';
-import { RiFilter3Fill } from 'react-icons/ri';
-import { createAxiosInstance } from '@/utils/createAxiosInstance';
+import React, { useEffect, useState } from "react";
+import MarketCard, { MarketCardProps } from "@/components/trenches/MarketCard";
+import { RiFilter3Fill } from "react-icons/ri";
+import { createAxiosInstance } from "@/utils/createAxiosInstance";
 
 const instance = createAxiosInstance();
 
@@ -13,7 +13,7 @@ export default function MarketPage() {
   useEffect(() => {
     async function fetchTokens() {
       try {
-        const response = await instance.get('/callers');
+        const response = await instance.get("/callers");
         setMarketCard(
           response.data.map((c: any, i: number) => ({
             ...c,
@@ -22,7 +22,7 @@ export default function MarketPage() {
           }))
         );
       } catch (error) {
-        console.error('Error fetching tokens:', error);
+        console.error("Error fetching tokens:", error);
       }
     }
     fetchTokens();
@@ -36,7 +36,7 @@ export default function MarketPage() {
             href="#"
             className="text-gray-400 hover:underline flex items-center"
           >
-            <RiFilter3Fill className="mr-1" size={24} />{' '}
+            <RiFilter3Fill className="mr-1" size={24} />{" "}
             <span className="text-sm">Filters</span>
           </a>
           <select className="text-gray-400 bg-neutral-800 border border-neutral-500 rounded-full px-3 py-1">
@@ -55,7 +55,7 @@ export default function MarketPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-20"></div>
         <div className="fixed inset-0 flex items-center justify-center z-30">
           <div className="transform rotate-[-30deg] bg-yellow-500 text-black text-6xl font-bold py-4 px-8 rounded-lg">
-            COMING SOON !!
+            COMING SOON
           </div>
         </div>
       </div>
