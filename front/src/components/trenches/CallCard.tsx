@@ -59,20 +59,20 @@ const callCard = ({
                 <span className="inline-flex items-center break-keep md:ml-0 text-xs leading-none border-gray-500 pr-1">
                   <span className="text-gray-400 font-medium">Called by</span>
                   <Link
-                    href={`/caller/${call.caller.id}`}
+                    href={`/caller/${call.caller?.id}`}
                     className="flex flex-row items-center"
                   >
                     <CallerAvatar
-                      name={call.caller.name}
+                      name={call.caller?.name || ''}
                       image={
-                        call.caller.image === null
+                        call.caller?.image === null
                           ? undefined
-                          : call.caller.image
+                          : call.caller?.image
                       }
                       className="w-4 h-4 ml-2"
                     />
                     <span className="inline-flex text-gray-200 font-medium ml-1">
-                      {call.caller.name}
+                      {call.caller?.name}
                     </span>
                   </Link>
                 </span>
