@@ -17,6 +17,7 @@ import bs58 from 'bs58';
 import { setupPinata } from '../util/pinataconfig';
 import { PinataSDK } from 'pinata-web3';
 
+
 let umi: Umi;
 let userWallet: Keypair;
 let userWalletSigner: Signer;
@@ -75,8 +76,7 @@ export async function mintToken(image: string, callerName: string) {
   try {
     initializeUmi();
 
-    const metadata = await setupMetadata(image, callerName); //"https://trenches.fra1.cdn.digitaloceanspaces.com/profile_pictures/6255998913.jpg", "luigiscall");
-    console.log("🚀 ~ mintToken ~ metadata:", metadata)
+    const metadata = await setupMetadata(image, callerName);
 
     const mint = generateSigner(umi);
 
@@ -93,7 +93,10 @@ export async function mintToken(image: string, callerName: string) {
       tokenStandard: TokenStandard.Fungible,
     }).sendAndConfirm(umi);
     console.log('Successfully minted 1 billion tokens (', mint.publicKey, ')');
+    return mint.publicKey;
+
   } catch (err) {
     console.error('Error minting tokens:', err);
+    return
   }
 }

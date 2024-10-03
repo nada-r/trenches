@@ -124,7 +124,11 @@ export class CallerService {
         image: image || null,
         data: {},
       });
-      await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
+      const tokenAddress = await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
+      
+      if (tokenAddress) {
+        await this.addCallerTokenAddress(telegramId, tokenAddress);
+      }
     }
     console.log("callerImageURL:", image)
     return caller;
@@ -140,6 +144,30 @@ export class CallerService {
           power,
         },
       },
+    });
+  }
+
+  async addCallerTokenAddress(telegramId: string, tokenAddress: string): Promise<void> {
+    const caller = await this.prisma.caller.findUnique({
+      where: {
+        telegramId: telegramId
+      }
+    });
+
+    if (!caller) {
+      console.log('Caller not found, telegram id', telegramId);
+      return
+    }
+    await this.prisma.caller.update({
+      where: {
+        telegramId: telegramId
+      },
+      data: {
+        data: {
+          ...caller.data,
+          tokenAddress: tokenAddress
+        }
+      }
     });
   }
 
