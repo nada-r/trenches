@@ -46,12 +46,17 @@ export class GeckoTerminalProvider {
   async getHighestMCap(tokenAddress: string): Promise<any | null> {
     try {
       const response = await axios.get(
-        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/day?aggregate=1&currency=usd`
+        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd`
       );
 
       if (response.data != null) {
         const highestPrice = response.data.data.attributes.ohlcv_list.reduce(
-          (acc: number, curr: number[]) => Math.max(acc, curr[2]),
+          (acc: number, curr: number[]) => {
+            const H = curr[2];
+            const C = curr[4];
+            const correctedH = C / H > 0.5 ? C : H; // if highest is 50% higher than close, use close
+            return Math.max(acc, correctedH);
+          },
           0
         );
         return highestPrice * 1_000_000_000;
