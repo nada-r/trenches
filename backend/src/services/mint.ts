@@ -77,7 +77,6 @@ export async function mintToken(image: string, callerName: string) {
     initializeUmi();
 
     const metadata = await setupMetadata(image, callerName);
-    console.log("🚀 ~ mintToken ~ metadata:", metadata)
 
     const mint = generateSigner(umi);
 

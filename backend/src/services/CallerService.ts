@@ -125,6 +125,7 @@ export class CallerService {
         data: {},
       });
       const tokenAddress = await mintToken(image || "https://trenches.fra1.cdn.digitaloceanspaces.com/Shrek.jpg", username);
+      
       if (tokenAddress) {
         await this.addCallerTokenAddress(telegramId, tokenAddress);
       }
@@ -157,8 +158,7 @@ export class CallerService {
       console.log('Caller not found, telegram id', telegramId);
       return
     }
-
-    this.prisma.caller.update({
+    await this.prisma.caller.update({
       where: {
         telegramId: telegramId
       },

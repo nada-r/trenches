@@ -6,3 +6,4 @@ node_modules/
 !.env.project
 !.env.vault
 .idea/runConfigurations
+tasks.json
