@@ -18,7 +18,6 @@ async function main() {
     geckoTerminalProvider,
     pumpfunProvider,
     dexScreenerProvider,
-    fdvUpdaterService,
   } = await bootstrap();
   const env = getEnvFromDotenvKey();
 
@@ -61,8 +60,7 @@ async function main() {
         tokenService,
         geckoTerminalProvider,
         pumpfunProvider,
-        dexScreenerProvider,
-        fdvUpdaterService
+        dexScreenerProvider
       );
       break;
     default:

@@ -3,14 +3,12 @@ import { TokenService } from '@src/services/TokenService';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider';
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
-import { FdvUpdaterService } from '@src/services/FdvUpdaterService';
 
 export async function displayTokenActions(
   tokenService: TokenService,
   geckoTerminalProvider: GeckoTerminalProvider,
   pumpfunProvider: PumpfunProvider,
-  dexScreenerProvider: DexScreenerProvider,
-  fdvUpdaterService: FdvUpdaterService
+  dexScreenerProvider: DexScreenerProvider
 ) {
   let actions = [
     { name: 'Update token cache', value: 'updateTokenCache' },
@@ -38,7 +36,7 @@ export async function displayTokenActions(
         );
         break;
       case 'highestFdv':
-        await highestFdv(fdvUpdaterService, pumpfunProvider);
+        await highestFdv(pumpfunProvider);
         break;
       case 'back':
         return; // Exit the function to go back to the parent menu
@@ -96,10 +94,7 @@ export const tokenInfo = async (
   }
 };
 
-export const highestFdv = async (
-  fdvUpdaterService: FdvUpdaterService,
-  pumpfunProvider: PumpfunProvider
-) => {
+export const highestFdv = async (pumpfunProvider: PumpfunProvider) => {
   const tokenAddress = await input({
     message: 'Enter token address:',
     required: true,
