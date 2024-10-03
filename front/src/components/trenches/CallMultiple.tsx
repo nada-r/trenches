@@ -5,6 +5,6 @@ interface CallMultipleProps {
 }
 
 const CallMultiple: React.FC<CallMultipleProps> = ({ multiple }) => {
-  return <span>[{multiple.toFixed(1)}X]</span>;
+  return <span>x{multiple.toFixed(1)}</span>;
 };
 export default CallMultiple;

@@ -6,7 +6,7 @@ const TokenLinks = ({ token }: { token: Token }) => {
   const isDexScreener = !isPumpfun || token.data.poolAddress;
 
   return (
-    <div className="flex flex-row gap-1">
+    <div className="flex flex-row gap-2">
       {isPumpfun ? (
         <a
           href={`https://pump.fun/${token.address}`}

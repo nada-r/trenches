@@ -67,7 +67,7 @@ export class CallService {
   }
 
   async getOpenCalls(): Promise<Call[]> {
-    const openCalls = await this.prisma.call.findMany({
+    return await this.prisma.call.findMany({
       where: {
         createdAt: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -83,7 +83,6 @@ export class CallService {
         },
       },
     });
-    return openCalls.sort((c1, c2) => c2.multiple - c1.multiple);
   }
 
   async getClosedCalls(): Promise<Call[]> {
@@ -96,7 +95,7 @@ export class CallService {
       orderBy: {
         createdAt: 'desc',
       },
-      take: 10,
+      take: 50,
       include: {
         token: true,
         caller: {
