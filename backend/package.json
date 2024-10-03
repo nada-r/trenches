@@ -11,6 +11,7 @@
     "bot": "node -r module-alias/register ./dist/bot.js",
     "bot:dev": "npx ts-node --files -r tsconfig-paths/register ./src/bot.ts",
     "dev": "PORT=80 nodemon",
+    "dev_test": "npx ts-node --files -r tsconfig-paths/register ./src/index_test.ts",
     "console": "npx ts-node --files -r tsconfig-paths/register ./src/console.ts",
     "prisma:gen": "npx prisma generate",
     "prisma:migrate-prod": "npx prisma migrate deploy",
