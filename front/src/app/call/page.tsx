@@ -9,6 +9,7 @@ import CallCard from '@/components/trenches/CallCard';
 const instance = createAxiosInstance();
 
 type CallerLight = {
+  id: number;
   name: string;
   image: string;
 };

@@ -77,6 +77,7 @@ export class CallService {
         token: true,
         caller: {
           select: {
+            id: true,
             name: true,
             image: true,
           },
@@ -100,6 +101,7 @@ export class CallService {
         token: true,
         caller: {
           select: {
+            id: true,
             name: true,
             image: true,
           },
