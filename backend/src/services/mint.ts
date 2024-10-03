@@ -17,6 +17,7 @@ import bs58 from 'bs58';
 import { setupPinata } from '../util/pinataconfig';
 import { PinataSDK } from 'pinata-web3';
 
+
 let umi: Umi;
 let userWallet: Keypair;
 let userWalletSigner: Signer;
@@ -93,8 +94,10 @@ export async function mintToken(image: string, callerName: string) {
       tokenStandard: TokenStandard.Fungible,
     }).sendAndConfirm(umi);
     console.log('Successfully minted 1 billion tokens (', mint.publicKey, ')');
+    return mint.publicKey;
 
   } catch (err) {
     console.error('Error minting tokens:', err);
+    return
   }
 }
