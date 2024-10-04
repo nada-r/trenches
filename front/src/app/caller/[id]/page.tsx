@@ -10,7 +10,6 @@ import CallingPower from '@/components/trenches/CallingPower';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useRouter } from 'next/navigation';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import CallCard from '@/components/trenches/CallCard';
 
 const instance = createAxiosInstance();
@@ -25,11 +24,6 @@ const Page = ({ params }: { params: { id: string } }) => {
       closedCalls: Array<Call & { token: Token; multiple: number }>;
     }
   >();
-
-  const [selectedView, setSelectedView] = useState<'open' | 'closed'>('open');
-  const [calls, setCalls] = useState<
-    Array<Call & { token: Token; multiple: number }>
-  >([]);
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
@@ -61,14 +55,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     } catch (error) {
       console.error('Error toggling follow status:', error);
     }
-  };
-
-  const viewOpen = () => {
-    setCalls(caller?.openCalls || []);
-  };
-
-  const viewClosed = () => {
-    setCalls(caller?.closedCalls || []);
   };
 
   return (
@@ -119,54 +105,30 @@ const Page = ({ params }: { params: { id: string } }) => {
           </div>
         </div>
       </div>
-      <div className="lg:hidden mt-4">
-        <ToggleGroup
-          type="single"
-          value={selectedView}
-          className="justify-start"
-          onValueChange={(value) => {
-            if (value === 'open') {
-              viewOpen();
-            } else if (value === 'closed') {
-              viewClosed();
-            }
-            setSelectedView(value as 'open' | 'closed');
-          }}
-        >
-          <ToggleGroupItem
-            className="h-6 rounded-full"
-            onClick={() => viewOpen()}
-            value="open"
-          >
-            Top open calls
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            className="h-6 rounded-full"
-            onClick={() => viewClosed()}
-            value="closed"
-          >
-            Closed calls
-          </ToggleGroupItem>
-        </ToggleGroup>
-
-        <div className={`grid grid-cols-1 gap-3 mt-4`}>
-          {calls.map((call, index) => (
-            <CallCard key={index} call={call} showCaller={false} />
-          ))}
-        </div>
-      </div>
-      <div className="hidden lg:grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className={`flex flex-col gap-3 mt-4`}>
           <h1>Open Calls</h1>
-          {caller?.openCalls.map((call, index) => (
-            <CallCard key={index} call={call} showCaller={false} />
-          ))}
+          {caller?.openCalls && caller.openCalls.length > 0 ? (
+            caller.openCalls.map((call, index) => (
+              <CallCard key={index} call={call} showCaller={false} />
+            ))
+          ) : (
+            <p className="text-gray-500 italic">
+              This caller has no open calls at the moment.
+            </p>
+          )}
         </div>
         <div className={`flex flex-col gap-3 mt-4`}>
           <h1>Closed Calls</h1>
-          {caller?.closedCalls.map((call, index) => (
-            <CallCard key={index} call={call} showCaller={false} />
-          ))}
+          {caller?.closedCalls && caller.closedCalls.length > 0 ? (
+            caller.closedCalls.map((call, index) => (
+              <CallCard key={index} call={call} showCaller={false} />
+            ))
+          ) : (
+            <p className="text-gray-500 italic">
+              This caller has no closed calls at the moment.
+            </p>
+          )}
         </div>
       </div>
     </>
