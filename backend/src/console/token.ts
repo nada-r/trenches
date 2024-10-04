@@ -3,15 +3,17 @@ import { TokenService } from '@src/services/TokenService';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider';
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
+import { TokenUpdaterService } from '@src/services/TokenUpdaterService';
 
 export async function displayTokenActions(
   tokenService: TokenService,
   geckoTerminalProvider: GeckoTerminalProvider,
   pumpfunProvider: PumpfunProvider,
-  dexScreenerProvider: DexScreenerProvider
+  dexScreenerProvider: DexScreenerProvider,
+  tokenUpdaterService: TokenUpdaterService
 ) {
   let actions = [
-    { name: 'Update token cache', value: 'updateTokenCache' },
+    { name: 'Update missing tokens in database', value: 'updateTokenCache' },
     { name: 'Get token info', value: 'info' },
     { name: 'Get highest FDV', value: 'highestFdv' },
     { name: 'Back to parent menu', value: 'back' },
@@ -25,7 +27,7 @@ export async function displayTokenActions(
 
     switch (action) {
       case 'updateTokenCache':
-        await updateTokenCache(tokenService);
+        await updateTokenCache(tokenService, tokenUpdaterService);
         break;
       case 'info':
         await tokenInfo(
@@ -46,15 +48,17 @@ export async function displayTokenActions(
   }
 }
 
-export const updateTokenCache = async (tokenService: TokenService) => {
+export const updateTokenCache = async (
+  tokenService: TokenService,
+  tokenUpdaterService: TokenUpdaterService
+) => {
   const tokens = await tokenService.findMissingTokens();
-  let count = 0;
-  let notfounds = 0;
+  let count = 0,
+    notfounds = 0;
   for (const token of tokens) {
-    console.log(token);
-    const tokenInfo = null; //await tokenInfoProvider.getSolanaToken(token);
+    console.log('Update token:', token);
+    let tokenInfo = await tokenUpdaterService.findAndUpdateTokenInfo(token);
     if (tokenInfo) {
-      await tokenService.createOrUpdateToken(tokenInfo);
       count++;
     } else {
       notfounds++;

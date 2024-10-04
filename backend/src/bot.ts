@@ -15,9 +15,9 @@ async function startBot() {
     tokenService,
     pumpfunProvider,
     geckoTerminalProvider,
-    dexScreenerProvider,
     tournamentService,
     tournamentResultProcessor,
+    tokenUpdaterService,
     prisma,
     validateEnv,
   } = await bootstrap();
@@ -151,19 +151,12 @@ async function startBot() {
       let tokenAddress = splTokens[i];
 
       // Check if the token exists in the Pumpfun
-      let tokenInfo = await pumpfunProvider.getTokenInfo(tokenAddress);
+      let tokenInfo =
+        await tokenUpdaterService.findAndUpdateTokenInfo(tokenAddress);
       if (!tokenInfo) {
-        tokenInfo = await dexScreenerProvider.getTokenInfo(tokenAddress);
-        if (!tokenInfo) {
-          tokenInfo = await dexScreenerProvider.getPoolInfo(tokenAddress);
-          if (!tokenInfo) {
-            continue;
-          }
-        }
+        // token not found, skip it
+        continue;
       }
-
-      // Store token info in the database
-      await tokenService.createOrUpdateToken(tokenInfo);
 
       // record the call if there is not already one for this token and caller
       const existingCall = await callService.getCallByTelegramIdAndToken(
@@ -209,7 +202,7 @@ async function startBot() {
     console.log(
       `Found ${tokensToUpdate.length} unique tokens to process (${stepTime - startTime}ms)`
     );
-    //check if the pump token is out of bounding curve 
+    //check if the pump token is out of bounding curve
     let newPoolsDetected = 0;
     for (const token of tokensToUpdate) {
       if (token.poolAddress) {
@@ -272,7 +265,8 @@ async function startBot() {
       let result = 0;
       for (const call of callToUpdate) {
         let highestMcap = 0;
-        for (const entry of mcapHistory) { //mcapHistory is a table of the hostrical values
+        for (const entry of mcapHistory) {
+          //mcapHistory is a table of the hostrical values
           if (
             entry.timestamp > call.createdAt.getTime() / 1000 &&
             entry.highest > highestMcap //check if timestamp is AFTER call creation AND .... reduce
