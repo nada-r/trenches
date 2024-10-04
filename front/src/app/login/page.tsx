@@ -2,20 +2,10 @@
 
 import * as React from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { useState, useEffect } from 'react';
 
 export default function LoginPage() {
   const { authenticated, user, ready } = usePrivy();
-  const [userInfo, setUserInfo] = useState<any>(null);
 
-  useEffect(() => {
-    if (ready && authenticated && user) {
-      // Fetch user information when the user is authenticated
-      user.get().then((data) => {
-        setUserInfo(data);
-      });
-    }
-  }, [ready, authenticated, user]);
 
   if (!ready) {
     return (
@@ -33,15 +23,22 @@ export default function LoginPage() {
     );
   }
 
+ 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-2xl font-bold">User Information</h1>
-      {userInfo ? (
-        <pre className="mt-4 p-4 bg-gray-100 rounded-md">
-          {JSON.stringify(userInfo, null, 2)}
-        </pre>
+      {user ? (
+        <div className="mt-4 p-4 bg-gray-100 rounded-md">
+          <ul>
+            {Object.entries(user).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {JSON.stringify(value, null, 2)}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
-        <p>Loading user info...</p>
+        <p>No user information available</p>
       )}
     </div>
   );
