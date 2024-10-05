@@ -31,10 +31,10 @@ const MarketCard: React.FC<MarketCardProps> = ({
         </span>
       </div>
       <div className="flex space-x-2">
-        <button className="bg-green-700 text-white font-bold py-1 px-4 rounded-full">
+        <button className="bg-green-700 text-white font-bold py-1 px-2 sm:px-4 text-sm sm:text-base rounded-full">
           Buy
         </button>
-        <button className="bg-red-700 text-white font-bold py-1 px-4 rounded-full">
+        <button className="bg-red-700 text-white font-bold py-1 px-2 sm:px-4 text-sm sm:text-base rounded-full">
           Sell
         </button>
       </div>
