@@ -1,16 +1,22 @@
 import { input, select } from '@inquirer/prompts';
-import { TokenService } from '@src/services/TokenService';
+import { TokenRepository } from '@src/services/TokenRepository';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider';
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
 import { TokenUpdaterService } from '@src/services/TokenUpdaterService';
+import { EnvType } from '@src/console';
+
+type TokenActionsDependencies = {
+  tokenRepository: TokenRepository;
+  tokenUpdaterService: TokenUpdaterService;
+  geckoTerminalProvider: GeckoTerminalProvider;
+  pumpfunProvider: PumpfunProvider;
+  dexScreenerProvider: DexScreenerProvider;
+};
 
 export async function displayTokenActions(
-  tokenService: TokenService,
-  geckoTerminalProvider: GeckoTerminalProvider,
-  pumpfunProvider: PumpfunProvider,
-  dexScreenerProvider: DexScreenerProvider,
-  tokenUpdaterService: TokenUpdaterService
+  env: EnvType,
+  dependencies: TokenActionsDependencies
 ) {
   let actions = [
     { name: 'Update missing tokens in database', value: 'updateTokenCache' },
@@ -27,18 +33,13 @@ export async function displayTokenActions(
 
     switch (action) {
       case 'updateTokenCache':
-        await updateTokenCache(tokenService, tokenUpdaterService);
+        await updateTokenCache(dependencies);
         break;
       case 'info':
-        await tokenInfo(
-          tokenService,
-          geckoTerminalProvider,
-          pumpfunProvider,
-          dexScreenerProvider
-        );
+        await tokenInfo(dependencies);
         break;
       case 'highestFdv':
-        await highestFdv(pumpfunProvider);
+        await highestFdv(dependencies);
         break;
       case 'back':
         return; // Exit the function to go back to the parent menu
@@ -48,11 +49,9 @@ export async function displayTokenActions(
   }
 }
 
-export const updateTokenCache = async (
-  tokenService: TokenService,
-  tokenUpdaterService: TokenUpdaterService
-) => {
-  const tokens = await tokenService.findMissingTokens();
+const updateTokenCache = async (dependencies: TokenActionsDependencies) => {
+  const { tokenRepository, tokenUpdaterService } = dependencies;
+  const tokens = await tokenRepository.findMissingTokens();
   let count = 0,
     notfounds = 0;
   for (const token of tokens) {
@@ -68,12 +67,9 @@ export const updateTokenCache = async (
   console.log(`Updated ${count} tokens. ${notfounds} tokens not found.`);
 };
 
-export const tokenInfo = async (
-  tokenService: TokenService,
-  geckoTerminalProvider: GeckoTerminalProvider,
-  pumpfunProvider: PumpfunProvider,
-  dexScreenerProvider: DexScreenerProvider
-) => {
+const tokenInfo = async (dependencies: TokenActionsDependencies) => {
+  const { geckoTerminalProvider, pumpfunProvider } = dependencies;
+
   const tokenAddress = await input({
     message: 'Enter token address:',
     required: true,
@@ -98,7 +94,7 @@ export const tokenInfo = async (
   }
 };
 
-export const highestFdv = async (pumpfunProvider: PumpfunProvider) => {
+const highestFdv = async (dependencies: TokenActionsDependencies) => {
   const tokenAddress = await input({
     message: 'Enter token address:',
     required: true,

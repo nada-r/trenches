@@ -2,8 +2,9 @@ import { Call, Caller, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
 import { mintToken } from './mint';
 
-export class CallerService {
+export class CallerRepository {
   private prisma;
+
   constructor(prisma: PrismaClient) {
     this.prisma = prisma.$extends({
       result: {

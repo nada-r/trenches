@@ -1,13 +1,18 @@
 import { Call } from '@prisma/client';
-import { ICallingPowerCalculator } from '@src/calculator/PowerCalculatorFactory';
 import dayjs from 'dayjs';
 
-export class PremiumCallingPowerCalculator implements ICallingPowerCalculator {
+export interface ICallingPowerCalculator {
+  computePower(calls: Array<Call>, enableLogging?: boolean): number;
+}
+
+export class NewCallingPowerCalculator implements ICallingPowerCalculator {
+  constructor() {}
+
   computePower(calls: Array<Call>, enableLogging: boolean = false): number {
     let globalPerformance = 0;
     let totalWeight = 0;
     const currentDate = dayjs();
-    
+
     for (const call of calls) {
       // Calculate the performance
       const performance =
@@ -32,8 +37,6 @@ export class PremiumCallingPowerCalculator implements ICallingPowerCalculator {
     }
 
     // Calculate the final performance
-    const finalPerformance =
-      totalWeight > 0 ? globalPerformance / totalWeight : 0;
-    return finalPerformance;
+    return totalWeight > 0 ? globalPerformance / totalWeight : 0;
   }
 }

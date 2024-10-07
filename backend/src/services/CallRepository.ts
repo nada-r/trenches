@@ -1,8 +1,9 @@
 import { Call, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
 
-export class CallService {
+export class CallRepository {
   private prisma;
+
   constructor(prisma: PrismaClient) {
     this.prisma = prisma.$extends({
       result: {

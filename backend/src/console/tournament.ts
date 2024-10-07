@@ -1,13 +1,17 @@
 import { input, number, select } from '@inquirer/prompts';
-import { TournamentService } from '@src/services';
 import { TournamentStatus } from '@prisma/client';
 import { EnvType } from '@src/console';
 import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
+import { TournamentRepository } from '@src/services/TournamentRepository';
+
+type TournamentActionsDependencies = {
+  tournamentRepository: TournamentRepository;
+  tournamentResultProcessor: TournamentResultProcessor;
+};
 
 export async function displayTournamentActions(
   env: EnvType,
-  tournamentService: TournamentService,
-  tournamentResultProcessor: TournamentResultProcessor
+  dependencies: TournamentActionsDependencies
 ) {
   while (true) {
     const action = await select({
@@ -22,13 +26,13 @@ export async function displayTournamentActions(
 
     switch (action) {
       case 'create':
-        await createTournament(tournamentService);
+        await createTournament(dependencies);
         break;
       case 'start':
-        await startTournament(tournamentService);
+        await startTournament(dependencies);
         break;
       case 'end':
-        await endTournament(tournamentService, tournamentResultProcessor);
+        await endTournament(dependencies);
         break;
       case 'back':
         return; // Exit the function to go back to the parent menu
@@ -40,7 +44,10 @@ export async function displayTournamentActions(
     console.log('\n');
   }
 }
-async function createTournament(tournamentService: TournamentService) {
+
+const createTournament = async (
+  dependencies: TournamentActionsDependencies
+) => {
   const name = await input({ message: 'Tournament name:' });
   const openDuration = await number({ message: 'Open duration (days):' });
   const endDuration = await number({ message: 'End duration (days):' });
@@ -56,14 +63,15 @@ async function createTournament(tournamentService: TournamentService) {
   };
 
   console.log('Create tournament:', tournament);
-  await tournamentService.createTournament(tournament);
-}
+  await dependencies.tournamentRepository.createTournament(tournament);
+};
 
-async function startTournament(tournamentService: TournamentService) {
+const startTournament = async (dependencies: TournamentActionsDependencies) => {
+  const { tournamentRepository } = dependencies;
   try {
     const tournamentId = await select({
       message: 'Enter tournament ID:',
-      choices: (await tournamentService.getAll())
+      choices: (await tournamentRepository.getAll())
         .filter((t) => t.status === 'HIDDEN')
         .map((t) => ({
           name: t.name,
@@ -76,21 +84,20 @@ async function startTournament(tournamentService: TournamentService) {
       return;
     }
 
-    await tournamentService.startTournament(tournamentId);
+    await tournamentRepository.startTournament(tournamentId);
     console.log(`Tournament ${tournamentId} has been started successfully.`);
   } catch (error) {
     console.error(`Failed to start tournament: ${error.message}`);
   }
-}
+};
 
-async function endTournament(
-  tournamentService: TournamentService,
-  tournamentResultProcessor: TournamentResultProcessor
-) {
+const endTournament = async (dependencies: TournamentActionsDependencies) => {
+  const { tournamentRepository, tournamentResultProcessor } = dependencies;
+
   try {
     const tournamentId = await select({
       message: 'Enter tournament ID:',
-      choices: (await tournamentService.getAll())
+      choices: (await tournamentRepository.getAll())
         .filter((t) => t.status === 'STARTED')
         .map((t) => ({
           name: t.name,
@@ -107,4 +114,4 @@ async function endTournament(
   } catch (error) {
     console.error(`Failed to end tournament: ${error.message}`);
   }
-}
+};

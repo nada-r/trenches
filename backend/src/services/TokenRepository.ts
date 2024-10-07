@@ -1,6 +1,6 @@
 import { PrismaClient, Token } from '@prisma/client';
 
-export interface TokenInfo {
+export type TokenInfo = {
   address: string;
   fdv: number;
   symbol: string;
@@ -10,19 +10,19 @@ export interface TokenInfo {
   image_uri: string;
   type: 'pumpfun' | 'raydium';
   poolAddress?: string;
-}
+};
 
 export type TokenMcap = {
   mcap: number;
   highest: number;
 };
 
-export class TokenService {
+export class TokenRepository {
   constructor(private prisma: PrismaClient) {}
 
-  async createOrUpdateToken(tokenInfo: TokenInfo): Promise<void> {
+  async createOrUpdateToken(tokenInfo: TokenInfo): Promise<Token | null> {
     try {
-      const token = await this.prisma.token.upsert({
+      return this.prisma.token.upsert({
         where: {
           address: tokenInfo.address,
         },
@@ -50,9 +50,10 @@ export class TokenService {
       });
     } catch (error) {
       if (error.code === 'P2002') {
-        return;
+        return null;
       }
       console.error('Error creating token:', error);
+      return null;
     }
   }
 
@@ -97,7 +98,7 @@ export class TokenService {
     }
   }
 
-  async updateMcap(tokenAddress: string, mcap: number) {
+  async updateMcap(tokenAddress: string, mcap: number): Promise<void> {
     try {
       const token = await this.prisma.token.findUnique({
         where: {

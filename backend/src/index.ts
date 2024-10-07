@@ -3,21 +3,19 @@ import logger from 'jet-logger';
 
 import EnvVars from '@src/common/EnvVars';
 import server from './server';
-import {
-  CallerService,
-  CallingPowerService,
-  CallService,
-  ProfileService,
-  TournamentService,
-} from './services';
 import bootstrap from '@src/bootstrap';
+import { CallerRepository } from '@src/services/CallerRepository';
+import { CallRepository } from '@src/services/CallRepository';
+import { CallingPowerService } from '@src/services/CallingPowerService';
+import { TournamentRepository } from '@src/services/TournamentRepository';
+import { ProfileRepository } from '@src/services/ProfileRepository';
 
 interface IServices {
-  caller: CallerService;
-  call: CallService;
+  caller: CallerRepository;
+  call: CallRepository;
   callingPower: CallingPowerService;
-  tournament: TournamentService;
-  profile: ProfileService;
+  tournament: TournamentRepository;
+  profile: ProfileRepository;
 }
 
 export const services: Partial<IServices> = {};
@@ -55,6 +53,7 @@ export function addExistingService<T extends keyof IServices>(
 ): void {
   services[name] = service;
 }
+
 // **** Run **** //
 
 const SERVER_START_MSG =
@@ -67,17 +66,17 @@ const SERVER_START_MSG =
 
 server.listen(EnvVars.Port, async () => {
   const {
-    callerService,
-    callService,
+    callerRepository,
+    callRepository,
     callingPowerService,
-    profileService,
-    tournamentService,
+    profileRepository,
+    tournamentRepository,
   } = await bootstrap();
-  addExistingService('caller', callerService);
-  addExistingService('call', callService);
+  addExistingService('caller', callerRepository);
+  addExistingService('call', callRepository);
   addExistingService('callingPower', callingPowerService);
-  addExistingService('tournament', tournamentService);
-  addExistingService('profile', profileService);
+  addExistingService('tournament', tournamentRepository);
+  addExistingService('profile', profileRepository);
 
   logger.info(SERVER_START_MSG);
 });

@@ -1,21 +1,44 @@
-import { TokenInfo } from '@src/services/TokenService';
-import axios from 'axios';
+import { TokenInfo } from '@src/services/TokenRepository';
+import axios, { AxiosInstance } from 'axios';
 
 export class DexScreenerProvider {
-  constructor() {}
+  constructor(private axiosInstance: AxiosInstance = axios) {}
 
   private isRaydiumSolanaPair(tokenAddress: string, pair: any): boolean {
     return (
-      pair.chainId == 'solana' &&
+      pair.chainId === 'solana' &&
       pair.dexId === 'raydium' &&
       pair.baseToken.symbol === 'SOL' &&
       pair.baseToken.address === tokenAddress
     );
   }
 
+  private mapPairToTokenInfo(pair: any): TokenInfo {
+    return {
+      address: pair.baseToken.address,
+      fdv: parseFloat(pair.fdv),
+      symbol: pair.baseToken.symbol,
+      chain: 'solana',
+      url: pair.url,
+      name: pair.baseToken.name,
+      image_uri: pair.info.imageUrl,
+      type: 'raydium',
+      poolAddress: pair.pairAddress,
+    };
+  }
+
+  private handleApiError(error: any): null {
+    if (error.response && error.response.status === 429) {
+      console.log(`429 on ${error.config.url}`);
+    } else {
+      console.error('Error fetching token', error);
+    }
+    return null;
+  }
+
   async getTokenInfo(tokenAddress: string): Promise<TokenInfo | null> {
     try {
-      const response = await axios.get(
+      const response = await this.axiosInstance.get(
         `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`
       );
       const pairs = response.data.pairs;
@@ -23,65 +46,30 @@ export class DexScreenerProvider {
         const pair = pairs.find((p) =>
           this.isRaydiumSolanaPair(tokenAddress, p)
         );
-
-        if (pair) {
-          return {
-            address: pair.baseToken.address,
-            fdv: parseFloat(pair.fdv),
-            symbol: pair.baseToken.symbol,
-            chain: 'solana',
-            url: pair.url,
-            name: pair.baseToken.name,
-            image_uri: pair.info.imageUrl,
-            type: 'raydium',
-            poolAddress: pair.pairAddress,
-          };
-        } else {
-          return null;
-        }
+        return pair ? this.mapPairToTokenInfo(pair) : null;
       } else {
-        console.log('Token not found in pumpfun:', tokenAddress);
+        console.log('Token not found in dexscreener:', tokenAddress);
         return null;
       }
     } catch (error) {
-      if (error.response && error.response.status === 429) {
-        console.log(`429 on ${error.config.url}`);
-      } else {
-        console.error('Error fetching token', error);
-      }
-      return null;
+      return this.handleApiError(error);
     }
   }
 
-  async getPoolInfo(tokenAddress: string): Promise<TokenInfo | null> {
+  async getPoolInfo(poolAddress: string): Promise<TokenInfo | null> {
     try {
-      const response = await axios.get(
-        `https://api.dexscreener.com/latest/dex/pairs/solana/${tokenAddress}`
+      const response = await this.axiosInstance.get(
+        `https://api.dexscreener.com/latest/dex/pairs/solana/${poolAddress}`
       );
       const pair = response.data.pair;
-      if (this.isRaydiumSolanaPair(tokenAddress, pair)) {
-        return {
-          address: pair.baseToken.address,
-          fdv: parseFloat(pair.fdv),
-          symbol: pair.baseToken.symbol,
-          chain: 'solana',
-          url: pair.url,
-          name: pair.baseToken.name,
-          image_uri: pair.info.imageUrl,
-          type: 'raydium',
-          poolAddress: pair.pairAddress,
-        };
+      if (this.isRaydiumSolanaPair(poolAddress, pair)) {
+        return this.mapPairToTokenInfo(pair);
       } else {
-        console.log('Token not found in pumpfun:', tokenAddress);
+        console.log('Token not found in dexscreener:', poolAddress);
         return null;
       }
     } catch (error) {
-      if (error.response && error.response.status === 429) {
-        console.log(`429 on ${error.config.url}`);
-      } else {
-        console.error('Error fetching token', error);
-      }
-      return null;
+      return this.handleApiError(error);
     }
   }
 }

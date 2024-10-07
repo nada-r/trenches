@@ -1,12 +1,13 @@
-import axios from 'axios';
-import { TokenMcap } from '@src/services/TokenService';
+import axios, { AxiosInstance } from 'axios';
+import { TokenMcap } from '@src/services/TokenRepository';
+import { McapEntry } from '@src/services/FdvUpdaterService';
 
 export class GeckoTerminalProvider {
-  constructor() {}
-
   private solPriceCache: { price: number | null; timestamp: number } | null =
     null;
   private readonly CACHE_DURATION = 60000; // 1 minute in milliseconds
+
+  constructor(private axiosInstance: AxiosInstance = axios) {}
 
   async getSolPrice(): Promise<number | null> {
     const currentTime = Date.now();
@@ -18,8 +19,9 @@ export class GeckoTerminalProvider {
     ) {
       return this.solPriceCache.price;
     }
+
     try {
-      const response = await axios.get(
+      const response = await this.axiosInstance.get(
         `https://api.geckoterminal.com/api/v2/simple/networks/solana/token_price/So11111111111111111111111111111111111111112`
       );
       const price =
@@ -28,11 +30,7 @@ export class GeckoTerminalProvider {
         ];
 
       // Update cache
-      this.solPriceCache = {
-        price,
-        timestamp: currentTime,
-      };
-
+      this.solPriceCache = { price, timestamp: currentTime };
       return price;
     } catch (error) {
       if (error.response && error.response.status === 429) {
@@ -46,7 +44,7 @@ export class GeckoTerminalProvider {
 
   async getTokenMCap(tokenAddress: string): Promise<TokenMcap | null> {
     try {
-      const response = await axios.get(
+      const response = await this.axiosInstance.get(
         `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd&limit=1000`
       );
 
@@ -84,14 +82,12 @@ export class GeckoTerminalProvider {
     }
   }
 
-  async getTokenMCapHistory(tokenAddress: string): Promise<Array<{
-    timestamp: number;
-    highest: number;
-    close: number;
-  }> | null> {
+  async getTokenMCapHistory(
+    tokenAddress: string
+  ): Promise<Array<McapEntry> | null> {
     try {
-      const response = await axios.get(
-        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd`
+      const response = await this.axiosInstance.get(
+        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd&limit=1000`
       );
 
       if (response.data) {

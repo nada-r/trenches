@@ -1,23 +1,23 @@
 import { cleanEnv, str } from 'envalid';
 import { PrismaClient } from '@prisma/client';
-import {
-  CallerService,
-  CallingPowerService,
-  CallService,
-  ProfileService,
-  TournamentService,
-} from './services';
 import 'dotenv/config';
 import duration from 'dayjs/plugin/duration';
 import dayjs from 'dayjs';
-import { TokenService } from '@src/services/TokenService';
+import { TokenRepository } from '@src/services/TokenRepository';
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
-import { DexScreenerProvider } from '@src/services/DexScreenerProvider'; // ES 2015
+import { DexScreenerProvider } from '@src/services/DexScreenerProvider';
 import axios from 'axios';
 import axiosRetry, { retryAfter } from 'axios-retry';
 import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
+import { CallingPowerService } from '@src/services/CallingPowerService';
+import { ProfileRepository } from '@src/services/ProfileRepository';
 import { TokenUpdaterService } from '@src/services/TokenUpdaterService';
+import { CallerRepository } from '@src/services/CallerRepository';
+import { CallRepository } from '@src/services/CallRepository';
+import { TournamentRepository } from '@src/services/TournamentRepository';
+import { FdvUpdaterService } from '@src/services/FdvUpdaterService';
+import { NewCallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
 
 // Make sure all the Envs are loaded when launching the server
 // add the new env under envVariables
@@ -54,38 +54,48 @@ export default async function bootstrap() {
     retryCondition: (error) => error.response?.status === 429,
   });
 
-  const callerService = new CallerService(prisma);
-  const callService = new CallService(prisma);
-  const callingPowerService = new CallingPowerService(
-    callerService,
-    callService
-  );
-  const tournamentService = new TournamentService(prisma);
-  const tournamentResultProcessor: TournamentResultProcessor =
-    new TournamentResultProcessor(callerService, tournamentService, prisma);
-  const profileService = new ProfileService(prisma);
-  const tokenService = new TokenService(prisma);
   const geckoTerminalProvider = new GeckoTerminalProvider();
   const dexScreenerProvider = new DexScreenerProvider();
   const pumpfunProvider = new PumpfunProvider(geckoTerminalProvider);
+
+  const callerRepository = new CallerRepository(prisma);
+  const callRepository = new CallRepository(prisma);
+  const tournamentRepository = new TournamentRepository(prisma);
+  const profileRepository = new ProfileRepository(prisma);
+  const tokenRepository = new TokenRepository(prisma);
+
+  const callingPowerCalculator = new NewCallingPowerCalculator();
+
+  const callingPowerService = new CallingPowerService(
+    callerRepository,
+    callRepository,
+    callingPowerCalculator
+  );
+  const tournamentResultProcessor = new TournamentResultProcessor(
+    callerRepository,
+    tournamentRepository,
+    prisma
+  );
   const tokenUpdaterService = new TokenUpdaterService(
     pumpfunProvider,
     dexScreenerProvider,
-    tokenService
+    tokenRepository,
+    callRepository
   );
 
   return {
-    callerService,
-    callService,
+    callerRepository,
+    callRepository,
+    profileRepository,
+    tournamentRepository,
+    tokenRepository,
+    callingPowerCalculator,
     callingPowerService,
-    profileService,
-    tournamentService,
+    tokenUpdaterService,
     tournamentResultProcessor,
-    tokenService,
     pumpfunProvider,
     geckoTerminalProvider,
     dexScreenerProvider,
-    tokenUpdaterService,
     prisma,
     validateEnv,
   };

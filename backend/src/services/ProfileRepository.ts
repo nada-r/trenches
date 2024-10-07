@@ -1,9 +1,9 @@
 import { Claim, Player, PrismaClient } from '@prisma/client';
 
-export class ProfileService {
+export class ProfileRepository {
   constructor(private prisma: PrismaClient) {}
 
-  async createClaim(walletPubkey: string): Promise<Claim> {
+  public async createClaim(walletPubkey: string): Promise<Claim> {
     // 1. Get 5 random callers
     const allCallers = await this.prisma.caller.findMany();
     const shuffledCallers = allCallers.sort(() => Math.random() - 0.5);
@@ -39,7 +39,7 @@ export class ProfileService {
     });
   }
 
-  async claim(walletPubkey: string): Promise<Claim> {
+  public async claim(walletPubkey: string): Promise<Claim> {
     let claim = await this.prisma.claim.findUnique({
       where: {
         walletPubkey: walletPubkey,
@@ -53,13 +53,16 @@ export class ProfileService {
     return claim;
   }
 
-  async getProfile(walletPubkey: string): Promise<Player | null> {
+  public async getProfile(walletPubkey: string): Promise<Player | null> {
     return this.prisma.player.findUnique({
       where: { walletPubkey },
     });
   }
 
-  async followCaller(walletPubkey: string, callerId: number): Promise<Player> {
+  public async followCaller(
+    walletPubkey: string,
+    callerId: number
+  ): Promise<Player> {
     let player = await this.prisma.player.findUnique({
       where: { walletPubkey },
     });
@@ -90,7 +93,7 @@ export class ProfileService {
     });
   }
 
-  async unfollowCaller(
+  public async unfollowCaller(
     walletPubkey: string,
     callerId: number
   ): Promise<Player> {

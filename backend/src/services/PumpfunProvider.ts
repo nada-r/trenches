@@ -1,12 +1,15 @@
-import { TokenInfo, TokenMcap } from '@src/services/TokenService';
-import axios from 'axios';
+import { TokenInfo, TokenMcap } from '@src/services/TokenRepository';
+import axios, { AxiosInstance } from 'axios';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 
 export class PumpfunProvider {
-  constructor(private geckoTerminalProvider: GeckoTerminalProvider) {}
+  constructor(
+    private geckoTerminalProvider: GeckoTerminalProvider,
+    private axiosInstance: AxiosInstance = axios
+  ) {}
 
   async getTokenInfo(tokenAddress: string): Promise<TokenInfo | null> {
-    return axios
+    return this.axiosInstance
       .get(`https://frontend-api.pump.fun/coins/${tokenAddress}`)
       .then((response) => {
         if (response.data != null && response.data.mint) {
@@ -44,7 +47,7 @@ export class PumpfunProvider {
 
   async getTokenMCap(tokenAddress: string): Promise<TokenMcap | null> {
     try {
-      const response = await axios.get(
+      const response = await this.axiosInstance.get(
         `https://frontend-api.pump.fun/candlesticks/${tokenAddress}?offset=0&limit=1000&timeframe=5`
       );
       if (response.data != null && Array.isArray(response.data)) {
@@ -76,15 +79,13 @@ export class PumpfunProvider {
     }
   }
 
-  async getTokenMCapHistory(
-    tokenAddress: string
-  ): Promise<Array<{
+  async getTokenMCapHistory(tokenAddress: string): Promise<Array<{
     timestamp: number;
     highest: number;
     close: number;
   }> | null> {
     try {
-      const response = await axios.get(
+      const response = await this.axiosInstance.get(
         `https://frontend-api.pump.fun/candlesticks/${tokenAddress}?offset=0&limit=1000&timeframe=5`
       );
       if (response.data != null && Array.isArray(response.data)) {

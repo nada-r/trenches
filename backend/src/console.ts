@@ -8,66 +8,42 @@ import { displayTokenActions } from '@src/console/token';
 export type EnvType = 'production' | 'development';
 
 async function main() {
-  const {
-    callerService,
-    callService,
-    callingPowerService,
-    tournamentResultProcessor,
-    tournamentService,
-    tokenService,
-    geckoTerminalProvider,
-    pumpfunProvider,
-    dexScreenerProvider,
-    tokenUpdaterService,
-  } = await bootstrap();
+  const dependencies = await bootstrap();
   const env = getEnvFromDotenvKey();
 
-  const answer = await select({
-    message: 'Select a category',
-    choices: [
-      {
-        name: 'Tournaments',
-        value: 'tournament',
-      },
-      {
-        name: 'Caller',
-        value: 'caller',
-      },
-      {
-        name: 'Token',
-        value: 'token',
-      },
-    ],
-  });
+  while (true) {
+    const answer = await select({
+      message: 'Select a category',
+      choices: [
+        {
+          name: 'Tournaments',
+          value: 'tournament',
+        },
+        {
+          name: 'Caller',
+          value: 'caller',
+        },
+        {
+          name: 'Token',
+          value: 'token',
+        },
+      ],
+    });
 
-  switch (answer) {
-    case 'caller':
-      await displayCallerActions(
-        env,
-        callerService,
-        callService,
-        callingPowerService
-      );
-      break;
-    case 'tournament':
-      await displayTournamentActions(
-        env,
-        tournamentService,
-        tournamentResultProcessor
-      );
-      break;
-    case 'token':
-      await displayTokenActions(
-        tokenService,
-        geckoTerminalProvider,
-        pumpfunProvider,
-        dexScreenerProvider,
-        tokenUpdaterService
-      );
-      break;
-    default:
-      // Handle default case or leave empty if no default action is needed
-      break;
+    switch (answer) {
+      case 'caller':
+        await displayCallerActions(env, dependencies);
+        break;
+      case 'tournament':
+        await displayTournamentActions(env, dependencies);
+        break;
+      case 'token':
+        await displayTokenActions(env, dependencies);
+        break;
+      default:
+        // Handle default case or leave empty if no default action is needed
+        break;
+    }
   }
 }
 

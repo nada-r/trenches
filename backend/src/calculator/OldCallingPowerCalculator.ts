@@ -1,10 +1,14 @@
 import { Call } from '@prisma/client';
-import { ICallingPowerCalculator } from '@src/calculator/PowerCalculatorFactory';
+import { ICallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
 
-export class StandardCallingPowerCalculator implements ICallingPowerCalculator {
-  computePower(calls: Array<Call>, enableLogging: boolean = false): number {
+export class OldCallingPowerCalculator implements ICallingPowerCalculator {
+  constructor() {}
+
+  public computePower(
+    calls: Array<Call>,
+    enableLogging: boolean = false
+  ): number {
     if (calls.length === 0) return 0;
-
     // Calculer la performance de chaque appel
     const performances = calls.map((call) => {
       return ((call.highestFDV - call.startFDV) / call.startFDV) * 100;

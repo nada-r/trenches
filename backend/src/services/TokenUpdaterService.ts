@@ -1,12 +1,14 @@
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
+import { TokenInfo, TokenRepository } from '@src/services/TokenRepository';
+import { CallRepository } from '@src/services/CallRepository';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider';
-import { TokenInfo, TokenService } from '@src/services/TokenService';
 
 export class TokenUpdaterService {
   constructor(
     private pumpfunProvider: PumpfunProvider,
     private dexScreenerProvider: DexScreenerProvider,
-    private tokenService: TokenService
+    private tokenRepository: TokenRepository,
+    private callRepository: CallRepository
   ) {}
 
   async findAndUpdateTokenInfo(
@@ -24,7 +26,7 @@ export class TokenUpdaterService {
 
     // Store token info in the database
     if (tokenInfo) {
-      await this.tokenService.createOrUpdateToken(tokenInfo);
+      await this.tokenRepository.createOrUpdateToken(tokenInfo);
     }
 
     return tokenInfo;

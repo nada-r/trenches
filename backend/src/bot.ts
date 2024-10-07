@@ -9,13 +9,11 @@ require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
 async function startBot() {
   const {
-    callerService,
-    callService,
+    callerRepository,
+    callRepository,
     callingPowerService,
-    tokenService,
-    pumpfunProvider,
-    geckoTerminalProvider,
-    tournamentService,
+    tokenRepository,
+    tournamentRepository,
     tournamentResultProcessor,
     tokenUpdaterService,
     prisma,
@@ -141,7 +139,7 @@ async function startBot() {
       BOT_TOKEN as string,
       isNormalUser
     );
-    const caller = await callerService.getOrCreateCaller(
+    const caller = await callerRepository.getOrCreateCaller(
       telegramId,
       username,
       imageUrl
@@ -159,13 +157,13 @@ async function startBot() {
       }
 
       // record the call if there is not already one for this token and caller
-      const existingCall = await callService.getCallByTelegramIdAndToken(
+      const existingCall = await callRepository.getCallByTelegramIdAndToken(
         telegramId,
         tokenInfo.address
       );
 
       if (!existingCall) {
-        await callService.createCall({
+        await callRepository.createCall({
           tokenAddress: tokenInfo.address,
           startFDV: tokenInfo.fdv,
           highestFDV: tokenInfo.fdv,
@@ -190,6 +188,7 @@ async function startBot() {
     console.log('Starting FDV update process...');
 
     const activeCalls = await callService.getActiveCalls();
+    const activeCalls = await callRepository.getActiveCalls();
     const tokensToUpdate = [
       ...new Set(
         activeCalls.map((call) => ({
@@ -276,12 +275,13 @@ async function startBot() {
         }
         // if highest detected is indeed higher thatn the on in DB, update the highest value
         if (call.highestFDV < highestMcap) {
-          await callService.updateCallHighestMcap(call.id, highestMcap);
+          await callRepository.updateCallHighestMcap(call.id, highestMcap);
           result++;
         }
       }
 
       await tokenService.updateMcap(
+      await tokenRepository.updateMcap(
         token.tokenAddress,
         mcapHistory[mcapHistory.length - 1].close
       );
@@ -316,7 +316,7 @@ async function startBot() {
   setInterval(updateFDV, 30 * 60 * 1000);
 
   setInterval(async () => {
-    const startedTournaments = await tournamentService.getStarted();
+    const startedTournaments = await tournamentRepository.getStarted();
     for (const tournament of startedTournaments) {
       const startedAt = dayjs(tournament.startedAt);
       const endTime = startedAt.add(tournament.metadata.endDuration, 'second');

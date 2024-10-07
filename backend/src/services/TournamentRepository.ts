@@ -5,18 +5,17 @@ import { OmitPrisma } from '@src/types';
  * TournamentService is a class that provides CRUD operations for tournaments.
  * It uses the Prisma client to interact with the database.
  */
-export class TournamentService {
-  constructor(
-    private prisma: PrismaClient
-  ) {}
+export class TournamentRepository {
+  constructor(private prisma: PrismaClient) {}
 
   /**
    * Creates a new tournament.
    * @param data - The tournament data to create, excluding the `startedAt` field.
    * @returns A Promise that resolves to the created Tournament object.
    */
-  async createTournament(data: OmitPrisma<Tournament, 'startedAt'>) {
-    data.metadata;
+  async createTournament(
+    data: OmitPrisma<Tournament, 'startedAt'>
+  ): Promise<Tournament> {
     return this.prisma.tournament.create({
       data: {
         ...data,
@@ -97,7 +96,7 @@ export class TournamentService {
    * @param tournamentId The ID of the tournament to start.
    * @returns A Promise that resolves to the updated Tournament object.
    */
-  async startTournament(tournamentId: number) {
+  async startTournament(tournamentId: number): Promise<Tournament> {
     return this.prisma.tournament.update({
       where: {
         id: tournamentId,
@@ -114,7 +113,9 @@ export class TournamentService {
    * @param data - The tournament participation data to create, excluding Prisma-specific fields.
    * @returns A Promise that resolves to the created TournamentParticipation object.
    */
-  async joinTournament(data: OmitPrisma<TournamentParticipation>) {
+  async joinTournament(
+    data: OmitPrisma<TournamentParticipation>
+  ): Promise<TournamentParticipation> {
     // TODO validate that sender is the owner of the walletPubkey by signing his message
     return this.prisma.tournamentParticipation.create({
       data: {
@@ -123,7 +124,7 @@ export class TournamentService {
     });
   }
 
-  async endTournament(tournamentId: number) {
+  async endTournament(tournamentId: number): Promise<Tournament> {
     return this.prisma.tournament.update({
       where: {
         id: tournamentId,
@@ -137,7 +138,7 @@ export class TournamentService {
   async getMyTournamentParticipation(
     tournamentId: number,
     walletPubkey: string
-  ): Promise<TournamentParticipation & { score: number } | null> {
+  ): Promise<(TournamentParticipation & { score: number }) | null> {
     const participation = await this.prisma.tournamentParticipation.findUnique({
       where: {
         unique_participation: {
@@ -147,24 +148,22 @@ export class TournamentService {
       },
       include: {
         tournament: true,
-      }
-
+      },
     });
-
 
     if (!participation) {
       return null;
     }
 
     return {
-
       ...participation,
       score: 0,
     };
   }
 
-  async getAllParticipations(tournamentId: number) {
-
+  async getAllParticipations(
+    tournamentId: number
+  ): Promise<TournamentParticipation[]> {
     return this.prisma.tournamentParticipation.findMany({
       where: {
         tournamentId: tournamentId,
@@ -172,5 +171,3 @@ export class TournamentService {
     });
   }
 }
-
-export default TournamentService;

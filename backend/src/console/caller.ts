@@ -1,78 +1,79 @@
 import { confirm, number, select } from '@inquirer/prompts';
-import { CallerService } from '@src/services/CallerService';
+import { CallerRepository } from '@src/services/CallerRepository';
 import { EnvType } from '@src/console';
-import { CallingPowerService, CallService } from '@src/services';
-import { PowerCalculatorFactory } from '@src/calculator/PowerCalculatorFactory';
+import { CallRepository } from '@src/services/CallRepository';
+import { CallingPowerService } from '@src/services/CallingPowerService';
+import { ICallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
+
+type CallerActionDependencies = {
+  callerRepository: CallerRepository;
+  callRepository: CallRepository;
+  callingPowerService: CallingPowerService;
+  callingPowerCalculator: ICallingPowerCalculator;
+};
 
 export async function displayCallerActions(
   env: EnvType,
-  callerService: CallerService,
-  callService: CallService,
-  callingPowerService: CallingPowerService
+  dependencies: CallerActionDependencies
 ) {
   let actions = [
     { name: 'Explain caller power', value: 'explainCallerPower' },
     { name: 'Update caller power', value: 'updateCallerPower' },
     { name: 'Export Callers', value: 'exportCallers' },
   ];
-  if (env === 'development') {
-    actions = [...actions, { name: 'Import Callers', value: 'importCallers' }];
-  }
 
-  const action = await select({
-    message: 'Select an action:',
-    choices: actions,
-  });
+  while (true) {
+    const action = await select({
+      message: 'Select an action:',
+      choices: actions,
+    });
 
-  switch (action) {
-    case 'explainCallerPower':
-      await explainCallerPower(callerService, callService);
-      break;
-    case 'updateCallerPower':
-      await updateCallerPower(callerService, callingPowerService);
-      break;
-    default:
-      console.log('Not yet implemented');
+    switch (action) {
+      case 'explainCallerPower':
+        await explainCallerPower(dependencies);
+        break;
+      case 'updateCallerPower':
+        await updateCallerPower(dependencies);
+        break;
+      default:
+        console.log('Not yet implemented');
+    }
   }
 }
 
-const explainCallerPower = async (
-  callerService: CallerService,
-  callService: CallService
-) => {
-  const callingPowerFactory = new PowerCalculatorFactory();
+const explainCallerPower = async (dependencies: CallerActionDependencies) => {
+  const { callerRepository, callRepository, callingPowerCalculator } =
+    dependencies;
+
   const callerId = await number({ message: 'Enter caller ID:' });
 
   if (callerId) {
-    const caller = await callerService.getCallerWithCall(callerId);
+    const caller = await callerRepository.getCallerWithCall(callerId);
     if (caller) {
-      const calls = await callService.getCallsByTelegramId(caller.telegramId);
-      callingPowerFactory?.getCalculator('standard')?.computePower(calls, true);
-      callingPowerFactory?.getCalculator('premium')?.computePower(calls, true);
+      const calls = await callRepository.getCallsByTelegramId(
+        caller.telegramId
+      );
+      callingPowerCalculator.computePower(calls, true);
     }
   } else {
-    const callers = await callerService.getAll();
+    const callers = await callerRepository.getAll();
     const results = [];
 
     for (const caller of callers) {
-      const calls = await callService.getCallsByTelegramId(caller.telegramId);
-      const power24h = callingPowerFactory
-        .getCalculator('premium')
-        ?.computePower(
-          calls.filter(
-            (c) => c.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
-          )
-        );
-      const power12h = callingPowerFactory
-        .getCalculator('premium')
-        ?.computePower(
-          calls.filter(
-            (c) => c.createdAt < new Date(Date.now() - 12 * 60 * 60 * 1000)
-          )
-        );
-      const powerNow = callingPowerFactory
-        .getCalculator('premium')
-        ?.computePower(calls);
+      const calls = await callRepository.getCallsByTelegramId(
+        caller.telegramId
+      );
+      const power24h = callingPowerCalculator.computePower(
+        calls.filter(
+          (c) => c.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
+        )
+      );
+      const power12h = callingPowerCalculator.computePower(
+        calls.filter(
+          (c) => c.createdAt < new Date(Date.now() - 12 * 60 * 60 * 1000)
+        )
+      );
+      const powerNow = callingPowerCalculator.computePower(calls);
       results.push({
         name: caller.name,
         power24h,
@@ -87,14 +88,13 @@ const explainCallerPower = async (
   }
 };
 
-async function updateCallerPower(
-  callerService: CallerService,
-  callingPowerService: CallingPowerService
-) {
+const updateCallerPower = async (dependencies: CallerActionDependencies) => {
+  const { callerRepository, callingPowerService } = dependencies;
+
   const callerId = await number({ message: 'Enter caller ID:' });
 
   if (callerId) {
-    const caller = await callerService.getCallerWithCall(callerId);
+    const caller = await callerRepository.getCallerWithCall(callerId);
     if (caller) {
       await callingPowerService.updateCallingPower(caller.telegramId);
     }
@@ -106,4 +106,4 @@ async function updateCallerPower(
       await callingPowerService.updateAllCallingPower();
     }
   }
-}
+};

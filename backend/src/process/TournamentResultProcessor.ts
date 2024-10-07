@@ -1,16 +1,17 @@
-import { CallerService, TournamentService } from '@src/services';
 import { PrismaClient } from '@prisma/client';
+import { CallerRepository } from '@src/services/CallerRepository';
+import { TournamentRepository } from '@src/services/TournamentRepository';
 
 export class TournamentResultProcessor {
   constructor(
-    private callerService: CallerService,
-    private tournamentService: TournamentService,
+    private callerRepository: CallerRepository,
+    private tournamentRepository: TournamentRepository,
     private prisma: PrismaClient
   ) {}
 
   async processResults(tournamentId: number): Promise<void> {
     // first store current calling power to dedicated table
-    const allCallers = await this.callerService.getAll();
+    const allCallers = await this.callerRepository.getAll();
 
     const tournamentCallingPowers = allCallers.map((caller) => ({
       callerId: caller.id,
@@ -24,7 +25,7 @@ export class TournamentResultProcessor {
 
     // then compute player ranking based on their participation
     const participations =
-      await this.tournamentService.getAllParticipations(tournamentId);
+      await this.tournamentRepository.getAllParticipations(tournamentId);
 
     // 1. update participation score and ranking
     for (const participation of participations) {
@@ -50,6 +51,6 @@ export class TournamentResultProcessor {
     }
 
     // 3. end tournament
-    await this.tournamentService.endTournament(tournamentId);
+    await this.tournamentRepository.endTournament(tournamentId);
   }
 }
