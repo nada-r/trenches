@@ -54,10 +54,14 @@ async function startBot() {
 
   bot.on('polling_error', (error) => console.log(error));
 
-  bot.onText(/\/login/, async (msg) => {
+  bot.onText(/\/start (.+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const user = msg.from;
     if (!user) return;
+
+    const param = match ? match[1] : "trenchyonsol";
+    const ref = param.split("_")[1];
+    console.log(ref);
 
     const telegramId = user.id.toString();
     const username = user.username;
@@ -71,7 +75,7 @@ async function startBot() {
     }
 
     try {
-      await bot.sendMessage(chatId, `Login to Trenches.top`, {
+      await bot.sendMessage(chatId, `Login to Trenches.\u200Btop`, {
         reply_markup: {
           inline_keyboard: [
             [
@@ -91,6 +95,25 @@ async function startBot() {
       );
     }
   });
+
+  // bot.onText(/\/referral/, async (msg) => {
+  //   // send referral link "https://t.me/trenchestopbot?start=ref_{username}"
+  //   const chatId = msg.chat.id;
+  //   const user = msg.from;
+  //   if (!user) return;
+  //   const username = user.username;
+  //   if (!username) {
+  //     bot.sendMessage(
+  //       chatId,
+  //       'Sorry, you need to set a username in Telegram to use this bot.'
+  //     );
+  //     return;
+  //   }
+  //   bot.sendMessage(
+  //     chatId,
+  //     `Your referral link: https://t.me/trenchestopbot?start=ref_${username}`
+  //   );
+  // });
 
   bot.on('message', async (msg) => {
     const user = msg.from;
