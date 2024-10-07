@@ -81,7 +81,7 @@ async function startBot() {
             [
               {
                 text: 'Login',
-                login_url: { url: 'https://www.trenches.top' },
+                login_url: { url: 'https://www.trenches.top/login' },
               },
             ],
           ],
