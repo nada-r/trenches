@@ -47,7 +47,7 @@ export default function LoginPage() {
     if (ready && authenticated && user?.telegram) {
       checkAndCreateWallet();
     }
-  }, [ready, authenticated]);
+  }, [ready, authenticated, user]);
 
   // Disable login when Privy is not ready or the user is already authenticated
   const disableLogin = !ready || (ready && authenticated && user?.telegram);
