@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { TokenMcap } from '@src/services/TokenRepository';
-import { McapEntry } from '@src/services/FdvUpdaterService';
+import { McapEntry } from '@src/services/MCapUpdaterService';
 
 export class GeckoTerminalProvider {
   private solPriceCache: { price: number | null; timestamp: number } | null =

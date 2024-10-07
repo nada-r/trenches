@@ -16,7 +16,7 @@ import { TokenUpdaterService } from '@src/services/TokenUpdaterService';
 import { CallerRepository } from '@src/services/CallerRepository';
 import { CallRepository } from '@src/services/CallRepository';
 import { TournamentRepository } from '@src/services/TournamentRepository';
-import { FdvUpdaterService } from '@src/services/FdvUpdaterService';
+import { MCapUpdaterService } from '@src/services/MCapUpdaterService';
 import { NewCallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
 
 // Make sure all the Envs are loaded when launching the server
@@ -82,6 +82,10 @@ export default async function bootstrap() {
     tokenRepository,
     callRepository
   );
+  const mcapUpdaterService = new MCapUpdaterService(
+    pumpfunProvider,
+    geckoTerminalProvider
+  );
 
   return {
     callerRepository,
@@ -92,6 +96,7 @@ export default async function bootstrap() {
     callingPowerCalculator,
     callingPowerService,
     tokenUpdaterService,
+    mcapUpdaterService,
     tournamentResultProcessor,
     pumpfunProvider,
     geckoTerminalProvider,

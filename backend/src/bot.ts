@@ -13,6 +13,7 @@ async function startBot() {
     callRepository,
     callingPowerService,
     tokenRepository,
+    mcapUpdaterService,
     tournamentRepository,
     tournamentResultProcessor,
     tokenUpdaterService,
@@ -145,10 +146,11 @@ async function startBot() {
       imageUrl
     );
 
+    // loop on each token identified in the message
     for (let i = 0; i < splTokens.length; i++) {
       let tokenAddress = splTokens[i];
 
-      // Check if the token exists in the Pumpfun
+      // find token information on pump or dexscreener (name, ticker, image, ...)
       let tokenInfo =
         await tokenUpdaterService.findAndUpdateTokenInfo(tokenAddress);
       if (!tokenInfo) {
@@ -187,8 +189,10 @@ async function startBot() {
     const startTime = Date.now();
     console.log('Starting FDV update process...');
 
-    const activeCalls = await callService.getActiveCalls();
+    // get all active calls from the database
     const activeCalls = await callRepository.getActiveCalls();
+
+    // extract unique tokens from the active calls
     const tokensToUpdate = [
       ...new Set(
         activeCalls.map((call) => ({
@@ -197,64 +201,41 @@ async function startBot() {
         }))
       ),
     ];
-    let stepTime = Date.now();
-    console.log(
-      `Found ${tokensToUpdate.length} unique tokens to process (${stepTime - startTime}ms)`
-    );
-    //check if the pump token is out of bounding curve
+
+    // check if the pump token is out of bounding curve
     let newPoolsDetected = 0;
     for (const token of tokensToUpdate) {
-      if (token.poolAddress) {
-        continue;
-      }
-
-      const tokenInfo = await pumpfunProvider.getTokenInfo(token.tokenAddress);
-      if (tokenInfo && tokenInfo.poolAddress) {
-        await tokenService.createOrUpdateToken(tokenInfo);
-
-        // update current state
-        token.poolAddress = tokenInfo.poolAddress;
-        newPoolsDetected++;
-
-        await callService.updateCallTokenPoolAddress(
-          token.tokenAddress,
-          tokenInfo.poolAddress
+      if (!token.poolAddress) {
+        // if pool address is not available, try to find it
+        const poolAddress = await tokenUpdaterService.findAndUpdateTokenPool(
+          token.tokenAddress
         );
+
+        // if pool address is found, storing it in the current token object for the next steps
+        if (poolAddress) {
+          token.poolAddress = poolAddress;
+          newPoolsDetected++;
+        }
       }
     }
     console.log(
-      `${newPoolsDetected} new pools detected (${Date.now() - stepTime}ms)`
+      `${newPoolsDetected} new pools detected (${Date.now() - startTime}ms)`
     );
-    stepTime = Date.now();
 
+    const stepTime = Date.now();
     const updatedTokens = [];
     //for each call, get marketcap
     for (const token of tokensToUpdate) {
-      let mcapHistory = undefined;
-      //if poolAddress already in DB (pump adress that is out of the bonding curve)
-      if (token.poolAddress) {
-        mcapHistory = await geckoTerminalProvider.getTokenMCapHistory(
-          token.poolAddress
-        );
-      }
-      //if it is an address is not a pump one (example BONK)
-      if (!mcapHistory && !token.tokenAddress.endsWith('pump')) {
-        mcapHistory = await geckoTerminalProvider.getTokenMCapHistory(
-          token.tokenAddress
-        );
-      }
-      //if not on gecko terminal, alsmot sure it is a pump token, but does not end up in 'pump', look on pump
-      if (!mcapHistory) {
-        mcapHistory = await pumpfunProvider.getTokenMCapHistory(
-          token.tokenAddress
-        );
-      }
-      //token not found (ex, $wSOL address or random)
+      let mcapHistory = await mcapUpdaterService.getMcapHistory(token);
+
+      // token not found (ex, $wSOL address or random)
       if (!mcapHistory) {
         console.log(`Could not get FDV for token ${token.tokenAddress}`);
+        // skip this token
         continue;
       }
-      // check whick call should be updated for this token, get a table of calls to update (often 1 or 2 calls)
+
+      // check which call should be updated for this token, get a table of calls to update (often 1 or 2 calls)
       const callToUpdate = activeCalls.filter(
         (call) =>
           call.tokenAddress === token.tokenAddress ||
@@ -262,17 +243,12 @@ async function startBot() {
       );
 
       let result = 0;
+      // update all cals
       for (const call of callToUpdate) {
-        let highestMcap = 0;
-        for (const entry of mcapHistory) {
-          //mcapHistory is a table of the hostrical values
-          if (
-            entry.timestamp > call.createdAt.getTime() / 1000 &&
-            entry.highest > highestMcap //check if timestamp is AFTER call creation AND .... reduce
-          ) {
-            highestMcap = entry.highest;
-          }
-        }
+        let highestMcap = mcapUpdaterService.getHighestMcap(
+          mcapHistory,
+          call.createdAt
+        );
         // if highest detected is indeed higher thatn the on in DB, update the highest value
         if (call.highestFDV < highestMcap) {
           await callRepository.updateCallHighestMcap(call.id, highestMcap);
@@ -280,12 +256,13 @@ async function startBot() {
         }
       }
 
-      await tokenService.updateMcap(
+      // then update mcap in token table
       await tokenRepository.updateMcap(
         token.tokenAddress,
         mcapHistory[mcapHistory.length - 1].close
       );
 
+      // if at least one call was updated, add the token address and the pool address to the updatedTokens array
       if (result > 0) {
         updatedTokens.push(token.tokenAddress);
         if (token.poolAddress) {
@@ -297,23 +274,20 @@ async function startBot() {
       ` => Updated FDV for ${updatedTokens.length} tokens (${Date.now() - stepTime}ms)`
     );
 
+    // finally update the calling power for all callers where 1 or more tokens were updated
     if (updatedTokens.length > 0) {
-      const callingPowerStartTime = Date.now();
       await callingPowerService.updateCallingPowerFor(updatedTokens);
-      console.log(
-        `Updated calling power in ${Date.now() - callingPowerStartTime}ms`
-      );
     }
 
     const totalTime = Date.now() - startTime;
     console.log(`Total FDV update process took ${totalTime}ms`);
   };
 
-  // Run immediately
+  // Update Mcap immediately after bot start
   await updateFDV();
 
-  // Then set interval to run every 30 minutes
-  setInterval(updateFDV, 30 * 60 * 1000);
+  // Then set interval to run every 10 minutes
+  setInterval(updateFDV, 10 * 60 * 1000);
 
   setInterval(async () => {
     const startedTournaments = await tournamentRepository.getStarted();
