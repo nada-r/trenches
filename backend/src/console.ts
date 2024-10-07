@@ -27,6 +27,10 @@ async function main() {
           name: 'Token',
           value: 'token',
         },
+        {
+          name: 'Quit',
+          value: 'quit',
+        },
       ],
     });
 
@@ -40,6 +44,8 @@ async function main() {
       case 'token':
         await displayTokenActions(env, dependencies);
         break;
+      case 'quit':
+        return;
       default:
         // Handle default case or leave empty if no default action is needed
         break;

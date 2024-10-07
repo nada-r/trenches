@@ -22,7 +22,7 @@ export async function displayTokenActions(
     { name: 'Update missing tokens in database', value: 'updateTokenCache' },
     { name: 'Get token info', value: 'info' },
     { name: 'Get highest FDV', value: 'highestFdv' },
-    { name: 'Back to parent menu', value: 'back' },
+    { name: '< Back', value: 'back' },
   ];
 
   while (true) {

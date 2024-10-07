@@ -19,7 +19,7 @@ export async function displayCallerActions(
   let actions = [
     { name: 'Explain caller power', value: 'explainCallerPower' },
     { name: 'Update caller power', value: 'updateCallerPower' },
-    { name: 'Export Callers', value: 'exportCallers' },
+    { name: '< Back', value: 'back' },
   ];
 
   while (true) {
@@ -35,6 +35,8 @@ export async function displayCallerActions(
       case 'updateCallerPower':
         await updateCallerPower(dependencies);
         break;
+      case 'back':
+        return; // Exit the function to go back to the parent menu
       default:
         console.log('Not yet implemented');
     }

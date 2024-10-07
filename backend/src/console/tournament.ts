@@ -20,7 +20,7 @@ export async function displayTournamentActions(
         { name: 'Create tournament', value: 'create' },
         { name: 'Start tournament', value: 'start' },
         { name: 'Result tournament', value: 'end' },
-        { name: 'Back to parent menu', value: 'back' },
+        { name: '< Back', value: 'back' },
       ],
     });
 
