@@ -46,6 +46,7 @@ export class GeckoTerminalProvider {
     const high = entry[2];
     const close = entry[4];
     // if highest is 50% higher than close, use close instead
+    //tend toward 1 to ger the value of close in a candle
     return close / high < 0.66 ? close : high;
   }
 
