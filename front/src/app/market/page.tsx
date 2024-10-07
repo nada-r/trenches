@@ -17,7 +17,7 @@ export default function MarketPage() {
         setMarketCard(
           response.data.map((c: any, i: number) => ({
             ...c,
-            rank: i,
+            rank: i + 1,
             variation: 387,
           }))
         );

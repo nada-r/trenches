@@ -68,11 +68,14 @@ export class CallRepository {
   }
 
   async getOpenCalls(): Promise<Call[]> {
-    return await this.prisma.call.findMany({
+    return this.prisma.call.findMany({
       where: {
         createdAt: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
       include: {
         token: true,
