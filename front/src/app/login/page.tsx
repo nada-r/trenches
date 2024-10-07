@@ -1,37 +1,46 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import * as React from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 
-function LoginInfo() {
-  const searchParams = useSearchParams();
+export default function LoginPage() {
+  const { authenticated, user, ready } = usePrivy();
 
-  // Log searchParams entries
-  console.log('Search Parameters:');
-  searchParams.forEach((value, key) => {
-    console.log(`${key}: ${value}`);
-  });
 
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>You are not logged in. Please login to view your info.</p>
+      </div>
+    );
+  }
+
+ 
   return (
-    <div>
-      <h2>Query Parameters:</h2>
-      <ul>
-        {Array.from(searchParams.entries()).map(([key, value]) => (
-          <li key={key}>
-            {key}: {value}
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-2xl font-bold">User Information</h1>
+      {user ? (
+        <div className="mt-4 p-4 bg-gray-100 rounded-md">
+          <ul>
+            {Object.entries(user).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {JSON.stringify(value, null, 2)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p>No user information available</p>
+      )}
     </div>
   );
 }
 
-const Login = () => {
-  return (
-    <Suspense>
-      <LoginInfo />
-    </Suspense>
-  );
-};
-
-export default Login;

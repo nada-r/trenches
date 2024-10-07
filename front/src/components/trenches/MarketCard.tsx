@@ -1,6 +1,6 @@
-import React from 'react';
-import SimCardIcon from '@/components/icons/SimCardIcon';
-import RankingImage from '@/components/trenches/RankingImage';
+import React from "react";
+import SimCardIcon from "@/components/icons/SimCardIcon";
+import RankingImage from "@/components/trenches/RankingImage";
 
 export interface MarketCardProps {
   id: string;
@@ -30,9 +30,14 @@ const MarketCard: React.FC<MarketCardProps> = ({
           #{rank}
         </span>
       </div>
-      <button className="bg-green-700 text-white font-bold py-1 px-4 rounded-full">
-        Buy
-      </button>
+      <div className="flex space-x-2">
+        <button className="bg-green-700 text-white font-bold py-1 px-2 sm:px-4 text-sm sm:text-base rounded-full">
+          Buy
+        </button>
+        <button className="bg-red-700 text-white font-bold py-1 px-2 sm:px-4 text-sm sm:text-base rounded-full">
+          Sell
+        </button>
+      </div>
     </div>
   );
 };
