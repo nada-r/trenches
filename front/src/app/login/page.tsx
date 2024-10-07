@@ -44,13 +44,13 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (ready && authenticated) {
+    if (ready && authenticated && user?.telegram) {
       checkAndCreateWallet();
     }
   }, [ready, authenticated]);
 
   // Disable login when Privy is not ready or the user is already authenticated
-  const disableLogin = !ready || (ready && authenticated);
+  const disableLogin = !ready || (ready && authenticated && user?.telegram);
 
   //console.log(process.env);
   return (
