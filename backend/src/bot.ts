@@ -201,6 +201,7 @@ async function startBot() {
         }))
       ),
     ];
+    console.log(`Found ${tokensToUpdate.length} unique tokens to process`);
 
     // check if the pump token is out of bounding curve
     let newPoolsDetected = 0;
@@ -277,6 +278,7 @@ async function startBot() {
     // finally update the calling power for all callers where 1 or more tokens were updated
     if (updatedTokens.length > 0) {
       await callingPowerService.updateCallingPowerFor(updatedTokens);
+      console.log(`Updated calling power and ranking`);
     }
 
     const totalTime = Date.now() - startTime;
