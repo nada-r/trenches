@@ -42,42 +42,27 @@ export class GeckoTerminalProvider {
     }
   }
 
-  async getTokenMCap(tokenAddress: string): Promise<TokenMcap | null> {
-    try {
-      const response = await this.axiosInstance.get(
-        `https://api.geckoterminal.com/api/v2/networks/solana/pools/${tokenAddress}/ohlcv/minute?aggregate=1&currency=usd&limit=1000`
-      );
+  private normalizeHighestPrice(entry: number[]): number {
+    const high = entry[2];
+    const close = entry[4];
+    // if highest is 50% higher than close, use close instead
+    return close / high < 0.66 ? close : high;
+  }
 
-      if (response.data) {
-        const highestPrice = response.data.data.attributes.ohlcv_list.reduce(
-          (acc: number, curr: number[]) => {
-            const H = curr[2];
-            const C = curr[4];
-            const correctedH = C / H > 0.5 ? C : H; // if highest is 50% higher than close, use close
-            return Math.max(acc, correctedH);
-          },
-          0
-        );
-        const lastPrice =
-          response.data.data.attributes.ohlcv_list[
-            response.data.data.attributes.ohlcv_list.length - 1
-          ][4];
-        return {
-          mcap: lastPrice * 1_000_000_000,
-          highest: highestPrice * 1_000_000_000,
-        };
-      } else {
-        console.log('Token not found in geckoterminal:', tokenAddress);
-        return null;
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        return null;
-      } else if (error.response && error.response.status === 429) {
-        console.log(`429 on ${error.config.url}`);
-      } else {
-        console.error('Error fetching highest price on geckoterminal:', error);
-      }
+  async getTokenMCap(tokenAddress: string): Promise<TokenMcap | null> {
+    const history = await this.getTokenMCapHistory(tokenAddress);
+
+    if (history) {
+      const highestPrice = history.reduce(
+        (acc: number, curr: McapEntry) => Math.max(acc, curr.highest),
+        0
+      );
+      const lastPrice = history[history.length - 1].close;
+      return {
+        mcap: lastPrice,
+        highest: highestPrice,
+      };
+    } else {
       return null;
     }
   }
@@ -93,12 +78,11 @@ export class GeckoTerminalProvider {
       if (response.data) {
         return response.data.data.attributes.ohlcv_list
           .map((data: number[]) => {
-            const H = data[2];
             const C = data[4];
-            const correctedH = C / H > 0.5 ? C : H; // if highest is 50% higher than close, use close
+            const normalizedHigh = this.normalizeHighestPrice(data);
             return {
               timestamp: data[0],
-              highest: correctedH * 1_000_000_000,
+              highest: normalizedHigh * 1_000_000_000,
               close: C * 1_000_000_000,
             };
           })
