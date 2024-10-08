@@ -70,51 +70,34 @@ export class CallerRepository {
         id: id,
       },
       include: {
-        calls: true,
+        calls: {
+          include: {
+            token: true,
+          },
+        },
       },
     });
 
     if (!caller) return null;
 
-    const tokenAddresses = [
-      ...new Set(caller.calls.map((call) => call.tokenAddress)),
-    ];
-    const tokens = await this.prisma.token.findMany({
-      where: {
-        address: {
-          in: tokenAddresses,
-        },
-      },
-    });
-
-    const tokenMap = new Map(tokens.map((token) => [token.address, token]));
-
-    const callerWithTokens = {
-      ...caller,
-      calls: caller.calls.map((call) => ({
-        ...call,
-        token: tokenMap.get(call.tokenAddress) || null,
-      })),
-    };
-
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    const openCalls = callerWithTokens.calls
+    const openCalls = caller.calls
       .filter((call: Call) => new Date(call.createdAt) >= twentyFourHoursAgo)
       .sort(
         (a: Call, b: Call) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
-    const closedCalls = callerWithTokens.calls
+    const closedCalls = caller.calls
       .filter((call: Call) => new Date(call.createdAt) < twentyFourHoursAgo)
       .sort(
         (a: Call, b: Call) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     return {
-      ...callerWithTokens,
+      ...caller,
       openCalls,
       closedCalls,
     };
