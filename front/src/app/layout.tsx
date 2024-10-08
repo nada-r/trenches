@@ -5,6 +5,7 @@ import '@/styles/globals.css';
 
 import { siteConfig } from '@/constant/config';
 import Providers from '@/app/providers';
+import PostHogPageView from '@/components/PostHogPageView';
 
 // !STARTERCONF Change these default meta
 // !STARTERCONF Look at @/constant/config to change them
@@ -56,7 +57,9 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <PostHogPageView /> {children}
+        </Providers>
       </body>
     </html>
   );
