@@ -98,7 +98,7 @@ app.post('/tournament/join', async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await services.tournament?.joinTournament({
+    const result = await services.participation?.joinTournament({
       tournamentId,
       walletPubkey,
       callers,
@@ -132,7 +132,7 @@ app.get(
 
     try {
       const participation =
-        await services.tournament?.getMyTournamentParticipation(
+        await services.participation?.getMyTournamentParticipation(
           tournamentId,
           walletPubkey
         );

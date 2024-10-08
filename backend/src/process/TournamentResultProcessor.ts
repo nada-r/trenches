@@ -1,11 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { CallerRepository } from '@src/services/CallerRepository';
 import { TournamentRepository } from '@src/services/TournamentRepository';
+import { TournamentParticipationRepository } from '@src/services/TournamentParticipationRepository';
 
 export class TournamentResultProcessor {
   constructor(
     private callerRepository: CallerRepository,
     private tournamentRepository: TournamentRepository,
+    private tournamentParticipationRepository: TournamentParticipationRepository,
     private prisma: PrismaClient
   ) {}
 
@@ -25,7 +27,9 @@ export class TournamentResultProcessor {
 
     // then compute player ranking based on their participation
     const participations =
-      await this.tournamentRepository.getAllParticipations(tournamentId);
+      await this.tournamentParticipationRepository.getAllParticipations(
+        tournamentId
+      );
 
     // 1. update participation score and ranking
     for (const participation of participations) {

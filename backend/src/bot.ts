@@ -227,48 +227,54 @@ async function startBot() {
     const updatedTokens = [];
     //for each call, get marketcap
     for (const token of tokensToUpdate) {
-      let mcapHistory = await mcapUpdaterService.getMcapHistory(token);
+      try {
+        let mcapHistory = await mcapUpdaterService.getMcapHistory(token);
 
-      // token not found (ex, $wSOL address or random)
-      if (!mcapHistory) {
-        console.log(`Could not get FDV for token ${token.tokenAddress}`);
-        // skip this token
-        continue;
-      }
+        // token not found (ex, $wSOL address or random)
+        if (!mcapHistory) {
+          console.log(`Could not get FDV for token ${token.tokenAddress}`);
+          // skip this token
+          continue;
+        }
 
-      // check which call should be updated for this token, get a table of calls to update (often 1 or 2 calls)
-      const callToUpdate = activeCalls.filter(
-        (call) =>
-          call.tokenAddress === token.tokenAddress ||
-          call.tokenAddress === token.poolAddress
-      );
-
-      let result = 0;
-      // update all cals
-      for (const call of callToUpdate) {
-        let highestMcap = mcapUpdaterService.getHighestMcap(
-          mcapHistory,
-          call.createdAt
+        // check which call should be updated for this token, get a table of calls to update (often 1 or 2 calls)
+        const callToUpdate = activeCalls.filter(
+          (call) =>
+            call.tokenAddress === token.tokenAddress ||
+            call.tokenAddress === token.poolAddress
         );
-        // if highest detected is indeed higher thatn the on in DB, update the highest value
-        if (call.highestFDV < highestMcap) {
-          await callRepository.updateCallHighestMcap(call.id, highestMcap);
-          result++;
-        }
-      }
 
-      // then update mcap in token table
-      await tokenRepository.updateMcap(
-        token.tokenAddress,
-        mcapHistory[mcapHistory.length - 1].close
-      );
-
-      // if at least one call was updated, add the token address and the pool address to the updatedTokens array
-      if (result > 0) {
-        updatedTokens.push(token.tokenAddress);
-        if (token.poolAddress) {
-          updatedTokens.push(token.poolAddress);
+        let result = 0;
+        // update all cals
+        for (const call of callToUpdate) {
+          let highestMcap = mcapUpdaterService.getHighestMcap(
+            mcapHistory,
+            call.createdAt
+          );
+          // if highest detected is indeed higher thatn the on in DB, update the highest value
+          if (call.highestFDV < highestMcap) {
+            await callRepository.updateCallHighestMcap(call.id, highestMcap);
+            result++;
+          }
         }
+
+        // then update mcap in token table
+        await tokenRepository.updateMcap(
+          token.tokenAddress,
+          mcapHistory[mcapHistory.length - 1].close
+        );
+
+        // if at least one call was updated, add the token address and the pool address to the updatedTokens array
+        if (result > 0) {
+          updatedTokens.push(token.tokenAddress);
+          if (token.poolAddress) {
+            updatedTokens.push(token.poolAddress);
+          }
+        }
+      } catch (err) {
+        console.error(
+          `Error while updating FDV for token ${token.tokenAddress}: ${err.message}`
+        );
       }
     }
     console.log(

@@ -9,12 +9,14 @@ import { CallRepository } from '@src/services/CallRepository';
 import { CallingPowerService } from '@src/services/CallingPowerService';
 import { TournamentRepository } from '@src/services/TournamentRepository';
 import { ProfileRepository } from '@src/services/ProfileRepository';
+import { TournamentParticipationRepository } from '@src/services/TournamentParticipationRepository';
 
 interface IServices {
   caller: CallerRepository;
   call: CallRepository;
   callingPower: CallingPowerService;
   tournament: TournamentRepository;
+  participation: TournamentParticipationRepository;
   profile: ProfileRepository;
 }
 
@@ -71,11 +73,13 @@ server.listen(EnvVars.Port, async () => {
     callingPowerService,
     profileRepository,
     tournamentRepository,
+    tournamentParticipationRepository,
   } = await bootstrap();
   addExistingService('caller', callerRepository);
   addExistingService('call', callRepository);
   addExistingService('callingPower', callingPowerService);
   addExistingService('tournament', tournamentRepository);
+  addExistingService('participation', tournamentParticipationRepository);
   addExistingService('profile', profileRepository);
 
   logger.info(SERVER_START_MSG);

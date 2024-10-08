@@ -4,21 +4,26 @@ import { TournamentRepository } from '@src/services/TournamentRepository';
 import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import { createCaller, createParticipation } from '@src/__tests__/utils';
+import { TournamentParticipationRepository } from '@src/services/TournamentParticipationRepository';
 
 describe('TournamentResultProcessor', () => {
   let processor: TournamentResultProcessor;
   let prisma: DeepMockProxy<PrismaClient>;
   let callerRepository: DeepMockProxy<CallerRepository>;
   let tournamentRepository: DeepMockProxy<TournamentRepository>;
+  let tournamentParticiptionRepository: DeepMockProxy<TournamentParticipationRepository>;
 
   beforeEach(() => {
     prisma = mockDeep<PrismaClient>();
     callerRepository = mockDeep<CallerRepository>();
     tournamentRepository = mockDeep<TournamentRepository>();
+    tournamentParticiptionRepository =
+      mockDeep<TournamentParticipationRepository>();
 
     processor = new TournamentResultProcessor(
       callerRepository,
       tournamentRepository,
+      tournamentParticiptionRepository,
       prisma
     );
   });
@@ -32,13 +37,13 @@ describe('TournamentResultProcessor', () => {
       createCaller(3, '3', 'User3', { power: 300 }),
     ];
     const mockParticipations = [
-      createParticipation(1, '0x1', 1, ['1', '2']),
-      createParticipation(2, '0x2', 1, ['2', '3']),
-      createParticipation(3, '0x3', 1, ['1', '3']),
+      createParticipation(1, '0x1', ['1', '2']),
+      createParticipation(2, '0x2', ['2', '3']),
+      createParticipation(3, '0x3', ['1', '3']),
     ];
 
     callerRepository.getAll.mockResolvedValue(mockCallers);
-    tournamentRepository.getAllParticipations.mockResolvedValue(
+    tournamentParticiptionRepository.getAllParticipations.mockResolvedValue(
       mockParticipations
     );
 

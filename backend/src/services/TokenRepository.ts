@@ -49,52 +49,8 @@ export class TokenRepository {
         },
       });
     } catch (error) {
-      if (error.code === 'P2002') {
-        return null;
-      }
       console.error('Error creating token:', error);
       return null;
-    }
-  }
-
-  async findMissingTokens(): Promise<string[]> {
-    try {
-      const calls = await this.prisma.call.findMany({
-        select: {
-          tokenAddress: true,
-        },
-        distinct: ['tokenAddress'],
-        where: {
-          tokenAddress: {
-            notIn: await this.prisma.token
-              .findMany({
-                select: { address: true },
-              })
-              .then((tokens) => tokens.map((token) => token.address)),
-          },
-        },
-      });
-
-      return calls.map((call) => call.tokenAddress);
-    } catch (error) {
-      console.error('Error finding missing tokens:', error);
-      throw error;
-    }
-  }
-
-  async getTokenList(tokenAddresses: string[]): Promise<Token[]> {
-    try {
-      const tokens = await this.prisma.token.findMany({
-        where: {
-          address: {
-            in: tokenAddresses,
-          },
-        },
-      });
-      return tokens;
-    } catch (error) {
-      console.error('Error fetching token list:', error);
-      throw error;
     }
   }
 
@@ -124,6 +80,33 @@ export class TokenRepository {
     } catch (error) {
       console.error(`Error updating mcap for token ${tokenAddress}:`, error);
       throw error; // Re-throw the error for the caller to handle if needed
+    }
+  }
+
+  // TOOLING
+
+  async findMissingTokens(): Promise<string[]> {
+    try {
+      const calls = await this.prisma.call.findMany({
+        select: {
+          tokenAddress: true,
+        },
+        distinct: ['tokenAddress'],
+        where: {
+          tokenAddress: {
+            notIn: await this.prisma.token
+              .findMany({
+                select: { address: true },
+              })
+              .then((tokens) => tokens.map((token) => token.address)),
+          },
+        },
+      });
+
+      return calls.map((call) => call.tokenAddress);
+    } catch (error) {
+      console.error('Error finding missing tokens:', error);
+      throw error;
     }
   }
 }

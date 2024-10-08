@@ -67,6 +67,7 @@ model Call {
   data         Json?
 }
 
+/// cette table a été pensée pour etre supprimer facilement une fois l'implem de spl token teriminée
 model Claim {
   id           Int      @id @default(autoincrement())
   walletPubkey String   @unique
@@ -104,7 +105,6 @@ enum TournamentStatus {
   UPCOMING
   STARTED
   COMPLETED
-  CANCELLED
 }
 
 model Tournament {
