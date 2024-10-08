@@ -1,12 +1,12 @@
 import { Call, Caller, PrismaClient } from '@prisma/client';
 import { OmitPrisma } from '@src/types';
-import { mintToken } from './mint';
+import { mintToken } from '@src/services/mint';
 
 export class CallerRepository {
-  private prisma;
+  private prismaExtended;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma.$extends({
+  constructor(private prisma: PrismaClient) {
+    this.prismaExtended = prisma.$extends({
       result: {
         call: {
           multiple: {
@@ -17,12 +17,6 @@ export class CallerRepository {
           },
         },
       },
-    });
-  }
-
-  async createCaller(data: OmitPrisma<Caller>): Promise<Caller> {
-    return this.prisma.caller.create({
-      data,
     });
   }
 
@@ -71,7 +65,7 @@ export class CallerRepository {
   async getCallerWithCall(
     id: number
   ): Promise<(Caller & { openCalls: Call[]; closedCalls: Call[] }) | null> {
-    const caller = await this.prisma.caller.findUnique({
+    const caller = await this.prismaExtended.caller.findUnique({
       where: {
         id: id,
       },
@@ -126,6 +120,12 @@ export class CallerRepository {
     };
   }
 
+  async createCaller(data: OmitPrisma<Caller>): Promise<Caller> {
+    return this.prisma.caller.create({
+      data,
+    });
+  }
+
   async getOrCreateCaller(
     telegramId: string,
     username: string,
@@ -152,26 +152,6 @@ export class CallerRepository {
     return caller;
   }
 
-  async updateCallingPower(id: number, power: number): Promise<Caller> {
-    const caller = await this.prisma.caller.findUnique({
-      where: { id },
-    });
-
-    if (!caller) {
-      throw new Error(`Caller with id ${id} not found`);
-    }
-
-    return this.prisma.caller.update({
-      where: { id },
-      data: {
-        data: {
-          ...caller.data,
-          power,
-        },
-      },
-    });
-  }
-
   async addCallerTokenAddress(
     telegramId: string,
     tokenAddress: string
@@ -194,6 +174,26 @@ export class CallerRepository {
         data: {
           ...caller.data,
           tokenAddress,
+        },
+      },
+    });
+  }
+
+  async updateCallingPower(id: number, power: number): Promise<Caller> {
+    const caller = await this.prisma.caller.findUnique({
+      where: { id },
+    });
+
+    if (!caller) {
+      throw new Error(`Caller with id ${id} not found`);
+    }
+
+    return this.prisma.caller.update({
+      where: { id },
+      data: {
+        data: {
+          ...caller.data,
+          power,
         },
       },
     });

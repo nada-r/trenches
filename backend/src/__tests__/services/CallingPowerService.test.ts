@@ -102,4 +102,33 @@ describe('CallingPowerService', () => {
       );
     });
   });
+
+  describe('updateCallingPower error handling', () => {
+    it('should catch and not rethrow error when updateCallingPower fails', async () => {
+      const callerId = 999;
+      const calls: Call[] = [];
+      const callerPower = 0;
+
+      mockCallRepository.getCallsByTelegramId.mockResolvedValue(calls);
+      mockCallingPowerCalculator.computePower.mockReturnValue(callerPower);
+      mockCallerRepository.updateCallingPower.mockRejectedValue(
+        new Error('Update failed')
+      );
+
+      await expect(
+        callingPowerService.updateCallingPower(callerId)
+      ).resolves.not.toThrow();
+
+      expect(mockCallRepository.getCallsByTelegramId).toHaveBeenCalledWith(
+        callerId
+      );
+      expect(mockCallingPowerCalculator.computePower).toHaveBeenCalledWith(
+        calls
+      );
+      expect(mockCallerRepository.updateCallingPower).toHaveBeenCalledWith(
+        callerId,
+        callerPower
+      );
+    });
+  });
 });

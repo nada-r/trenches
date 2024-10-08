@@ -29,8 +29,15 @@ export class CallingPowerService {
   }
 
   async updateCallingPower(callerId: number): Promise<void> {
-    const calls = await this.callRepository.getCallsByTelegramId(callerId);
-    const callerPower = this.callingPowerCalculator.computePower(calls);
-    await this.callerRepository.updateCallingPower(callerId, callerPower);
+    try {
+      const calls = await this.callRepository.getCallsByTelegramId(callerId);
+      const callerPower = this.callingPowerCalculator.computePower(calls);
+      await this.callerRepository.updateCallingPower(callerId, callerPower);
+    } catch (error) {
+      console.error(
+        `Error updating calling power for caller ${callerId}:`,
+        error.message
+      );
+    }
   }
 }
