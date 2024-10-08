@@ -1,6 +1,7 @@
 import { Caller, PrismaClient } from '@prisma/client';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import { CallerRepository } from '@src/services/CallerRepository';
+import { createCaller } from '@src/__tests__/utils';
 
 // Mock the mintToken function
 jest.mock('@src/services/mint', () => ({
@@ -15,24 +16,6 @@ describe('CallerRepository', () => {
     prisma = mockDeep<PrismaClient>();
     callerRepository = new CallerRepository(prisma);
   });
-
-  function createCaller(
-    id: number,
-    telegramId: string,
-    name: string,
-    data: any = {}
-  ) {
-    const mockNewCaller: Caller = {
-      id,
-      telegramId,
-      name,
-      image: null,
-      data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    return mockNewCaller;
-  }
 
   describe('getAll', () => {
     it('should return all callers sorted by rank', async () => {
