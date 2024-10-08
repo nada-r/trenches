@@ -153,12 +153,19 @@ export class CallerRepository {
   }
 
   async updateCallingPower(id: number, power: number): Promise<Caller> {
+    const caller = await this.prisma.caller.findUnique({
+      where: { id },
+    });
+
+    if (!caller) {
+      throw new Error(`Caller with id ${id} not found`);
+    }
+
     return this.prisma.caller.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
         data: {
+          ...caller.data,
           power,
         },
       },
@@ -171,7 +178,7 @@ export class CallerRepository {
   ): Promise<void> {
     const caller = await this.prisma.caller.findUnique({
       where: {
-        telegramId: telegramId,
+        telegramId,
       },
     });
 
@@ -181,12 +188,12 @@ export class CallerRepository {
     }
     await this.prisma.caller.update({
       where: {
-        telegramId: telegramId,
+        telegramId,
       },
       data: {
         data: {
           ...caller.data,
-          tokenAddress: tokenAddress,
+          tokenAddress,
         },
       },
     });
