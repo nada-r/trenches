@@ -152,10 +152,10 @@ export class CallerRepository {
     return caller;
   }
 
-  async updateCallingPower(telegramId: string, power: number): Promise<Caller> {
+  async updateCallingPower(id: number, power: number): Promise<Caller> {
     return this.prisma.caller.update({
       where: {
-        telegramId,
+        id,
       },
       data: {
         data: {

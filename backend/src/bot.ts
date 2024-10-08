@@ -278,6 +278,7 @@ async function startBot() {
     // finally update the calling power for all callers where 1 or more tokens were updated
     if (updatedTokens.length > 0) {
       await callingPowerService.updateCallingPowerFor(updatedTokens);
+      await callerRepository.updateCallerRanks();
       console.log(`Updated calling power and ranking`);
     }
 

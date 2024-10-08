@@ -26,13 +26,13 @@ export class CallRepository {
   }
 
   async getCallsByTelegramId(
-    telegramId: string,
+    callerId: number,
     start?: Date,
     end?: Date
   ): Promise<Call[]> {
     return this.prisma.call.findMany({
       where: {
-        caller: { telegramId },
+        callerId: callerId,
         ...((start || end) && {
           createdAt: {
             ...(start && { gte: start }),

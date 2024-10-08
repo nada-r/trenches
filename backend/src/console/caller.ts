@@ -50,21 +50,14 @@ const explainCallerPower = async (dependencies: CallerActionDependencies) => {
   const callerId = await number({ message: 'Enter caller ID:' });
 
   if (callerId) {
-    const caller = await callerRepository.getCallerWithCall(callerId);
-    if (caller) {
-      const calls = await callRepository.getCallsByTelegramId(
-        caller.telegramId
-      );
-      callingPowerCalculator.computePower(calls, true);
-    }
+    const calls = await callRepository.getCallsByTelegramId(callerId);
+    callingPowerCalculator.computePower(calls, true);
   } else {
     const callers = await callerRepository.getAll();
     const results = [];
 
     for (const caller of callers) {
-      const calls = await callRepository.getCallsByTelegramId(
-        caller.telegramId
-      );
+      const calls = await callRepository.getCallsByTelegramId(caller.id);
       const power24h = callingPowerCalculator.computePower(
         calls.filter(
           (c) => c.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
@@ -96,10 +89,7 @@ const updateCallerPower = async (dependencies: CallerActionDependencies) => {
   const callerId = await number({ message: 'Enter caller ID:' });
 
   if (callerId) {
-    const caller = await callerRepository.getCallerWithCall(callerId);
-    if (caller) {
-      await callingPowerService.updateCallingPower(caller.telegramId);
-    }
+    await callingPowerService.updateCallingPower(callerId);
   } else {
     const answer = await confirm({
       message: 'Are you sure you want to update all calling power?',
@@ -108,4 +98,5 @@ const updateCallerPower = async (dependencies: CallerActionDependencies) => {
       await callingPowerService.updateAllCallingPower();
     }
   }
+  await callerRepository.updateCallerRanks();
 };
