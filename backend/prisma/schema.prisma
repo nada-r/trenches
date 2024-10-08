@@ -102,7 +102,6 @@ model Token {
 
 enum TournamentStatus {
   HIDDEN
-  UPCOMING
   STARTED
   COMPLETED
 }
@@ -110,7 +109,7 @@ enum TournamentStatus {
 model Tournament {
   id             Int                       @id @default(autoincrement())
   name           String
-  status         TournamentStatus          @default(HIDDEN)
+  status         TournamentStatus          @default(STARTED)
   startedAt      DateTime?
   /// [TournamentMetadata]
   metadata       Json /// @zod.custom.use(z.object({ openDuration: z.number(), endDuration: z.number(), prize: z.number(), supplyBurn: z.number() }))

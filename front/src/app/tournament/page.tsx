@@ -16,7 +16,7 @@ export default function Homepage() {
   const [upcomingTournaments, setUpcomingTournaments] = useState<
     Array<TournamentExtended>
   >([]);
-  const [closedTournaments, setClosedTournaments] = useState<
+  const [previousTournaments, setPreviousTournaments] = useState<
     Array<TournamentExtended>
   >([]);
 
@@ -24,8 +24,8 @@ export default function Homepage() {
     async function fetchTournaments() {
       try {
         const response = await instance.get('/tournament/all');
-        setTournaments(
-          response.data.map((t: unknown) => {
+        const tournaments: TournamentExtended[] = response.data.map(
+          (t: unknown) => {
             const parsedTournament = TournamentSchema.parse(t);
             const startedAt = dayjs(parsedTournament.startedAt);
             const now = dayjs();
@@ -44,8 +44,11 @@ export default function Homepage() {
               isClosed: closeTime.isBefore(now) && now.isBefore(endTime),
               isFinish: endTime.isBefore(now),
             };
-          })
+          }
         );
+        setTournaments(tournaments.filter((t) => !t.isUpcoming && !t.isFinish));
+        setUpcomingTournaments(tournaments.filter((t) => t.isUpcoming));
+        setPreviousTournaments(tournaments.filter((t) => t.isFinish));
       } catch (error) {
         console.error('Error fetching tournaments:', error);
       }
@@ -75,7 +78,7 @@ export default function Homepage() {
           ))}
         </>
       )}
-      {closedTournaments.length > 0 && (
+      {previousTournaments.length > 0 && (
         <>
           <div className="text-center">
             <h1 className="text-lg italic text-gray-500 mb-4">
@@ -83,7 +86,7 @@ export default function Homepage() {
             </h1>
           </div>
 
-          {closedTournaments.map((tournament) => (
+          {previousTournaments.map((tournament) => (
             <TournamentCard key={tournament.id} tournament={tournament} />
           ))}
         </>

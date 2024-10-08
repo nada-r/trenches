@@ -70,7 +70,7 @@ app.get('/calls/tops', async (req: Request, res: Response) => {
 });
 
 app.get('/tournament/all', async (req: Request, res: Response) => {
-  const tournaments = await services.tournament?.getAvailable();
+  const tournaments = await services.tournament?.getAll();
   res.json(tournaments);
 });
 

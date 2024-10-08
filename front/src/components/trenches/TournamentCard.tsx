@@ -52,13 +52,12 @@ const TournamentCard = ({ tournament }: { tournament: TournamentExtended }) => {
           </div>*/}
         </div>
         <div className=" basis-1/3">
-          <Button
-            asChild
-            disabled={isUpcoming}
-            className="w-full rounded-full text-lg font-bold"
-          >
-            <Link href={`/tournament/${tournament.id}`} className="w-full">
-              {isOpen ? 'Play' : 'View'}
+          <Button asChild className="w-full rounded-full text-lg font-bold">
+            <Link
+              href={`/tournament/${tournament.id}`}
+              className={`w-full ${isUpcoming ? 'pointer-events-none' : ''}`}
+            >
+              {isOpen ? 'Play' : isUpcoming ? 'Upcoming' : 'View'}
             </Link>
           </Button>
         </div>

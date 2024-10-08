@@ -84,7 +84,7 @@ export const JsonNullValueFilterSchema = z.enum(['DbNull','JsonNull','AnyNull',]
 
 export const NullsOrderSchema = z.enum(['first','last']);
 
-export const TournamentStatusSchema = z.enum(['HIDDEN','UPCOMING','STARTED','COMPLETED','CANCELLED']);
+export const TournamentStatusSchema = z.enum(['HIDDEN','STARTED','COMPLETED']);
 
 export type TournamentStatusType = `${z.infer<typeof TournamentStatusSchema>}`
 
@@ -138,6 +138,9 @@ export type Call = z.infer<typeof CallSchema>
 // CLAIM SCHEMA
 /////////////////////////////////////////
 
+/**
+ * cette table a été pensée pour etre supprimer facilement une fois l'implem de spl token teriminée
+ */
 export const ClaimSchema = z.object({
   id: z.number().int(),
   walletPubkey: z.string(),

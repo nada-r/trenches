@@ -16,18 +16,18 @@ describe('TournamentRepository', () => {
     describe('getAll', () => {
       it('should return all tournaments', async () => {
         // given
-        const mockTournaments = [
-          createTournament(1, 'UPCOMING'),
-          createTournament(2, 'STARTED'),
-          createTournament(3, 'COMPLETED'),
-        ];
-        prisma.tournament.findMany.mockResolvedValue(mockTournaments);
+        const mockTournament1 = createTournament(2, 'STARTED');
+        const mockTournament2 = createTournament(3, 'COMPLETED');
+        prisma.tournament.findMany.mockResolvedValue([
+          mockTournament1,
+          mockTournament2,
+        ]);
 
         // when
         const result = await tournamentRepository.getAll();
 
         // then
-        expect(result).toEqual(mockTournaments);
+        expect(result).toEqual([mockTournament1, mockTournament2]);
       });
     });
 
@@ -56,69 +56,23 @@ describe('TournamentRepository', () => {
         expect(result).toBeNull();
       });
     });
-
-    describe('getAvailable', () => {
-      it('should return available tournaments', async () => {
-        // given
-        const mockTournaments = [
-          createTournament(1, 'UPCOMING'),
-          createTournament(2, 'STARTED'),
-          createTournament(3, 'COMPLETED'),
-        ];
-        prisma.tournament.findMany.mockResolvedValue(mockTournaments);
-
-        // when
-        const result = await tournamentRepository.getAvailable();
-
-        // then
-        expect(result).toEqual(mockTournaments);
-      });
-    });
-
-    describe('getStarted', () => {
-      it('should return started tournaments', async () => {
-        // given
-        const mockTournaments = [createTournament(1, 'STARTED')];
-        prisma.tournament.findMany.mockResolvedValue(mockTournaments);
-
-        // when
-        const result = await tournamentRepository.getStarted();
-
-        // then
-        expect(result).toEqual(mockTournaments);
-      });
-    });
   });
 
   describe('Administration', () => {
     describe('createTournament', () => {
       it('should create a new tournament', async () => {
         // given
-        const mockTournament = createTournament(1, 'UPCOMING');
+        const mockTournament = createTournament(1, 'STARTED');
         prisma.tournament.create.mockResolvedValue(mockTournament);
 
         const tournament = {
           name: mockTournament.name,
-          status: mockTournament.status,
+          startedAt: mockTournament.startedAt,
           metadata: mockTournament.metadata,
         };
 
         // when
         const result = await tournamentRepository.createTournament(tournament);
-
-        // then
-        expect(result).toEqual(mockTournament);
-      });
-    });
-
-    describe('startTournament', () => {
-      it('should start a tournament', async () => {
-        // given
-        const mockTournament = createTournament(1, 'STARTED');
-        prisma.tournament.update.mockResolvedValue(mockTournament);
-
-        // when
-        const result = await tournamentRepository.startTournament(1);
 
         // then
         expect(result).toEqual(mockTournament);

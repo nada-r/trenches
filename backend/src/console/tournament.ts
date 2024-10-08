@@ -1,8 +1,8 @@
 import { input, number, select } from '@inquirer/prompts';
-import { TournamentStatus } from '@prisma/client';
 import { EnvType } from '@src/console';
 import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
 import { TournamentRepository } from '@src/services/TournamentRepository';
+import dayjs from 'dayjs';
 
 type TournamentActionsDependencies = {
   tournamentRepository: TournamentRepository;
@@ -17,9 +17,7 @@ export async function displayTournamentActions(
     const action = await select({
       message: 'Select an action:',
       choices: [
-        { name: 'Create tournament', value: 'create' },
-        { name: 'Start tournament', value: 'start' },
-        { name: 'Result tournament', value: 'end' },
+        { name: 'Create new tournament', value: 'create' },
         { name: '< Back', value: 'back' },
       ],
     });
@@ -27,12 +25,6 @@ export async function displayTournamentActions(
     switch (action) {
       case 'create':
         await createTournament(dependencies);
-        break;
-      case 'start':
-        await startTournament(dependencies);
-        break;
-      case 'end':
-        await endTournament(dependencies);
         break;
       case 'back':
         return; // Exit the function to go back to the parent menu
@@ -49,11 +41,35 @@ const createTournament = async (
   dependencies: TournamentActionsDependencies
 ) => {
   const name = await input({ message: 'Tournament name:' });
-  const openDuration = await number({ message: 'Open duration (days):' });
-  const endDuration = await number({ message: 'End duration (days):' });
+  const startedAt = await input({ message: 'Started at (YYYY-MM-DD HH:mm):' });
+  const openDuration = await number({
+    message: 'Participation duration (in days since start):',
+  });
+  const endDuration = await number({
+    message: 'Finish duration (in days since start):',
+  });
+
+  const parsedDate = dayjs(startedAt);
+  if (!parsedDate.isValid()) {
+    console.log('Error: Invalid date format. Please use YYYY-MM-DD HH:mm');
+    return;
+  }
+
+  if (parsedDate.isBefore(dayjs())) {
+    console.log('Error: Tournament start date cannot be in the past');
+    return;
+  }
+
+  if (openDuration === endDuration) {
+    console.log(
+      'Error: Finish duration must be greater than participation duration'
+    );
+    return;
+  }
+
   const tournament = {
-    name: name,
-    status: TournamentStatus.HIDDEN,
+    name,
+    startedAt: parsedDate.toDate(),
     metadata: {
       openDuration: openDuration ? openDuration * 24 * 60 * 60 || 0 : 0,
       endDuration: endDuration ? endDuration * 24 * 60 * 60 || 0 : 0,
@@ -64,54 +80,4 @@ const createTournament = async (
 
   console.log('Create tournament:', tournament);
   await dependencies.tournamentRepository.createTournament(tournament);
-};
-
-const startTournament = async (dependencies: TournamentActionsDependencies) => {
-  const { tournamentRepository } = dependencies;
-  try {
-    const tournamentId = await select({
-      message: 'Enter tournament ID:',
-      choices: (await tournamentRepository.getAll())
-        .filter((t) => t.status === 'HIDDEN')
-        .map((t) => ({
-          name: t.name,
-          value: t.id,
-        })),
-    });
-
-    if (!tournamentId) {
-      console.log('Please provide valid id;');
-      return;
-    }
-
-    await tournamentRepository.startTournament(tournamentId);
-    console.log(`Tournament ${tournamentId} has been started successfully.`);
-  } catch (error) {
-    console.error(`Failed to start tournament: ${error.message}`);
-  }
-};
-
-const endTournament = async (dependencies: TournamentActionsDependencies) => {
-  const { tournamentRepository, tournamentResultProcessor } = dependencies;
-
-  try {
-    const tournamentId = await select({
-      message: 'Enter tournament ID:',
-      choices: (await tournamentRepository.getAll())
-        .filter((t) => t.status === 'STARTED')
-        .map((t) => ({
-          name: t.name,
-          value: t.id,
-        })),
-    });
-
-    if (!tournamentId) {
-      console.log('Please provide valid id;');
-      return;
-    }
-
-    await tournamentResultProcessor.processResults(tournamentId);
-  } catch (error) {
-    console.error(`Failed to end tournament: ${error.message}`);
-  }
 };

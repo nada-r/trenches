@@ -299,7 +299,7 @@ async function startBot() {
   setInterval(updateFDV, 10 * 60 * 1000);
 
   setInterval(async () => {
-    const startedTournaments = await tournamentRepository.getStarted();
+    const startedTournaments = await tournamentRepository.getAll(['STARTED']);
     for (const tournament of startedTournaments) {
       const startedAt = dayjs(tournament.startedAt);
       const endTime = startedAt.add(tournament.metadata.endDuration, 'second');
