@@ -31,9 +31,7 @@ describe('MCapUpdaterService', () => {
 
   describe('getMcapHistory', () => {
     it('should get mcap history from GeckoTerminal for tokens with poolAddress', async () => {
-      const mockMcapHistory: McapEntry[] = [
-        { timestamp: 1000, highest: 100, close: 90 },
-      ];
+      const mockMcapHistory: McapEntry[] = [{ timestamp: 1000, close: 90 }];
       mockGeckoTerminalProvider.getTokenMCapHistory.mockResolvedValue(
         mockMcapHistory
       );
@@ -50,9 +48,7 @@ describe('MCapUpdaterService', () => {
     });
 
     it('should get mcap history from GeckoTerminal for non-pump tokens', async () => {
-      const mockMcapHistory: McapEntry[] = [
-        { timestamp: 1000, highest: 100, close: 90 },
-      ];
+      const mockMcapHistory: McapEntry[] = [{ timestamp: 1000, close: 90 }];
       mockGeckoTerminalProvider.getTokenMCapHistory.mockResolvedValueOnce(
         mockMcapHistory
       );
@@ -69,9 +65,7 @@ describe('MCapUpdaterService', () => {
     });
 
     it('should get mcap history from PumpfunProvider for pump tokens', async () => {
-      const mockMcapHistory: McapEntry[] = [
-        { timestamp: 1000, highest: 100, close: 90 },
-      ];
+      const mockMcapHistory: McapEntry[] = [{ timestamp: 1000, close: 90 }];
       mockPumpfunProvider.getTokenMCapHistory.mockResolvedValue(
         mockMcapHistory
       );
@@ -91,9 +85,7 @@ describe('MCapUpdaterService', () => {
     });
 
     it('should get mcap history from PumpfunProvider for pump tokens that doesnt look vanity pump address', async () => {
-      const mockMcapHistory: McapEntry[] = [
-        { timestamp: 1000, highest: 100, close: 90 },
-      ];
+      const mockMcapHistory: McapEntry[] = [{ timestamp: 1000, close: 90 }];
       mockGeckoTerminalProvider.getTokenMCapHistory.mockResolvedValue(null);
       mockPumpfunProvider.getTokenMCapHistory.mockResolvedValue(
         mockMcapHistory
@@ -117,31 +109,31 @@ describe('MCapUpdaterService', () => {
   describe('getHighestMcap', () => {
     it('should return the highest mcap after the given date', () => {
       const mcapHistory: McapEntry[] = [
-        { timestamp: 1620000000, highest: 1000, close: 900 },
-        { timestamp: 1620086400, highest: 1500, close: 1400 },
-        { timestamp: 1620172800, highest: 2200, close: 1900 },
-        { timestamp: 1620259200, highest: 1800, close: 1700 },
-        { timestamp: 1620345600, highest: 2000, close: 2100 },
+        { timestamp: 1620000000, close: 900 },
+        { timestamp: 1620086400, close: 1400 },
+        { timestamp: 1620172800, close: 1900 },
+        { timestamp: 1620259200, close: 2200 },
+        { timestamp: 1620345600, close: 2100 },
       ];
 
       const after = new Date(1620172800 * 1000);
 
       const result = mCapUpdaterService.getHighestMcap(mcapHistory, after);
 
-      expect(result).toBe(2000);
+      expect(result).toStrictEqual({ highest: 2200, mcap: 2100 });
     });
 
     it('should return 0 if no mcap entries are after the given date', () => {
       const mcapHistory: McapEntry[] = [
-        { timestamp: 1620000000, highest: 1000, close: 900 },
-        { timestamp: 1620086400, highest: 1500, close: 1400 },
+        { timestamp: 1620000000, close: 900 },
+        { timestamp: 1620086400, close: 1400 },
       ];
 
       const after = new Date('2021-05-10T00:00:00Z'); // After all entries
 
       const result = mCapUpdaterService.getHighestMcap(mcapHistory, after);
 
-      expect(result).toBe(0);
+      expect(result).toStrictEqual({ highest: 0, mcap: 0 });
     });
 
     it('should handle an empty mcap history', () => {
@@ -151,7 +143,7 @@ describe('MCapUpdaterService', () => {
 
       const result = mCapUpdaterService.getHighestMcap(mcapHistory, after);
 
-      expect(result).toBe(0);
+      expect(result).toStrictEqual({ highest: 0, mcap: 0 });
     });
   });
 });

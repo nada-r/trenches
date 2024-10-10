@@ -15,7 +15,7 @@ export class DexScreenerProvider {
 
   private mapPairToTokenInfo(pair: any): TokenInfo {
     return {
-      address: pair.baseToken.address,
+      tokenAddress: pair.baseToken.address,
       fdv: parseFloat(pair.fdv),
       symbol: pair.baseToken.symbol,
       chain: 'solana',

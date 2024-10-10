@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from 'axios';
-import { TokenMcap } from '@src/services/TokenRepository';
 import { McapEntry } from '@src/services/MCapUpdaterService';
 
 export class GeckoTerminalProvider {
@@ -42,32 +41,6 @@ export class GeckoTerminalProvider {
     }
   }
 
-  private normalizeHighestPrice(entry: number[]): number {
-    const high = entry[2];
-    const close = entry[4];
-    // if highest is 50% higher than close, use close instead
-    //tend toward 1 to ger the value of close in a candle
-    return close / high < 0.66 ? close : high;
-  }
-
-  async getTokenMCap(tokenAddress: string): Promise<TokenMcap | null> {
-    const history = await this.getTokenMCapHistory(tokenAddress);
-
-    if (history) {
-      const highestPrice = history.reduce(
-        (acc: number, curr: McapEntry) => Math.max(acc, curr.highest),
-        0
-      );
-      const lastPrice = history[history.length - 1].close;
-      return {
-        mcap: lastPrice,
-        highest: highestPrice,
-      };
-    } else {
-      return null;
-    }
-  }
-
   async getTokenMCapHistory(
     tokenAddress: string
   ): Promise<Array<McapEntry> | null> {
@@ -80,10 +53,8 @@ export class GeckoTerminalProvider {
         return response.data.data.attributes.ohlcv_list
           .map((data: number[]) => {
             const C = data[4];
-            const normalizedHigh = this.normalizeHighestPrice(data);
             return {
               timestamp: data[0],
-              highest: normalizedHigh * 1_000_000_000,
               close: C * 1_000_000_000,
             };
           })

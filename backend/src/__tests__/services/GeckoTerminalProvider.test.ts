@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { TokenMcap } from '@src/services/TokenRepository';
 import { McapEntry } from '@src/services/MCapUpdaterService';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 
@@ -66,31 +65,6 @@ describe('GeckoTerminalProvider', () => {
     );
   });
 
-  describe('getTokenMCap', () => {
-    it('should return token market cap data', async () => {
-      const mockOhlcvList = [
-        [2000, 10, 15, 8, 12],
-        [1000, 12, 18, 10, 14],
-      ];
-      mockedAxios.get.mockResolvedValueOnce({
-        data: {
-          data: {
-            attributes: {
-              ohlcv_list: mockOhlcvList,
-            },
-          },
-        },
-      });
-
-      const result = await geckoTerminalProvider.getTokenMCap('token123');
-      const expected: TokenMcap = {
-        mcap: 12 * 1_000_000_000,
-        highest: 18 * 1_000_000_000,
-      };
-      expect(result).toEqual(expected);
-    });
-  });
-
   describe('getTokenMCapHistory', () => {
     it('should return token market cap history', async () => {
       const mockOhlcvList = [
@@ -112,12 +86,10 @@ describe('GeckoTerminalProvider', () => {
       const expected: McapEntry[] = [
         {
           timestamp: 1000,
-          highest: 15 * 1_000_000_000,
           close: 12 * 1_000_000_000,
         },
         {
           timestamp: 2000,
-          highest: 18 * 1_000_000_000,
           close: 14 * 1_000_000_000,
         },
       ];
@@ -145,17 +117,14 @@ describe('GeckoTerminalProvider', () => {
       const expected: McapEntry[] = [
         {
           timestamp: 1000,
-          highest: 15 * 1_000_000_000,
           close: 12 * 1_000_000_000,
         },
         {
           timestamp: 2000,
-          highest: 19 * 1_000_000_000,
           close: 19 * 1_000_000_000,
         },
         {
           timestamp: 3000,
-          highest: 18 * 1_000_000_000,
           close: 14 * 1_000_000_000,
         },
       ];

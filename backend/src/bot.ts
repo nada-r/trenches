@@ -161,12 +161,12 @@ async function startBot() {
       // record the call if there is not already one for this token and caller
       const existingCall = await callRepository.getCallByTelegramIdAndToken(
         telegramId,
-        tokenInfo.address
+        tokenInfo.tokenAddress
       );
 
       if (!existingCall) {
         await callRepository.createCall({
-          tokenAddress: tokenInfo.address,
+          tokenAddress: tokenInfo.tokenAddress,
           startFDV: tokenInfo.fdv,
           highestFDV: tokenInfo.fdv,
           callerId: caller.id,
@@ -252,8 +252,11 @@ async function startBot() {
             call.createdAt
           );
           // if highest detected is indeed higher thatn the on in DB, update the highest value
-          if (call.highestFDV < highestMcap) {
-            await callRepository.updateCallHighestMcap(call.id, highestMcap);
+          if (call.highestFDV < highestMcap.highest) {
+            await callRepository.updateCallHighestMcap(
+              call.id,
+              highestMcap.highest
+            );
             result++;
           }
         }

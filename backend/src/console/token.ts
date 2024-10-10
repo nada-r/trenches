@@ -5,10 +5,13 @@ import { DexScreenerProvider } from '@src/services/DexScreenerProvider';
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
 import { TokenUpdaterService } from '@src/services/TokenUpdaterService';
 import { EnvType } from '@src/console';
+import { MCapUpdaterService } from '@src/services/MCapUpdaterService';
+import dayjs from 'dayjs';
 
 type TokenActionsDependencies = {
   tokenRepository: TokenRepository;
   tokenUpdaterService: TokenUpdaterService;
+  mcapUpdaterService: MCapUpdaterService;
   geckoTerminalProvider: GeckoTerminalProvider;
   pumpfunProvider: PumpfunProvider;
   dexScreenerProvider: DexScreenerProvider;
@@ -21,7 +24,6 @@ export async function displayTokenActions(
   let actions = [
     { name: 'Update missing tokens in database', value: 'updateTokenCache' },
     { name: 'Get token info', value: 'info' },
-    { name: 'Get highest FDV', value: 'highestFdv' },
     { name: '< Back', value: 'back' },
   ];
 
@@ -37,9 +39,6 @@ export async function displayTokenActions(
         break;
       case 'info':
         await tokenInfo(dependencies);
-        break;
-      case 'highestFdv':
-        await highestFdv(dependencies);
         break;
       case 'back':
         return; // Exit the function to go back to the parent menu
@@ -68,47 +67,29 @@ const updateTokenCache = async (dependencies: TokenActionsDependencies) => {
 };
 
 const tokenInfo = async (dependencies: TokenActionsDependencies) => {
-  const { geckoTerminalProvider, pumpfunProvider } = dependencies;
+  const { tokenUpdaterService, mcapUpdaterService } = dependencies;
 
   const tokenAddress = await input({
     message: 'Enter token address:',
     required: true,
   });
 
-  const tokenInfo = await pumpfunProvider.getTokenInfo(tokenAddress!);
-  let poolAddress = undefined;
+  const tokenInfo = await tokenUpdaterService.findAndUpdateTokenInfo(
+    tokenAddress!
+  );
   if (tokenInfo) {
-    console.log('Address:', tokenInfo.address);
+    console.log('Address:', tokenInfo.tokenAddress);
     console.log('Poll:', tokenInfo.poolAddress);
-    poolAddress = tokenInfo.poolAddress;
 
     console.log('Current FDV:', tokenInfo.fdv);
 
-    const highestMCap = await pumpfunProvider.getTokenMCap(tokenAddress);
-    console.log('Highest FDV (pump):', highestMCap);
+    const mcapHistory = await mcapUpdaterService.getMcapHistory(tokenInfo);
+    if (mcapHistory) {
+      const highestMCap = mcapUpdaterService.getHighestMcap(
+        mcapHistory,
+        dayjs().subtract(24, 'hours').toDate()
+      );
+      console.log('Highest FDV (last 24h):', highestMCap);
+    }
   }
-
-  if (poolAddress) {
-    const highestMCap = await geckoTerminalProvider.getTokenMCap(poolAddress);
-    console.log('Highest FDV (gecko):', highestMCap);
-  }
-};
-
-const highestFdv = async (dependencies: TokenActionsDependencies) => {
-  const tokenAddress = await input({
-    message: 'Enter token address:',
-    required: true,
-  });
-
-  // const highestFDV = await fdvUpdaterService.getHighestMcap(tokenAddress);
-  // console.log('Highest FDV:', highestFDV);
-  //
-  // const tokenInfo = await pumpfunProvider.getTokenInfo(tokenAddress);
-  // if (tokenInfo?.poolAddress) {
-  //   console.log('Find pool address:', tokenInfo.poolAddress);
-  //   const highestPoolFDV = await fdvUpdaterService.getHighestMcap(
-  //     tokenInfo.poolAddress
-  //   );
-  //   console.log('Highest FDV (pool):', highestPoolFDV);
-  // }
 };

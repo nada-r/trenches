@@ -1,7 +1,7 @@
 import { PrismaClient, Token } from '@prisma/client';
 
 export type TokenInfo = {
-  address: string;
+  tokenAddress: string;
   fdv: number;
   symbol: string;
   chain: string;
@@ -24,7 +24,7 @@ export class TokenRepository {
     try {
       return this.prisma.token.upsert({
         where: {
-          address: tokenInfo.address,
+          address: tokenInfo.tokenAddress,
         },
         update: {
           url: tokenInfo.url,
@@ -36,7 +36,7 @@ export class TokenRepository {
           },
         },
         create: {
-          address: tokenInfo.address,
+          address: tokenInfo.tokenAddress,
           name: tokenInfo.name,
           ticker: tokenInfo.symbol,
           url: tokenInfo.url,

@@ -30,7 +30,7 @@ export function createTokenInfo(
   fdv: number = 1000000
 ): TokenInfo {
   return {
-    address,
+    tokenAddress: address,
     symbol: ticker,
     name,
     fdv,
@@ -64,7 +64,7 @@ export function createToken(
 export function fromTokenInfo(tokenInfo: TokenInfo, id: number): Token {
   return {
     id, // Assuming id is auto-generated or needs to be set separately
-    address: tokenInfo.address,
+    address: tokenInfo.tokenAddress,
     name: tokenInfo.name,
     ticker: tokenInfo.symbol,
     url: tokenInfo.url,

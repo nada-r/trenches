@@ -1,9 +1,9 @@
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
 import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
+import { TokenMcap } from '@src/services/TokenRepository';
 
 export type McapEntry = {
   timestamp: number;
-  highest: number;
   close: number;
 };
 
@@ -15,7 +15,7 @@ export class MCapUpdaterService {
 
   async getMcapHistory(token: {
     tokenAddress: string;
-    poolAddress: string | undefined;
+    poolAddress?: string;
   }): Promise<McapEntry[] | null> {
     let mcapHistory;
     //if poolAddress already in DB (pump address that is out of the bonding curve)
@@ -40,14 +40,22 @@ export class MCapUpdaterService {
     return mcapHistory;
   }
 
-  getHighestMcap(mcapHistory: McapEntry[], after: Date): number {
+  getHighestMcap(mcapHistory: McapEntry[], after: Date): TokenMcap {
     const afterTimestamp = after.getTime() / 1000;
-    return (
-      mcapHistory
-        // keep only history after date
-        .filter((entry) => entry.timestamp > afterTimestamp)
-        // then find max value
-        .reduce((highestMcap, entry) => Math.max(highestMcap, entry.highest), 0)
+    // keep only history after date
+    const afterHistory = mcapHistory.filter(
+      (entry) => entry.timestamp > afterTimestamp
     );
+    // then find max value
+    const highestPrice = afterHistory.reduce(
+      (highestMcap, entry) => Math.max(highestMcap, entry.close),
+      0
+    );
+    const lastPrice =
+      afterHistory.length > 0 ? afterHistory[afterHistory.length - 1].close : 0;
+    return {
+      mcap: lastPrice,
+      highest: highestPrice,
+    };
   }
 }

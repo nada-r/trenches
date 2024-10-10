@@ -38,7 +38,7 @@ describe('TokenRepository', () => {
       expect(result).toEqual(mockToken);
       expect(prisma.token.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { address: mockTokenInfo.address },
+          where: { address: mockTokenInfo.tokenAddress },
           update: {
             url: mockTokenInfo.url,
             image_uri: mockTokenInfo.image_uri,
@@ -49,7 +49,7 @@ describe('TokenRepository', () => {
             },
           },
           create: {
-            address: mockTokenInfo.address,
+            address: mockTokenInfo.tokenAddress,
             name: mockTokenInfo.name,
             ticker: mockTokenInfo.symbol,
             url: mockTokenInfo.url,
