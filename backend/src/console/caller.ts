@@ -3,13 +3,24 @@ import { CallerRepository } from '@src/services/CallerRepository';
 import { EnvType } from '@src/console';
 import { CallRepository } from '@src/services/CallRepository';
 import { CallingPowerService } from '@src/services/CallingPowerService';
-import { ICallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
+import { SECOND_CALLING_POWER_CONFIG } from '@src/calculator/SecondCallingPowerCalculator';
+import { FIRST_CALLING_POWER_CONFIG } from '@src/calculator/FirstCallingPowerCalculator';
+import {
+  CallingPowerData,
+  callingPowerEngine,
+  callPerformancePercentage,
+  logarithmicTotalFactor,
+  noFactor,
+  normalizeScore,
+  temporalWeightFormula,
+  totalPerformance,
+} from '@src/calculator/CallingPowerEngine';
+import { THIRD_CALLING_POWER_CONFIG } from '@src/calculator/ThirdCallingPowerCalculator';
 
 type CallerActionDependencies = {
   callerRepository: CallerRepository;
   callRepository: CallRepository;
   callingPowerService: CallingPowerService;
-  callingPowerCalculator: ICallingPowerCalculator;
 };
 
 export async function displayCallerActions(
@@ -44,49 +55,77 @@ export async function displayCallerActions(
 }
 
 const explainCallerPower = async (dependencies: CallerActionDependencies) => {
-  const { callerRepository, callRepository, callingPowerCalculator } =
-    dependencies;
+  const { callerRepository, callRepository } = dependencies;
 
-  const callerId = await number({ message: 'Enter caller ID:' });
+  const callerId = await number({
+    message: 'Enter caller ID (leave empty for all):',
+  });
 
   if (callerId) {
     const calls = await callRepository.getCallsByTelegramId(callerId);
-    callingPowerCalculator.computePower(calls, true);
+    logCallingPowerCalculation(
+      callingPowerEngine(calls, FIRST_CALLING_POWER_CONFIG),
+      'FIRST_IMPLEM'
+    );
+    logCallingPowerCalculation(
+      callingPowerEngine(calls, SECOND_CALLING_POWER_CONFIG),
+      'SECOND_IMPLEM'
+    );
+    logCallingPowerCalculation(
+      callingPowerEngine(calls, THIRD_CALLING_POWER_CONFIG),
+      'THIRD_IMPLEM'
+    );
   } else {
     const callers = await callerRepository.getAll();
-    const results = [];
 
+    const logs = [];
     for (const caller of callers) {
       const calls = await callRepository.getCallsByTelegramId(caller.id);
-      const power24h = callingPowerCalculator.computePower(
-        calls.filter(
-          (c) => c.createdAt < new Date(Date.now() - 24 * 60 * 60 * 1000)
-        )
-      );
-      const power12h = callingPowerCalculator.computePower(
-        calls.filter(
-          (c) => c.createdAt < new Date(Date.now() - 12 * 60 * 60 * 1000)
-        )
-      );
-      const powerNow = callingPowerCalculator.computePower(calls);
-      results.push({
+      const power1 = callingPowerEngine(calls, FIRST_CALLING_POWER_CONFIG);
+      const power2 = callingPowerEngine(calls, SECOND_CALLING_POWER_CONFIG);
+      const power3 = callingPowerEngine(calls, THIRD_CALLING_POWER_CONFIG);
+      const power4 = callingPowerEngine(calls, {
+        callPerformance: callPerformancePercentage,
+        callWeight: temporalWeightFormula,
+        basePerformance: totalPerformance,
+        correction: logarithmicTotalFactor,
+        constancy: noFactor,
+        normalize: normalizeScore(8000, 2500, 5, 0.8),
+      });
+      logs.push({
+        id: caller.id,
         name: caller.name,
-        power24h,
-        power12h,
-        powerNow,
+        first: power1.normalized,
+        second: power2.normalized,
+        third: power3.normalized,
+        fourth: power4.callingPower,
+        fourthNorm: power4.normalized,
       });
     }
-
-    results.sort((a, b) => b.powerNow - a.powerNow);
-
-    console.table(results);
+    console.table(logs.sort((p1, p2) => p2.third - p1.third));
   }
 };
+
+function logCallingPowerCalculation(data: CallingPowerData, type: string) {
+  console.log('Calculation details:', type);
+  console.log('Calls:');
+  //console.table(data.performances);
+  console.log(`Number of calls: ${data.performances.length}`);
+  console.log(`Avg performance: ${data.avgPerformance}`);
+  console.log(`Base performance: ${data.basePerformance.toFixed(2)}`);
+  console.log(
+    `Corrected performance: ${(data.basePerformance / data.correction).toFixed(2)}`
+  );
+  console.log(`Constancy: ${data.constancy.toFixed(2)}`);
+  console.log(`Calling power: ${data.callingPower.toFixed(2)}`);
+}
 
 const updateCallerPower = async (dependencies: CallerActionDependencies) => {
   const { callerRepository, callingPowerService } = dependencies;
 
-  const callerId = await number({ message: 'Enter caller ID:' });
+  const callerId = await number({
+    message: 'Enter caller ID (leave empty for all):',
+  });
 
   if (callerId) {
     await callingPowerService.updateCallingPower(callerId);

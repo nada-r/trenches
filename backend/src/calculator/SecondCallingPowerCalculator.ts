@@ -1,14 +1,35 @@
 import { Call } from '@prisma/client';
-import dayjs from 'dayjs';
+import {
+  CallingPowerData,
+  callingPowerEngine,
+  callPerformancePercentage,
+  ICallingPowerCalculator,
+  noFactor,
+  noNormalize,
+  temporalWeightFormula,
+  totalPerformance,
+  totalWeight,
+} from '@src/calculator/CallingPowerEngine';
 
-export interface ICallingPowerCalculator {
-  computePower(calls: Array<Call>, enableLogging?: boolean): number;
-}
+export const SECOND_CALLING_POWER_CONFIG = {
+  callPerformance: callPerformancePercentage,
+  callWeight: temporalWeightFormula,
+  basePerformance: totalPerformance,
+  correction: totalWeight,
+  constancy: noFactor,
+  normalize: noNormalize,
+};
 
-export class NewCallingPowerCalculator implements ICallingPowerCalculator {
+export class SecondCallingPowerCalculator implements ICallingPowerCalculator {
   constructor() {}
 
-  computePower(calls: Array<Call>, enableLogging: boolean = false): number {
+  computePower(calls: Array<Call>): CallingPowerData {
+    return callingPowerEngine(calls, SECOND_CALLING_POWER_CONFIG);
+  }
+
+  // ORIGINAL IMPLEMENTATION BELOW, PRODUCE SAME RESULT
+
+  /*computePower(calls: Array<Call>): number {
     let globalPerformance = 0;
     let totalWeight = 0;
     const currentDate = dayjs();
@@ -38,5 +59,5 @@ export class NewCallingPowerCalculator implements ICallingPowerCalculator {
 
     // Calculate the final performance
     return totalWeight > 0 ? globalPerformance / totalWeight : 0;
-  }
+  }*/
 }

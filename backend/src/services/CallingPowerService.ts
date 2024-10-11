@@ -1,12 +1,12 @@
 import { CallerRepository } from '@src/services/CallerRepository';
 import { CallRepository } from '@src/services/CallRepository';
-import { ICallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
+import { callingPowerEngine } from '@src/calculator/CallingPowerEngine';
+import { THIRD_CALLING_POWER_CONFIG } from '@src/calculator/ThirdCallingPowerCalculator';
 
 export class CallingPowerService {
   constructor(
     private callerRepository: CallerRepository,
-    private callRepository: CallRepository,
-    private callingPowerCalculator: ICallingPowerCalculator
+    private callRepository: CallRepository
   ) {}
 
   async updateCallingPowerFor(uniqueTokens: string[]): Promise<void> {
@@ -31,8 +31,11 @@ export class CallingPowerService {
   async updateCallingPower(callerId: number): Promise<void> {
     try {
       const calls = await this.callRepository.getCallsByTelegramId(callerId);
-      const callerPower = this.callingPowerCalculator.computePower(calls);
-      await this.callerRepository.updateCallingPower(callerId, callerPower);
+      const callerPower = callingPowerEngine(calls, THIRD_CALLING_POWER_CONFIG);
+      await this.callerRepository.updateCallingPower(
+        callerId,
+        callerPower.normalized
+      );
     } catch (error) {
       console.error(
         `Error updating calling power for caller ${callerId}:`,

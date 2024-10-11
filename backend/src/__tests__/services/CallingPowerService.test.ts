@@ -1,7 +1,6 @@
 import { CallingPowerService } from '@src/services/CallingPowerService';
 import { CallerRepository } from '@src/services/CallerRepository';
 import { CallRepository } from '@src/services/CallRepository';
-import { ICallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
 import { Call, Caller } from '@prisma/client';
 
 jest.mock('@src/services/CallerRepository');
@@ -11,7 +10,6 @@ describe('CallingPowerService', () => {
   let callingPowerService: CallingPowerService;
   let mockCallerRepository: jest.Mocked<CallerRepository>;
   let mockCallRepository: jest.Mocked<CallRepository>;
-  let mockCallingPowerCalculator: jest.Mocked<ICallingPowerCalculator>;
 
   beforeEach(() => {
     mockCallerRepository = {
@@ -24,14 +22,9 @@ describe('CallingPowerService', () => {
       getCallsByTelegramId: jest.fn(),
     } as unknown as jest.Mocked<CallRepository>;
 
-    mockCallingPowerCalculator = {
-      computePower: jest.fn(),
-    } as unknown as jest.Mocked<ICallingPowerCalculator>;
-
     callingPowerService = new CallingPowerService(
       mockCallerRepository,
-      mockCallRepository,
-      mockCallingPowerCalculator
+      mockCallRepository
     );
   });
 
@@ -83,18 +76,14 @@ describe('CallingPowerService', () => {
         { id: 1, callerId: 1, tokenAddress: 'token1', startFDV: 1000, highestFDV: 1100, data: {}, createdAt: new Date(), updatedAt: new Date() },
         { id: 2, callerId: 1, tokenAddress: 'token2', startFDV: 1000, highestFDV: 1100, data: {}, createdAt: new Date(), updatedAt: new Date() },
       ];
-      const callerPower = 10;
+      const callerPower = 0;
 
       mockCallRepository.getCallsByTelegramId.mockResolvedValue(calls);
-      mockCallingPowerCalculator.computePower.mockReturnValue(callerPower);
 
       await callingPowerService.updateCallingPower(callerId);
 
       expect(mockCallRepository.getCallsByTelegramId).toHaveBeenCalledWith(
         callerId
-      );
-      expect(mockCallingPowerCalculator.computePower).toHaveBeenCalledWith(
-        calls
       );
       expect(mockCallerRepository.updateCallingPower).toHaveBeenCalledWith(
         callerId,
@@ -110,7 +99,6 @@ describe('CallingPowerService', () => {
       const callerPower = 0;
 
       mockCallRepository.getCallsByTelegramId.mockResolvedValue(calls);
-      mockCallingPowerCalculator.computePower.mockReturnValue(callerPower);
       mockCallerRepository.updateCallingPower.mockRejectedValue(
         new Error('Update failed')
       );
@@ -121,9 +109,6 @@ describe('CallingPowerService', () => {
 
       expect(mockCallRepository.getCallsByTelegramId).toHaveBeenCalledWith(
         callerId
-      );
-      expect(mockCallingPowerCalculator.computePower).toHaveBeenCalledWith(
-        calls
       );
       expect(mockCallerRepository.updateCallingPower).toHaveBeenCalledWith(
         callerId,

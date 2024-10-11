@@ -17,7 +17,6 @@ import { CallerRepository } from '@src/services/CallerRepository';
 import { CallRepository } from '@src/services/CallRepository';
 import { TournamentRepository } from '@src/services/TournamentRepository';
 import { MCapUpdaterService } from '@src/services/MCapUpdaterService';
-import { NewCallingPowerCalculator } from '@src/calculator/NewCallingPowerCalculator';
 import { TournamentParticipationRepository } from '@src/services/TournamentParticipationRepository';
 
 // Make sure all the Envs are loaded when launching the server
@@ -67,12 +66,9 @@ export default async function bootstrap() {
   const profileRepository = new ProfileRepository(prisma);
   const tokenRepository = new TokenRepository(prisma);
 
-  const callingPowerCalculator = new NewCallingPowerCalculator();
-
   const callingPowerService = new CallingPowerService(
     callerRepository,
-    callRepository,
-    callingPowerCalculator
+    callRepository
   );
   const tournamentResultProcessor = new TournamentResultProcessor(
     callerRepository,
@@ -98,7 +94,6 @@ export default async function bootstrap() {
     tournamentRepository,
     tournamentParticipationRepository,
     tokenRepository,
-    callingPowerCalculator,
     callingPowerService,
     tokenUpdaterService,
     mcapUpdaterService,
