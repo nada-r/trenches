@@ -1,7 +1,45 @@
 import { CallerRepository } from '@src/services/CallerRepository';
 import { CallRepository } from '@src/services/CallRepository';
-import { callingPowerEngine } from '@src/calculator/CallingPowerEngine';
-import { THIRD_CALLING_POWER_CONFIG } from '@src/calculator/ThirdCallingPowerCalculator';
+import {
+  callingPowerEngine,
+  callPerformancePercentage,
+  constancyFactor,
+  logarithmicTotalFactor,
+  noFactor,
+  noNormalize,
+  noWeight,
+  successRate,
+  temporalWeightFormula,
+  totalPerformance,
+  totalWeight,
+} from '@src/calculator/CallingPowerEngine';
+
+export const FIRST_CALLING_POWER_CONFIG = {
+  callPerformance: callPerformancePercentage,
+  callWeight: noWeight,
+  basePerformance: successRate,
+  correction: noFactor,
+  constancy: constancyFactor,
+  normalize: noNormalize,
+};
+
+export const SECOND_CALLING_POWER_CONFIG = {
+  callPerformance: callPerformancePercentage,
+  callWeight: temporalWeightFormula,
+  basePerformance: totalPerformance,
+  correction: totalWeight,
+  constancy: noFactor,
+  normalize: noNormalize,
+};
+
+export const THIRD_CALLING_POWER_CONFIG = {
+  callPerformance: callPerformancePercentage,
+  callWeight: temporalWeightFormula,
+  basePerformance: totalPerformance,
+  correction: logarithmicTotalFactor,
+  constancy: noFactor,
+  normalize: noNormalize,
+};
 
 export class CallingPowerService {
   constructor(
@@ -28,10 +66,12 @@ export class CallingPowerService {
     console.log(`Calling power updated for ${callers.length} callers.`);
   }
 
+  private engineConfig = THIRD_CALLING_POWER_CONFIG;
+
   async updateCallingPower(callerId: number): Promise<void> {
     try {
       const calls = await this.callRepository.getCallsByTelegramId(callerId);
-      const callerPower = callingPowerEngine(calls, THIRD_CALLING_POWER_CONFIG);
+      const callerPower = callingPowerEngine(calls, this.engineConfig);
       await this.callerRepository.updateCallingPower(
         callerId,
         callerPower.normalized

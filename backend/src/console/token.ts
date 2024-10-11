@@ -4,7 +4,7 @@ import { GeckoTerminalProvider } from '@src/services/GeckoTerminalProvider';
 import { DexScreenerProvider } from '@src/services/DexScreenerProvider';
 import { PumpfunProvider } from '@src/services/PumpfunProvider';
 import { TokenUpdaterService } from '@src/services/TokenUpdaterService';
-import { EnvType } from '@src/console';
+import { bodyguard, EnvType } from '@src/console';
 import { MCapUpdaterService } from '@src/services/MCapUpdaterService';
 import dayjs from 'dayjs';
 
@@ -15,15 +15,15 @@ type TokenActionsDependencies = {
   geckoTerminalProvider: GeckoTerminalProvider;
   pumpfunProvider: PumpfunProvider;
   dexScreenerProvider: DexScreenerProvider;
+  env: EnvType;
 };
 
 export async function displayTokenActions(
-  env: EnvType,
   dependencies: TokenActionsDependencies
 ) {
   let actions = [
-    { name: 'Update missing tokens in database', value: 'updateTokenCache' },
     { name: 'Get token info', value: 'info' },
+    { name: 'Update tokens in database', value: 'updateTokenCache' },
     { name: '< Back', value: 'back' },
   ];
 
@@ -51,6 +51,11 @@ export async function displayTokenActions(
 const updateTokenCache = async (dependencies: TokenActionsDependencies) => {
   const { tokenRepository, tokenUpdaterService } = dependencies;
   const tokens = await tokenRepository.findMissingTokens();
+
+  console.log(`Find ${tokens.length} tokens to update.`);
+  // DO NOT REMOVE
+  await bodyguard(dependencies.env);
+
   let count = 0,
     notfounds = 0;
   for (const token of tokens) {

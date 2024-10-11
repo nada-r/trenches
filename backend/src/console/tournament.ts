@@ -1,5 +1,5 @@
 import { input, number, select } from '@inquirer/prompts';
-import { EnvType } from '@src/console';
+import { bodyguard, EnvType } from '@src/console';
 import { TournamentResultProcessor } from '@src/process/TournamentResultProcessor';
 import { TournamentRepository } from '@src/services/TournamentRepository';
 import dayjs from 'dayjs';
@@ -7,10 +7,10 @@ import dayjs from 'dayjs';
 type TournamentActionsDependencies = {
   tournamentRepository: TournamentRepository;
   tournamentResultProcessor: TournamentResultProcessor;
+  env: EnvType;
 };
 
 export async function displayTournamentActions(
-  env: EnvType,
   dependencies: TournamentActionsDependencies
 ) {
   while (true) {
@@ -40,13 +40,14 @@ export async function displayTournamentActions(
 const createTournament = async (
   dependencies: TournamentActionsDependencies
 ) => {
+  const defaultOpeningDuration = 2;
+  const defaultWaitingDuration = 2;
+  const defaultPrize = 0;
+  const defaultSupplyBurn = 0;
+
   const name = await input({ message: 'Tournament name:' });
-  const startedAt = await input({ message: 'Started at (YYYY-MM-DD HH:mm):' });
-  const openDuration = await number({
-    message: 'Participation duration (in days since start):',
-  });
-  const endDuration = await number({
-    message: 'Finish duration (in days since start):',
+  const startedAt = await input({
+    message: 'Started at (YYYY-MM-DD HH:mm) UTC:',
   });
 
   const parsedDate = dayjs(startedAt);
@@ -60,21 +61,52 @@ const createTournament = async (
     return;
   }
 
-  if (openDuration === endDuration) {
-    console.log(
-      'Error: Finish duration must be greater than participation duration'
-    );
-    return;
-  }
+  const openingDuration =
+    (await number({
+      message: 'Participation duration (in days):',
+      default: defaultOpeningDuration,
+    })) || defaultOpeningDuration;
+
+  const waitingDuration =
+    (await number({
+      message: 'Finish duration (in days):',
+      default: defaultWaitingDuration,
+    })) || defaultWaitingDuration;
+
+  const prizeInput =
+    (await number({ message: 'Prize (SOL):', default: defaultPrize })) ||
+    defaultPrize;
+  const supplyBurnInput =
+    (await number({
+      message: 'Supply burn (%):',
+      default: defaultSupplyBurn,
+    })) || defaultSupplyBurn;
+
+  const DAYS = 24 * 60 * 60;
+  const openSeconds = openingDuration! * DAYS;
+  const endSeconds = (openingDuration! + waitingDuration!) * DAYS;
+
+  console.log('Tournament details:');
+  console.log(`Name: ${name}`);
+  console.log(`Start date: ${parsedDate.format('YYYY-MM-DD HH:mm')} UTC`);
+  console.log(
+    `Participate until: ${parsedDate.add(openSeconds, 'seconds').format('YYYY-MM-DD HH:mm')} UTC`
+  );
+  console.log(
+    `Closing date: ${parsedDate.add(endSeconds, 'seconds').format('YYYY-MM-DD HH:mm')} UTC`
+  );
+
+  // DO NOT REMOVE
+  await bodyguard(dependencies.env);
 
   const tournament = {
     name,
     startedAt: parsedDate.toDate(),
     metadata: {
-      openDuration: openDuration ? openDuration * 24 * 60 * 60 || 0 : 0,
-      endDuration: endDuration ? endDuration * 24 * 60 * 60 || 0 : 0,
-      prize: (await number({ message: 'Prize (SOL):' })) || 0,
-      supplyBurn: (await number({ message: 'Supply burn (%):' })) || 0,
+      openDuration: openSeconds,
+      endDuration: endSeconds,
+      prize: prizeInput || defaultPrize,
+      supplyBurn: supplyBurnInput || defaultSupplyBurn,
     },
   };
 

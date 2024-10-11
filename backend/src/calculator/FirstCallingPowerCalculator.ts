@@ -1,37 +1,13 @@
 import { Call } from '@prisma/client';
-import {
-  CallingPowerData,
-  callingPowerEngine,
-  callPerformancePercentage,
-  constancyFactor,
-  ICallingPowerCalculator,
-  noFactor,
-  noNormalize,
-  noWeight,
-  successRate,
-} from '@src/calculator/CallingPowerEngine';
 
-export const FIRST_CALLING_POWER_CONFIG = {
-  callPerformance: callPerformancePercentage,
-  callWeight: noWeight,
-  basePerformance: successRate,
-  correction: noFactor,
-  constancy: constancyFactor,
-  normalize: noNormalize,
-};
-
-export class FirstCallingPowerCalculator implements ICallingPowerCalculator {
+/**
+ * @deprecated This class is no longer recommended for use.
+ * Please use the updated version CallingPowerService.FIRST_CALLING_POWER_CONFIG with callingPowerEngine
+ */
+export class FirstCallingPowerCalculator {
   constructor() {}
 
-  computePower(calls: Array<Call>): CallingPowerData {
-    return callingPowerEngine(calls, FIRST_CALLING_POWER_CONFIG);
-  }
-
-  // ORIGINAL IMPLEMENTATION BELOW, PRODUCE SAME RESULT
-
-  /*public computePower(
-    calls: Array<Call>,
-  ): number {
+  public computePower(calls: Array<Call>): number {
     if (calls.length === 0) return 0;
     // Calculer la performance de chaque call
     const performances = calls.map((call) => {
@@ -62,5 +38,5 @@ export class FirstCallingPowerCalculator implements ICallingPowerCalculator {
       (averagePerformance * successRate) / (standardDeviation + 1);
 
     return callerPower;
-  }*/
+  }
 }

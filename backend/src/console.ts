@@ -1,4 +1,4 @@
-import { select } from '@inquirer/prompts';
+import { confirm, select } from '@inquirer/prompts';
 import bootstrap from './bootstrap';
 import { displayCallerActions } from './console/caller';
 import { displayTournamentActions } from './console/tournament';
@@ -36,13 +36,13 @@ async function main() {
 
     switch (answer) {
       case 'caller':
-        await displayCallerActions(env, dependencies);
+        await displayCallerActions({ ...dependencies, env });
         break;
       case 'tournament':
-        await displayTournamentActions(env, dependencies);
+        await displayTournamentActions({ ...dependencies, env });
         break;
       case 'token':
-        await displayTokenActions(env, dependencies);
+        await displayTokenActions({ ...dependencies, env });
         break;
       case 'quit':
         return;
@@ -75,11 +75,35 @@ function getEnvFromDotenvKey(): EnvType {
   }
 
   if (envValue === 'production') {
+    if (process.env.DATABASE_URL?.includes('localhost')) {
+      console.error(
+        'Production Env is used, but DATABASE_URL is set to localhost'
+      );
+      process.exit(1);
+    }
+
     console.warn('###########################################');
-    console.warn('!!!! Production DB is used, be careful !!!!');
+    console.warn('!!!! Production Env is used, be careful !!!!');
     console.warn('###########################################');
   }
   return envValue;
+}
+
+export async function bodyguard(env: EnvType) {
+  if (env === 'production') {
+    console.warn('###########################################');
+    console.warn('!!!! Production Env is used, be careful !!!!');
+    console.warn('###########################################');
+
+    if (
+      !(await confirm({
+        message: 'Production Env is used, are you sure to update database ?',
+      }))
+    ) {
+      console.error('Safety first, action cancelled');
+      process.exit(1);
+    }
+  }
 }
 
 main().catch((e) => console.error('!Unhandled error in main:', e));

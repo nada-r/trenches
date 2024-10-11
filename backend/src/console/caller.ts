@@ -1,10 +1,13 @@
 import { confirm, number, select } from '@inquirer/prompts';
 import { CallerRepository } from '@src/services/CallerRepository';
-import { EnvType } from '@src/console';
+import { bodyguard, EnvType } from '@src/console';
 import { CallRepository } from '@src/services/CallRepository';
-import { CallingPowerService } from '@src/services/CallingPowerService';
-import { SECOND_CALLING_POWER_CONFIG } from '@src/calculator/SecondCallingPowerCalculator';
-import { FIRST_CALLING_POWER_CONFIG } from '@src/calculator/FirstCallingPowerCalculator';
+import {
+  CallingPowerService,
+  FIRST_CALLING_POWER_CONFIG,
+  SECOND_CALLING_POWER_CONFIG,
+  THIRD_CALLING_POWER_CONFIG,
+} from '@src/services/CallingPowerService';
 import {
   CallingPowerData,
   callingPowerEngine,
@@ -15,16 +18,15 @@ import {
   temporalWeightFormula,
   totalPerformance,
 } from '@src/calculator/CallingPowerEngine';
-import { THIRD_CALLING_POWER_CONFIG } from '@src/calculator/ThirdCallingPowerCalculator';
 
 type CallerActionDependencies = {
   callerRepository: CallerRepository;
   callRepository: CallRepository;
   callingPowerService: CallingPowerService;
+  env: EnvType;
 };
 
 export async function displayCallerActions(
-  env: EnvType,
   dependencies: CallerActionDependencies
 ) {
   let actions = [
@@ -126,6 +128,9 @@ const updateCallerPower = async (dependencies: CallerActionDependencies) => {
   const callerId = await number({
     message: 'Enter caller ID (leave empty for all):',
   });
+  
+  // DO NOT REMOVE
+  await bodyguard(dependencies.env);
 
   if (callerId) {
     await callingPowerService.updateCallingPower(callerId);
