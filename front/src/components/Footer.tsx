@@ -36,9 +36,13 @@ const menulist = [
 
 const Footer: React.FC = () => {
   return (
-    <footer className="sticky z-[999] bottom-0 w-full flex justify-center bg-background text-foreground border-t border-border py-2">
+    <footer className="sticky z-[999] bottom-0 w-full flex justify-between bg-background text-foreground border-t border-border py-2 px-4">
       {menulist.map((menu) => (
-        <Link href={menu.href} className="text-foreground no-underline mx-4">
+        <Link
+          href={menu.href}
+          key={menu.name}
+          className="text-foreground no-underline flex-1 flex justify-center"
+        >
           <div className="flex flex-col items-center">
             <div className="shrink-0">{menu.icon}</div>
             <p className="m-0 text-xs">{menu.name}</p>
