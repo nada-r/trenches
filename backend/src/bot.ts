@@ -186,113 +186,117 @@ async function startBot() {
   }
 
   const updateFDV = async () => {
-    const startTime = Date.now();
-    console.log('Starting FDV update process...');
+    try {
+      const startTime = Date.now();
+      console.log('Starting FDV update process...');
 
-    // get all active calls from the database
-    const activeCalls = await callRepository.getActiveCalls();
+      // get all active calls from the database
+      const activeCalls = await callRepository.getActiveCalls();
 
-    // extract unique tokens from the active calls
-    const tokensToUpdate = [
-      ...new Set(
-        activeCalls.map((call) => ({
-          tokenAddress: call.tokenAddress,
-          poolAddress: call.data?.poolAddress,
-        }))
-      ),
-    ];
-    console.log(`Found ${tokensToUpdate.length} unique tokens to process`);
+      // extract unique tokens from the active calls
+      const tokensToUpdate = [
+        ...new Set(
+          activeCalls.map((call) => ({
+            tokenAddress: call.tokenAddress,
+            poolAddress: call.data?.poolAddress,
+          }))
+        ),
+      ];
+      console.log(`Found ${tokensToUpdate.length} unique tokens to process`);
 
-    // check if the pump token is out of bounding curve
-    let newPoolsDetected = 0;
-    for (const token of tokensToUpdate) {
-      if (!token.poolAddress) {
-        // if pool address is not available, try to find it
-        const poolAddress = await tokenUpdaterService.findAndUpdateTokenPool(
-          token.tokenAddress
-        );
-
-        // if pool address is found, storing it in the current token object for the next steps
-        if (poolAddress) {
-          token.poolAddress = poolAddress;
-          newPoolsDetected++;
-        }
-      }
-    }
-    console.log(
-      `${newPoolsDetected} new pools detected (${Date.now() - startTime}ms)`
-    );
-
-    const stepTime = Date.now();
-    const updatedTokens = [];
-    //for each call, get marketcap
-    for (const token of tokensToUpdate) {
-      try {
-        let mcapHistory = await mcapUpdaterService.getMcapHistory(token);
-
-        // token not found (ex, $wSOL address or random)
-        if (!mcapHistory) {
-          console.log(`Could not get FDV for token ${token.tokenAddress}`);
-          // skip this token
-          continue;
-        }
-
-        // check which call should be updated for this token, get a table of calls to update (often 1 or 2 calls)
-        const callToUpdate = activeCalls.filter(
-          (call) =>
-            call.tokenAddress === token.tokenAddress ||
-            call.tokenAddress === token.poolAddress
-        );
-
-        let result = 0;
-        // update all cals
-        for (const call of callToUpdate) {
-          let highestMcap = mcapUpdaterService.getHighestMcap(
-            mcapHistory,
-            call.createdAt
+      // check if the pump token is out of bounding curve
+      let newPoolsDetected = 0;
+      for (const token of tokensToUpdate) {
+        if (!token.poolAddress) {
+          // if pool address is not available, try to find it
+          const poolAddress = await tokenUpdaterService.findAndUpdateTokenPool(
+            token.tokenAddress
           );
-          // if highest detected is indeed higher thatn the on in DB, update the highest value
-          if (call.highestFDV < highestMcap.highest) {
-            await callRepository.updateCallHighestMcap(
-              call.id,
-              highestMcap.highest
-            );
-            result++;
+
+          // if pool address is found, storing it in the current token object for the next steps
+          if (poolAddress) {
+            token.poolAddress = poolAddress;
+            newPoolsDetected++;
           }
         }
-
-        // then update mcap in token table
-        await tokenRepository.updateMcap(
-          token.tokenAddress,
-          mcapHistory[mcapHistory.length - 1].close
-        );
-
-        // if at least one call was updated, add the token address and the pool address to the updatedTokens array
-        if (result > 0) {
-          updatedTokens.push(token.tokenAddress);
-          if (token.poolAddress) {
-            updatedTokens.push(token.poolAddress);
-          }
-        }
-      } catch (err) {
-        console.error(
-          `Error while updating FDV for token ${token.tokenAddress}: ${err.message}`
-        );
       }
-    }
-    console.log(
-      ` => Updated FDV for ${updatedTokens.length} tokens (${Date.now() - stepTime}ms)`
-    );
+      console.log(
+        `${newPoolsDetected} new pools detected (${Date.now() - startTime}ms)`
+      );
 
-    // finally update the calling power for all callers where 1 or more tokens were updated
-    if (updatedTokens.length > 0) {
-      await callingPowerService.updateCallingPowerFor(updatedTokens);
-      await callerRepository.updateCallerRanks();
-      console.log(`Updated calling power and ranking`);
-    }
+      const stepTime = Date.now();
+      const updatedTokens = [];
+      //for each call, get marketcap
+      for (const token of tokensToUpdate) {
+        try {
+          let mcapHistory = await mcapUpdaterService.getMcapHistory(token);
 
-    const totalTime = Date.now() - startTime;
-    console.log(`Total FDV update process took ${totalTime}ms`);
+          // token not found (ex, $wSOL address or random)
+          if (!mcapHistory) {
+            console.log(`Could not get FDV for token ${token.tokenAddress}`);
+            // skip this token
+            continue;
+          }
+
+          // check which call should be updated for this token, get a table of calls to update (often 1 or 2 calls)
+          const callToUpdate = activeCalls.filter(
+            (call) =>
+              call.tokenAddress === token.tokenAddress ||
+              call.tokenAddress === token.poolAddress
+          );
+
+          let result = 0;
+          // update all cals
+          for (const call of callToUpdate) {
+            let highestMcap = mcapUpdaterService.getHighestMcap(
+              mcapHistory,
+              call.createdAt
+            );
+            // if highest detected is indeed higher thatn the on in DB, update the highest value
+            if (call.highestFDV < highestMcap.highest) {
+              await callRepository.updateCallHighestMcap(
+                call.id,
+                highestMcap.highest
+              );
+              result++;
+            }
+          }
+
+          // then update mcap in token table
+          await tokenRepository.updateMcap(
+            token.tokenAddress,
+            mcapHistory[mcapHistory.length - 1].close
+          );
+
+          // if at least one call was updated, add the token address and the pool address to the updatedTokens array
+          if (result > 0) {
+            updatedTokens.push(token.tokenAddress);
+            if (token.poolAddress) {
+              updatedTokens.push(token.poolAddress);
+            }
+          }
+        } catch (err) {
+          console.error(
+            `Error while updating FDV for token ${token.tokenAddress}: ${err.message}`
+          );
+        }
+      }
+      console.log(
+        ` => Updated FDV for ${updatedTokens.length} tokens (${Date.now() - stepTime}ms)`
+      );
+
+      // finally update the calling power for all callers where 1 or more tokens were updated
+      if (updatedTokens.length > 0) {
+        await callingPowerService.updateCallingPowerFor(updatedTokens);
+        await callerRepository.updateCallerRanks();
+        console.log(`Updated calling power and ranking`);
+      }
+
+      const totalTime = Date.now() - startTime;
+      console.log(`Total FDV update process took ${totalTime}ms`);
+    } catch (error) {
+      console.error('Error processing tournaments:', error);
+    }
   };
 
   // Update Mcap immediately after bot start
@@ -302,17 +306,24 @@ async function startBot() {
   setInterval(updateFDV, 10 * 60 * 1000);
 
   setInterval(async () => {
-    const startedTournaments = await tournamentRepository.getAll(['STARTED']);
-    for (const tournament of startedTournaments) {
-      const startedAt = dayjs(tournament.startedAt);
-      const endTime = startedAt.add(tournament.metadata.endDuration, 'second');
-      const now = dayjs();
-      if (now.isAfter(endTime)) {
-        console.log(
-          `Complete tournament: ${tournament.name} [${tournament.id}]`
+    try {
+      const startedTournaments = await tournamentRepository.getAll(['STARTED']);
+      for (const tournament of startedTournaments) {
+        const startedAt = dayjs(tournament.startedAt);
+        const endTime = startedAt.add(
+          tournament.metadata.endDuration,
+          'second'
         );
-        await tournamentResultProcessor.processResults(tournament.id);
+        const now = dayjs();
+        if (now.isAfter(endTime)) {
+          console.log(
+            `Complete tournament: ${tournament.name} [${tournament.id}]`
+          );
+          await tournamentResultProcessor.processResults(tournament.id);
+        }
       }
+    } catch (error) {
+      console.error('Error processing tournaments:', error);
     }
   }, 60 * 1000);
 }
