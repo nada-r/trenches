@@ -22,16 +22,16 @@ const menulist = [
     name: "Calls",
     href: "/call",
   },
-  // {
-  //   icon: <MarketIcon />,
-  //   name: "Market",
-  //   href: "/market",
-  // },
-  // {
-  //   icon: <TournamentIcon />,
-  //   name: "Tournament",
-  //   href: "/tournament",
-  // },
+  {
+    icon: <MarketIcon />,
+    name: "Market",
+    href: "/market",
+  },
+  {
+    icon: <TournamentIcon />,
+    name: "Tournament",
+    href: "/tournament",
+  },
 ];
 
 const Footer: React.FC = () => {
