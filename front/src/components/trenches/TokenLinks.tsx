@@ -1,8 +1,8 @@
-import React from 'react';
-import { Token } from '@/models';
+import React from "react";
+import { Token } from "@/models";
 
 const TokenLinks = ({ token }: { token: Token }) => {
-  const isPumpfun = token.data?.type === 'pumpfun';
+  const isPumpfun = token.data?.type === "pumpfun";
   const isDexScreener = !isPumpfun || token.data.poolAddress;
 
   return (
@@ -13,7 +13,7 @@ const TokenLinks = ({ token }: { token: Token }) => {
           target="_blank"
           className="w-4 h-4"
         >
-          <img src="/images/pumpfun.png" alt="pumpfun" />
+          <img src="/images/dexscreener.png" alt="pumpfun" />
         </a>
       ) : (
         <a
