@@ -13,7 +13,7 @@ const TokenLinks = ({ token }: { token: Token }) => {
           target="_blank"
           className="w-4 h-4"
         >
-          <img src="/images/dexscreener.png" alt="pumpfun" />
+          <img src="/images/pumpfun.png" alt="pumpfun" />
         </a>
       ) : (
         <a
