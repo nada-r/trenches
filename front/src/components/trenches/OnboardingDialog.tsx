@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogClose,
@@ -7,8 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const OnboardingDialog = ({
   showOnboarding,
@@ -37,6 +37,7 @@ const OnboardingDialog = ({
             section
           </li>
           <li>Compete in tournaments to win SOL using your caller-bags</li>
+          <li>Add the bot to your telegram group to log your calls</li>
         </ul>
 
         <p>
